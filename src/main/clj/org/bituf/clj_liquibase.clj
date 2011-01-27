@@ -1,0 +1,438 @@
+(ns org.bituf.clj-liquibase
+  "Expose functions from the Liquibase library.
+  See also:
+    http://www.liquibase.org/manual/home"
+  (:import
+    (java.io                     IOException Writer)
+    (java.sql                    Connection)
+    (java.text                   DateFormat)
+    (java.util                   Date)
+    (javax.sql                   DataSource)
+    (liquibase.changelog         ChangeLogIterator ChangeSet ChangeLogParameters
+                                 DatabaseChangeLog)
+    (liquibase.change            Change)
+    (liquibase.changelog.filter  AfterTagChangeSetFilter      AlreadyRanChangeSetFilter
+                                 ChangeSetFilter              ContextChangeSetFilter
+                                 CountChangeSetFilter         DbmsChangeSetFilter
+                                 ExecutedAfterChangeSetFilter ShouldRunChangeSetFilter)
+    (liquibase.changelog.visitor RollbackVisitor UpdateVisitor)
+    (liquibase.database          Database DatabaseFactory)
+    (liquibase.database.jvm      JdbcConnection)
+    (liquibase.executor          Executor ExecutorService LoggingExecutor)
+    (liquibase.exception         LiquibaseException LockException)
+    (liquibase.lockservice       LockService)
+    (liquibase.logging           LogFactory)
+    (liquibase.util              LiquibaseUtil))
+  (:require
+    [clojure.string         :as sr]
+    [org.bituf.clj-dbspec   :as sp]
+    [org.bituf.clj-miscutil :as mu]
+    [org.bituf.clj-liquibase.internal :as in]))
+
+
+;; ===== ChangeSet =====
+
+(defn ^ChangeSet make-changeset
+  "Return a ChangeSet instance.
+  Arguments:
+  Optional arguments:
+    :dbms                          ; String/Keyword/vector-of-multiple
+    :run-always         :always    ; Boolean
+    :run-on-change      :on-change ; Boolean
+    :context            :ctx       ; String
+    :run-in-transaction :in-txn    ; Boolean (true by default)
+    :fail-on-error      :fail-err  ; Boolean
+    ;; sub tags
+    :comment                        ; String
+    :pre-conditions     :pre-cond   ; vector
+    :valid-checksum     :valid-csum ; String
+  See also:
+    http://www.liquibase.org/manual/changeset"
+  [^String id ^String author ^String filepath changes
+   & {:keys [dbms
+             run-always         always
+             run-on-change      on-change
+             context            ctx
+             run-in-transaction in-txn
+             fail-on-error      fail-err
+             comment
+             pre-conditions     pre-cond
+             rollback-changes   rollback
+             valid-checksum     valid-csum
+             ]}]
+  (let [s-dbms     (in/as-dbident-names dbms)
+        b-always   (or run-always         always    false)
+        b-change   (or run-on-change      on-change false)
+        s-contxt   (or context            ctx)
+        b-in-txn   (let [x (or run-in-transaction in-txn)]
+                     (if (nil? x) true (or x false)))
+        b-fail-err (or fail-on-error      fail-err  false)
+        ;; sub tags
+        s-comment  comment
+        v-pre-cond (or pre-conditions     pre-cond)
+        v-rollback (or rollback-changes   rollback)
+        s-val-csum (or valid-checksum     valid-csum)
+        _ (do
+            (mu/verify string?       id)
+            (mu/verify string?       author)
+            (mu/verify string?       filepath)
+            (mu/verify mu/not-empty? changes)
+            (doseq [each changes]
+              (mu/verify #(instance? Change %) each))
+            (mu/verify mu/boolean? b-always)
+            (mu/verify mu/boolean? b-change)
+            (mu/verify #(or (nil? %) (string? %))
+              s-contxt)
+            (mu/verify string?     s-dbms)
+            (mu/verify mu/boolean? b-in-txn))
+        ;; String id, String author, boolean alwaysRun, boolean runOnChange,
+        ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
+        c-set (ChangeSet.
+                ^String id       ^String author   ^Boolean b-always ^Boolean b-change
+                ^String filepath ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn)]
+    (doseq [each changes]
+      (.addChange c-set each))
+    (if b-fail-err (.setFailOnError   c-set b-fail-err))
+    (if s-comment  (.setComments      c-set s-comment))
+    (if v-pre-cond (.setPreconditions c-set v-pre-cond)) ; TODO convert v-pre-cond
+    (if v-rollback (doseq [each (mu/as-vector v-rollback)]
+                     (if (string? each) (.addRollBackSQL c-set ^String each)
+                       (.addRollbackChange c-set ^Change each))))
+    (if s-val-csum (doseq [each (mu/as-vector s-val-csum)]
+                     (.addValidCheckSum c-set each)))
+    c-set))
+
+
+(defmacro changeset
+  ""
+  [^String id ^String author changes & more]
+  `(make-changeset ~id ~author *file* ~changes ~@more))
+
+
+;; ===== DatabaseChangeLog helpers =====
+
+
+(defn ^Database make-db-instance
+  "Return a Database instance for current connection."
+  [^Connection conn]
+  ;; DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn))
+  (.findCorrectDatabaseImplementation (DatabaseFactory/getInstance)
+    (JdbcConnection. conn)))
+
+
+(defn ^ChangeLogParameters make-changelog-params
+  "Return a ChangeLogParameters instance."
+  [^Database db-instance
+   & {:keys [contexts ; list of string
+             ]}]
+  (let [clp (ChangeLogParameters. db-instance)]
+    (doseq [each (mu/as-vector contexts)]
+      (.addContext clp (mu/as-string each)))
+    clp))
+
+
+;; ===== Integration =====
+
+
+(def ^{:doc "Database (liquibase.database.Database) instance."
+       :dynamic true}
+      *db-instance* nil)
+
+(def ^{:doc "Changelog params (liquibase.changelog.ChangeLogParameters) instance."
+       :dynamic true}
+      *changelog-params* nil)
+
+
+(defmacro do-initialized
+  "Initialize global settings and execute body of code in that context. Ensure
+  clj-dbspec/*dbspec* to have a valid :connection object as part of process."
+  [& body]
+  `(if (mu/not-nil? *db-instance*)
+     (do ~@body)
+     (sp/with-connection
+       (binding [*db-instance* (make-db-instance (:connection sp/*dbspec*))
+                 *changelog-params* (make-changelog-params *db-instance*)]
+         ~@body))))
+
+
+(defmacro with-dbspec
+  "Entry point"
+  [dbspec & body]
+  `(sp/with-dbspec ~dbspec
+     (do-initialized
+       ~@body)))
+
+
+;; ===== DatabaseChangeLog =====
+
+
+(defn ^DatabaseChangeLog make-db-changelog
+  "Return a DatabaseChangeLog instance.
+  See also:
+    http://www.liquibase.org/manual/databasechangelog
+    make-changelog-params"
+  [^String logical-filepath
+   change-sets
+   & {:keys [pre-conditions     pre-cond   ; vector
+             ]}]
+  (let [dbcl (DatabaseChangeLog.)
+        v-pc (or pre-conditions pre-cond)]
+    (doto dbcl
+      (.setLogicalFilePath logical-filepath)
+      (.setChangeLogParameters ^ChangeLogParameters *changelog-params*))
+    (doseq [each change-sets]
+      (.addChangeSet dbcl each))
+    (if v-pc (.setPreconditions dbcl v-pc)) ; TODO convert v-pre-cond
+    dbcl))
+
+
+(defmacro defchangelog
+  "Define a function that when executed (with no arguments), returns a database
+  changelog (DatabaseChangeLog instance).
+  See also:
+    db-change-log"
+  [var-name change-sets & var-args]
+  `(def ~var-name (partial make-db-changelog (str "hmm-" *file*) ~change-sets ~@var-args)))
+
+
+;; ===== Actions helpers =====
+
+
+(def ^{:doc "Liquibase logger"}
+      log (LogFactory/getLogger))
+
+(defn check-database-changelog-table
+  "Check database changelog table.
+  See also:
+    liquibase.Liquibase/checkDatabaseChangeLogTable"
+  [^Database db ^Boolean update-existing-null-checksums
+   ^DatabaseChangeLog db-changelog contexts]
+  (when (and update-existing-null-checksums (nil? db-changelog))
+    (throw
+      (LiquibaseException.
+        "'db-changelog' parameter is required if updating existing checksums")))
+  (.checkDatabaseChangeLogTable db
+    update-existing-null-checksums db-changelog (into-array String contexts))
+  (when (not (.hasChangeLogLock (LockService/getInstance db)))
+    (.checkDatabaseChangeLogLockTable db)))
+
+
+(defn ^ChangeLogIterator make-changelog-iterator
+  "Return a ChangeLogIterator instance.
+  See also:
+    liquibase.Liquibase/getStandardChangelogIterator"
+  ([^DatabaseChangeLog changelog ^List changeset-filters]
+    (ChangeLogIterator. changelog
+      (into-array ChangeSetFilter changeset-filters)))
+  ([^List ran-changesets ^DatabaseChangeLog changelog ^List changeset-filters]
+    (ChangeLogIterator. ran-changesets changelog
+      (into-array ChangeSetFilter
+        changeset-filters))))
+
+
+(defn ^Executor get-db-executor
+  []
+  (let [ex (ExecutorService/getInstance)]
+    (.getExecutor ex *db-instance*)))
+
+
+(defn output-header
+  [^String message]
+  (let [ex (get-db-executor)]
+    (doto ex
+      (.comment "*********************************************************************")
+      (.comment message)
+      (.comment "*********************************************************************")
+      (.comment (format "Change Log: %s" *file*)) ; TODO get the logical filename
+      (.comment (format "Ran at: %s" (.format (DateFormat/getDateTimeInstance
+                                                DateFormat/SHORT DateFormat/SHORT)
+                                       (Date.))))
+      (.comment (format "Against: %s@%s"
+                  (-> *db-instance* .getConnection .getConnectionUserName)
+                  (-> *db-instance* .getConnection .getURL)))
+      (.comment (format "Liquibase version: %s"
+                  (LiquibaseUtil/getBuildVersion)))
+      (.comment "*********************************************************************"))))
+
+
+(defmacro with-writer
+  [^Writer output & body]
+  `(let [old-template# (get-db-executor)
+         log-executor# (LoggingExecutor.
+                         (get-db-executor) ~output *db-instance*)]
+     (.setExecutor (ExecutorService/getInstance) *db-instance* log-executor#)
+     ~@body
+     (try
+       (.flush ~output)
+       (catch IOException e#
+         (throw (LiquibaseException. e#))))
+     (.setExecutor (ExecutorService/getInstance) *db-instance* old-template#)))
+
+
+(defmacro do-locked
+  "Acquire lock and execute body of code in that context. Make sure the lock is
+  released (or log an error if it can't be) before exit."
+  [& body]
+  `(let [ls# (LockService/getInstance *db-instance*)]
+     (.waitForLock ls#)
+     (try ~@body
+       (finally
+         (try (.releaseLock ls#)
+           (catch LockException e#
+             (.severe log "Could not release lock" e#)))))))
+
+
+;; ===== Actions =====
+
+
+(defn update
+  "Run the Liquibase Update command.
+  See also:
+    liquibase.Liquibase/update
+    make-db-instance
+    http://www.liquibase.org/manual/update"
+  ([changelog-fn]
+    (update changelog-fn []))
+  ([changelog-fn ^List contexts]
+    (do-locked
+      (.setContexts *changelog-params* contexts)
+      (let [changelog (changelog-fn)]
+        (check-database-changelog-table *db-instance* true changelog contexts)
+        (.validate changelog *db-instance* (into-array String contexts))
+        (let [changelog-it (make-changelog-iterator changelog
+                             [(ShouldRunChangeSetFilter. *db-instance*)
+                              (ContextChangeSetFilter.
+                                (into-array String
+                                  [(mu/comma-sep-str contexts)]))
+                              (DbmsChangeSetFilter. *db-instance*)
+                              ])]
+          (.run changelog-it (UpdateVisitor. *db-instance*) *db-instance*)))))
+  ([changelog-fn ^List contexts ^Writer output]
+    (.setContexts *changelog-params* contexts)
+    (with-writer output
+      (output-header "Update Database Script")
+      (update changelog-fn contexts))))
+
+
+(defn update-by-count
+  ""
+  ([changelog-fn ^Integer change-count]
+    (update-by-count changelog-fn change-count []))
+  ([changelog-fn ^Integer change-count ^List contexts]
+    (.setContexts *changelog-params* contexts)
+    (do-locked
+      (let [changelog (changelog-fn)]
+        (check-database-changelog-table *db-instance* true changelog contexts)
+        (.validate changelog *db-instance* (into-array String contexts))
+        (let [changelog-it (make-changelog-iterator changelog
+                             [(ShouldRunChangeSetFilter. *db-instance*)
+                              (ContextChangeSetFilter.
+                                (into-array String
+                                  [(mu/comma-sep-str contexts)]))
+                              (DbmsChangeSetFilter. *db-instance*)
+                              (CountChangeSetFilter. change-count)
+                              ])]
+          (.run changelog-it (UpdateVisitor. *db-instance*) *db-instance*)))))
+  ([changelog-fn ^Integer change-count ^List contexts ^Writer output]
+    (.setContexts *changelog-params* contexts)
+    (with-writer output
+      (output-header (str "Update " change-count " Change Sets Database Script"))
+      (update-by-count changelog-fn change-count contexts))))
+
+
+(defn tag
+  "Tag the database schema with specified tag (coerced as string)."
+  [the-tag]
+  (do-locked
+    (check-database-changelog-table *db-instance* false nil nil)
+    (.tag *db-instance* (mu/as-string the-tag))))
+
+
+(defn rollback-to-tag
+  "Rollback schema to specified tag.
+  See also:
+    liquibase.Liquibase/rollback
+    http://www.liquibase.org/manual/rollback"
+  ([changelog-fn ^String tag]
+    (rollback-to-tag changelog-fn tag []))
+  ([changelog-fn ^String tag ^List contexts]
+    (do-locked
+      (.setContexts *changelog-params* contexts)
+      (let [changelog (changelog-fn)]
+        (check-database-changelog-table *db-instance* false changelog contexts)
+        (.validate changelog *db-instance* (into-array String contexts))
+        (let [ran-changesets (.getRanChangeSetList *db-instance*)
+              changelog-it (make-changelog-iterator ran-changesets changelog
+                             [(AfterTagChangeSetFilter. tag ran-changesets)
+                              (AlreadyRanChangeSetFilter. ran-changesets)
+                              (ContextChangeSetFilter.
+                                (into-array String
+                                  [(mu/comma-sep-str contexts)]))
+                              (DbmsChangeSetFilter. *db-instance*)
+                              ])]
+          (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
+  ([changelog-fn ^String tag ^List contexts ^Writer output]
+    (.setContexts *changelog-params* contexts)
+    (with-writer output
+      (output-header (str "Rollback to '" tag "' Script"))
+      (rollback-to-tag changelog-fn tag contexts))))
+
+
+(defn rollback-to-date
+  "Rollback schema to specified date.
+  See also:
+    liquibase.Liquibase/rollback
+    http://www.liquibase.org/manual/rollback"
+  ([changelog-fn ^Date date]
+    (rollback-to-date changelog-fn date []))
+  ([changelog-fn ^Date date ^List contexts]
+    (do-locked
+      (.setContexts *changelog-params* contexts)
+      (let [changelog (changelog-fn)]
+        (check-database-changelog-table *db-instance* false changelog contexts)
+        (.validate changelog *db-instance* (into-array String contexts))
+        (let [ran-changesets (.getRanChangeSetList *db-instance*)
+              changelog-it (make-changelog-iterator ran-changesets changelog
+                             [(ExecutedAfterChangeSetFilter. date ran-changesets)
+                              (AlreadyRanChangeSetFilter. ran-changesets)
+                              (ContextChangeSetFilter.
+                                (into-array String
+                                  [(mu/comma-sep-str contexts)]))
+                              (DbmsChangeSetFilter. *db-instance*)
+                              ])]
+          (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
+  ([changelog-fn ^Date date contexts ^Writer output]
+    (.setContexts *changelog-params* contexts)
+    (with-writer output
+      (output-header (str "Rollback to " date " Script"))
+      (rollback-to-date changelog-fn date contexts))))
+
+
+(defn rollback-by-count
+  "Rollback schema by specified count of changes.
+  See also:
+    liquibase.Liquibase/rollback
+    http://www.liquibase.org/manual/rollback"
+  ([changelog-fn ^Integer change-count]
+    (rollback-by-count changelog-fn ^Integer change-count []))
+  ([changelog-fn ^Integer change-count ^List contexts]
+    (.setContexts *changelog-params* contexts)
+    (do-locked
+      (let [changelog (changelog-fn)]
+        (check-database-changelog-table *db-instance* false changelog contexts)
+        (.validate changelog *db-instance* (into-array String contexts))
+        (let [ran-changesets (.getRanChangeSetList *db-instance*)
+              changelog-it (make-changelog-iterator ran-changesets changelog
+                             [(AlreadyRanChangeSetFilter. ran-changesets)
+                              (ContextChangeSetFilter.
+                                (into-array String
+                                  [(mu/comma-sep-str contexts)]))
+                              (DbmsChangeSetFilter. *db-instance*)
+                              (CountChangeSetFilter. change-count)
+                              ])]
+          (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
+  ([changelog-fn ^Integer change-count ^List contexts ^Writer output]
+    (.setContexts *changelog-params* contexts)
+    (with-writer output
+      (output-header (str "Rollback to " change-count " Change(s) Script"))
+      (rollback-by-count changelog-fn change-count contexts))))

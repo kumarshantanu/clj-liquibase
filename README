@@ -1,0 +1,40 @@
+-*- markdown -*-
+
+# Clj-Liquibase v0.1-SNAPSHOT
+
+Clj-Liquibase is a simple Clojure wrapper around the Liquibase library for
+carrying out relational database change management and migrations.
+
+Supported actions:
+
+* update
+* tag
+* rollback
+
+
+## Usage
+
+Maven/Leiningen dependency details are here: [http://clojars.org/org.bituf/clj-liquibase](http://clojars.org/org.bituf/clj-liquibase)
+
+Examples for usage can be found in the tutorial below:
+
+
+## Building/Installation
+
+You will need Maven 2 to build from sources. Execute the following:
+
+    $ mvn clean package  # packages up a JAR in "target" dir
+    $ mvn install        # to install to your local Maven repo
+    $ mvn clojure:gendoc # generate Clojure API documentation
+
+
+## License
+
+Copyright (C) 2010 Shantanu Kumar (kumar.shantanu at gmail dot com)
+
+Distributed under the Apache 2 License.
+
+
+# Tutorial
+
+TODO

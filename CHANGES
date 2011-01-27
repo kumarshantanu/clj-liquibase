@@ -1,0 +1,75 @@
+-*- markdown -*-
+
+# Changes and TODO
+
+- [TODO] Liquibase Functionality (commands)
+  # Diff
+  # Generate Changelog
+  # DBDoc
+  # SQL Output
+- [TODO] Building Change-Logs
+  # <Preconditions>
+- [TODO] 'Change' implementations:
+  # Custom Refactorings
+    * Modifying Generated SQL
+    * Custom SQL
+    * Custom SQL File
+    * Custom Refactoring Class
+    * Execute Shell Command
+
+
+## 0.1 / 2011-Jan-??
+
+- [TODO] Liquibase Functionality (commands)
+  # Update
+  # Rollback
+- [TODO] Dynamic vars - DataSource/Connection, schema(name), etc.
+- Clojuresque schema/table/column names, data types, attributes and constraints
+- Building Change-Logs
+  # <DatabaseChangeLog>
+  # <ChangeSet>
+  # Contexts
+  # ChangeLog Parameters
+- Liquibase 'Change' implementations:
+  # Structural Refactorings
+    * Add Column
+    * Rename Column
+    * Modify Column
+    * Drop Column
+    * Alter Sequence
+    * Create Table
+    * Rename Table
+    * Drop Table
+    * Create View
+    * Rename View
+    * Drop View
+    * Merge Columns
+    * Create Stored Procedure
+  # Data Quality Refactorings
+    * Add Lookup Table
+    * Add Not-Null Constraint
+    * Remove Not-Null Constraint
+    * Add Unique Constraint
+    * Drop Unique Constraint
+    * Create Sequence
+    * Drop Sequence
+    * Add Auto-Increment
+    * Add Default Value
+    * Drop Default Value
+  # Referential Integrity Refactorings
+    * Add Foreign Key Constraint
+    * Drop Foreign Key Constraint
+    * Drop All Foreign Key Constraints
+    * Add Primary Key Constraint
+    * Drop Primary Key Constraint
+  # Non-Refactoring Transformations
+    * Insert Data
+    * Load Data
+    * Load Update Data
+    * Update Data
+    * Delete Data
+    * Tag Database
+    * Stop
+  # Architectural Refactorings
+    * Create Index
+    * Drop Index
