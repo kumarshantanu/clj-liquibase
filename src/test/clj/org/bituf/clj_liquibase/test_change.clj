@@ -1,4 +1,27 @@
 (ns org.bituf.clj-liquibase.test-change
+  (:import
+    (liquibase.change.core
+      ;; Structural Refactorings
+      AddColumnChange           RenameColumnChange         ModifyDataTypeChange
+      DropColumnChange          AlterSequenceChange        CreateTableChange
+      RenameTableChange         DropTableChange            CreateViewChange
+      RenameViewChange          DropViewChange             MergeColumnChange
+      CreateProcedureChange
+      ;; Data Quality Refactorings
+      AddLookupTableChange      AddNotNullConstraintChange DropNotNullConstraintChange
+      AddUniqueConstraintChange DropUniqueConstraintChange CreateSequenceChange
+      DropSequenceChange        AddAutoIncrementChange     AddDefaultValueChange
+      DropDefaultValueChange
+      ;; Referential Integrity Refactorings
+      AddForeignKeyConstraintChange DropForeignKeyConstraintChange
+      AddPrimaryKeyChange           DropPrimaryKeyChange
+      ;; Non-Refactoring Transformations
+      InsertDataChange LoadDataChange    LoadUpdateDataChange UpdateDataChange
+      DeleteDataChange TagDatabaseChange StopChange
+      ;; Architectural Refactorings
+      CreateIndexChange DropIndexChange)
+    (liquibase.statement DatabaseFunction)
+    (liquibase.util      ISODateFormat))
   (:require
     [org.bituf.clj-liquibase.change :as change])
   (:use org.bituf.test-util)
@@ -16,7 +39,9 @@
 
 (deftest test-add-columns
   (testing "add-columns with required args"
-    (ch-setup)))
+    (ch-setup)
+    (is (instance? AddColumnChange
+          (change/add-columns :table [])))))
 
 
 (deftest test-rename-column

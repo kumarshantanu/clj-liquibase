@@ -18,15 +18,16 @@
 
 
 (defn ^String as-coltype
-  "Create column-type (string).
+  "Create column-type (string - subject to sp/clj-to-dbident).
   Examples:
     (coltype :int)        => \"INT\"
     (coltype \"BIGINT\")  => \"BIGINT\"
     (coltype :char 80)    => \"char(80)\"
     (coltype :float 17 5) => \"float(17, 5)\"
-  Note: This function is called during constructing column-config."
+  Note: This function is called during constructing column-config.
+  See also: http://www.liquibase.org/manual/column"
   [t & more]
-  (str (mu/as-string t)
+  (str (sp/clj-to-dbident t)
     (if (mu/not-empty? more) (apply str "(" (mu/comma-sep-str more) ")"))))
 
 
@@ -107,54 +108,74 @@
 
 
 (defn ^ColumnConfig as-column-config
-  "Create column-configuration.
+  "Create column-configuration. This function is called by change/create-table.
   Arguments:
-    colname  (String/Keyword) column name
+    colname  (String/Keyword) column name - subject to clj-to-dbident
     coltype  (String/Keyword/Vector) column type
-  Optional arguments:
-    :default (String/Number/java.util.Date/DatabaseFunction)
-  Examples:
+  Optional arguments (can use either long/short name):
+    Long name              |Short name |Allowed types
+    -----------------------|-----------|------------------------
+    :default-value         |:default   | String/Number/java.util.Date/Boolean/DatabaseFunction
+    :auto-increment        |:autoinc   | Boolean
+    :remarks               |           | String
+    ;; constraints (s.t. = subject to)
+    :nullable              |:null      | Boolean
+    :primary-key           |:pk        | Boolean
+    :primary-key-name      |:pkname    | String/Keyword - s.t. clj-to-dbident
+    :primary-key-tablespace|:pktspace  | String/Keyword - s.t. clj-to-dbident
+    :references            |:refs      | String (Foreign key definition)
+    :unique                |:uniq      | Boolean
+    :unique-constraint-name|:ucname    | String/Keyword - s.t. clj-to-dbident
+    :check                 |           | String
+    :delete-cascade        |:dcascade  | Boolean
+    :foreign-key-name      |:fkname    | String/Keyword - s.t. clj-to-dbident
+    :initially-deferred    |:idefer    | Boolean
+    :deferrable            |:defer     | Boolean
+  Examples (when used inside 'change/create-table'):
     [:id         :int           :null false :pk true :autoinc true]
     [:name       [:varchar 40]  :null false]
     [:gender     [:char 1]      :null false]
-    [:birth-date :date          :null false]"
-  [colname coltype ; coltype (mixed) - keyword, string, vector
-   & {:keys [defaultValue         default-value          default  ; String/Number/Date/Boolean/DatabaseFunction
-             autoIncrement        auto-increment         autoinc  ; Boolean
-             remarks                                              ; String
+    [:birth-date :date          :null false]
+  See also:
+    as-coltype
+    http://www.liquibase.org/manual/column"
+  [colname coltype ; coltype (mixed) - keyword, string, vector (1st arg: clj-to-dbident)
+   & {:keys [default-value          default  ; String/Number/Date/Boolean/DatabaseFunction
+             auto-increment         autoinc  ; Boolean
+             remarks                         ; String
              ;; constraints
-             nullable                                    null     ; Boolean
-             primaryKey           primary-key            pk       ; Boolean
-             primaryKeyName       primary-key-name       pkname   ; String
-             primaryKeyTablespace primary-key-tablespace pktspace ; String
-             references                                  refs     ; String
-             unique                                      uniq     ; Boolean
-             uniqueConstraintName unique-constraint-name ucname   ; String
-             check                                                ; String
-             deleteCascade        delete-cascade         dcascade ; Boolean
-             foreignKeyName       foreign-key-name       fkname   ; String
-             initiallyDeferred    initially-deferred     idefer   ; Boolean
-             deferrable                                  defer    ; Boolean
+             nullable               null     ; Boolean
+             primary-key            pk       ; Boolean
+             primary-key-name       pkname   ; String/Keyword - s.t. clj-to-dbident
+             primary-key-tablespace pktspace ; String/Keyword - s.t. clj-to-dbident
+             references             refs     ; String (Foreign key definition)
+             unique                 uniq     ; Boolean
+             unique-constraint-name ucname   ; String/Keyword - s.t. clj-to-dbident
+             check                           ; String
+             delete-cascade         dcascade ; Boolean
+             foreign-key-name       fkname   ; String/Keyword - s.t. clj-to-dbident
+             initially-deferred     idefer   ; Boolean
+             deferrable             defer    ; Boolean
              ]}]
   (let [col (ColumnConfig.)
         con (ConstraintsConfig.)
         ;; optional column properties
-        c-default  (or defaultValue         default-value          default )
-        c-autoinc  (or autoIncrement        auto-increment         autoinc )
+        c-default  (or default-value          default )
+        c-autoinc  (or auto-increment         autoinc )
         c-remarks   remarks
         ;; constraints
-        c-null     (or nullable                                    null    )
-        c-pk       (or primaryKey           primary-key            pk      )
-        c-pkname   (or primaryKeyName       primary-key-name       pkname  )
-        c-pktspace (or primaryKeyTablespace primary-key-tablespace pktspace)
-        c-refs     (or references                                  refs    )
-        c-uniq     (or unique                                      uniq    )
-        c-ucname   (or uniqueConstraintName unique-constraint-name ucname  )
+        c-null     (or nullable               null    )
+        c-pk       (or primary-key            pk      )
+        c-pkname   (or primary-key-name       pkname  )
+        c-pktspace (or primary-key-tablespace pktspace)
+        c-refs     (or references             refs    )
+        c-uniq     (or unique                 uniq    )
+        c-ucname   (or unique-constraint-name ucname  )
         c-check    check
-        c-dcascade (or deleteCascade        delete-cascade         dcascade)
-        c-fkname   (or foreignKeyName       foreign-key-name       fkname  )
-        c-idefer   (or initiallyDeferred    initially-deferred     idefer  )
-        c-defer    (or deferrable                                  defer   )
+        c-dcascade (or delete-cascade         dcascade)
+        c-fkname   (or foreign-key-name       fkname  )
+        c-idefer   (or initially-deferred     idefer  )
+        c-defer    (or deferrable             defer   )
         ]
     ;; set base column properties
     (doto col
@@ -165,18 +186,22 @@
     (if-nn c-autoinc (.setAutoIncrement col ^Boolean c-autoinc))
     (if-nn c-remarks (.setRemarks       col ^String  c-remarks))
     ;; set constraints
-    (if-nn c-null     (.setNullable             con ^Boolean c-null    ))
-    (if-nn c-pk       (.setPrimaryKey           con ^Boolean c-pk      ))
-    (if-nn c-pkname   (.setPrimaryKeyName       con ^String  c-pkname  ))
-    (if-nn c-pktspace (.setPrimaryKeyTablespace con ^String  c-pktspace))
-    (if-nn c-refs     (.setReferences           con ^String  c-refs    ))
-    (if-nn c-uniq     (.setUnique               con ^Boolean c-uniq    ))
-    (if-nn c-ucname   (.setUniqueConstraintName con ^String  c-ucname  ))
-    (if-nn c-check    (.setCheck                con ^String  c-check   ))
-    (if-nn c-dcascade (.setDeleteCascade        con ^Boolean c-dcascade))
-    (if-nn c-fkname   (.setForeignKeyName       con ^String  c-fkname  ))
-    (if-nn c-idefer   (.setInitiallyDeferred    con ^Boolean c-idefer  ))
-    (if-nn c-defer    (.setDeferrable           con ^Boolean c-defer   ))
+    (if-nn c-null     (.setNullable             con ^Boolean   c-null     ))
+    (if-nn c-pk       (.setPrimaryKey           con ^Boolean   c-pk       ))
+    (if-nn c-pkname   (.setPrimaryKeyName       con ^String  (sp/clj-to-dbident
+                                                               c-pkname  )))
+    (if-nn c-pktspace (.setPrimaryKeyTablespace con ^String  (sp/clj-to-dbident
+                                                               c-pktspace)))
+    (if-nn c-refs     (.setReferences           con ^String    c-refs     ))
+    (if-nn c-uniq     (.setUnique               con ^Boolean   c-uniq     ))
+    (if-nn c-ucname   (.setUniqueConstraintName con ^String  (sp/clj-to-dbident
+                                                               c-ucname  )))
+    (if-nn c-check    (.setCheck                con ^String    c-check    ))
+    (if-nn c-dcascade (.setDeleteCascade        con ^Boolean   c-dcascade ))
+    (if-nn c-fkname   (.setForeignKeyName       con ^String  (sp/clj-to-dbident
+                                                               c-fkname  )))
+    (if-nn c-idefer   (.setInitiallyDeferred    con ^Boolean   c-idefer   ))
+    (if-nn c-defer    (.setDeferrable           con ^Boolean   c-defer    ))
     (.setConstraints col con)
     col))
 

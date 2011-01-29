@@ -3,6 +3,7 @@
   See also:
     http://www.liquibase.org/manual/home (Available Database Refactorings)"
   (:import
+    (java.util List)
     (liquibase.change.core
       ;; Structural Refactorings
       AddColumnChange           RenameColumnChange         ModifyDataTypeChange
@@ -66,7 +67,7 @@
   See also:
     http://www.liquibase.org/manual/add_column
     http://www.liquibase.org/manual/column"
-  [table-name columns
+  [table-name ^List columns
    & {:keys [schema-name schema ; String
              ]}]
   (let [change (AddColumnChange.)
