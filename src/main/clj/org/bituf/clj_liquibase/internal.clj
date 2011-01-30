@@ -74,20 +74,21 @@
     :header (Keyword/String)
   See also:
     http://www.liquibase.org/manual/load_data"
-  [colname ^String coltype
+  [colname coltype
    & {:keys [index  ; Integer
              header
              ]}]
-  (when-not (some #(.equalsIgnoreCase coltype %) ["STRING" "NUMERIC" "DATE" "BOOLEAN"])
-    (mu/illegal-arg-value "coltype"
-      "Either of \"STRING\", \"NUMERIC\", \"DATE\" or \"BOOLEAN\"" coltype))
-  (let [ldcc (LoadDataColumnConfig.)]
-    (doto ldcc
-      (.setName (sp/clj-to-dbident colname))
-      (.setType (sr/upper-case coltype)))
-    (if index  (.setIndex  ldcc index))
-    (if header (.setHeader ldcc header))
-    ldcc))
+  (let [s-coltype ^String (mu/as-string coltype)]
+    (when-not (some #(.equalsIgnoreCase s-coltype %) ["STRING" "NUMERIC" "DATE" "BOOLEAN"])
+      (mu/illegal-arg-value "coltype"
+        "Either of \"STRING\", \"NUMERIC\", \"DATE\" or \"BOOLEAN\"" coltype))
+    (let [ldcc (LoadDataColumnConfig.)]
+      (doto ldcc
+        (.setName (sp/clj-to-dbident colname))
+        (.setType (sr/upper-case s-coltype)))
+      (if index  (.setIndex  ldcc index))
+      (if header (.setHeader ldcc header))
+      ldcc)))
 
 
 (defmacro set-default-value

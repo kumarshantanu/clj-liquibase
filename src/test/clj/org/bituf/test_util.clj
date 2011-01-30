@@ -1,4 +1,6 @@
 (ns org.bituf.test-util
+  (:require
+    [org.bituf.clj-miscutil :as mu])
   (:use clojure.test))
 
 

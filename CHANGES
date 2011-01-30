@@ -18,12 +18,12 @@
     * Execute Shell Command
 
 
-## 0.1 / 2011-Jan-??
+## 0.1 / 2011-Feb-??
 
-- [TODO] Liquibase Functionality (commands)
+- [TODO - Unit tests] Liquibase Functionality (commands)
   # Update
   # Rollback
-- [TODO] Dynamic vars - DataSource/Connection, schema(name), etc.
+- Dynamic vars - DataSource/Connection, schema(name), etc.
 - Clojuresque schema/table/column names, data types, attributes and constraints
 - Building Change-Logs
   # <DatabaseChangeLog>
