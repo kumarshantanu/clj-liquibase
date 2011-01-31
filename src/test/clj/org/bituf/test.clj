@@ -26,10 +26,10 @@
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
 
-(def changeset-1 (mu/! (lb/changeset "id=1" "author=shantanu" [ct-change1])))
+(def changeset-1 ["id=1" "author=shantanu" [ct-change1]])
 
 
-(def changeset-2 (mu/! (lb/changeset "id=2" "author=shantanu" [ct-change2])))
+(def changeset-2 ["id=2" "author=shantanu" [ct-change2]])
 
 
 (lb/defchangelog changelog-1 [changeset-1])

@@ -1,6 +1,11 @@
 (ns org.bituf.test-clj-liquibase
   (:require
-    [org.bituf.clj-liquibase :as clb])
+    [clojure.pprint                 :as pp]
+    [org.bituf.clj-miscutil         :as mu]
+    [org.bituf.clj-liquibase        :as lb]
+    [org.bituf.clj-liquibase.change :as ch]
+    [org.bituf.clj-dbcp             :as dbcp]
+    [org.bituf.clj-dbspec           :as spec])
   (:use org.bituf.test-util)
   (:use clojure.test))
 
@@ -11,24 +16,58 @@
   (todo))
 
 
+(def make-ds dbcp/h2-memory-datasource)
+
+
+(def ct-change1 (mu/! (ch/create-table :sample-table-1
+                        [[:id     :int          :null false :pk true :autoinc true]
+                         [:name   [:varchar 40] :null false]
+                         [:gender [:char 1]     :null false]])))
+
+(def ct-change2 (mu/! (ch/create-table "sampletable2"
+                        [[:id     :int          :null false :pk true :autoinc true]
+                         [:name   [:varchar 40] :null false]
+                         [:gender [:char 1]     :null false]])))
+
+
 ;; ===== ChangeSet =====
 
 
 (deftest test-make-changeset
   (testing "make-changeset"
-    (clb-setup)))
-
-
-(deftest test-changeset
-  (testing "changeset"
-    (clb-setup)))
+    (let [pf (partial lb/make-changeset "id=1" "author=shantanu" [ct-change1])]
+      (is (lb/changeset? (pf :filepath "dummy")) "Minimum arguments")
+      (is (lb/changeset? (pf
+                           :logical-filepath   "somename"
+                           :dbms               :mysql
+                           :run-always         true
+                           :run-on-change      false
+                           :context            "some-ctx"
+                           :run-in-transaction true
+                           :fail-on-error      true
+                           :comment            "describe this"
+                           :pre-conditions     nil
+                           :rollback-changes   []
+                           :valid-checksum     "1234"
+                           )) "Optional arguments with longname")
+      (is (lb/changeset? (pf
+                           :filepath   "dummy"
+                           :always     false
+                           :on-change  true
+                           :ctx        "sample"
+                           :in-txn     false
+                           :fail-err   true
+                           :pre-cond   nil
+                           :rollback   []
+                           :valid-csum "something"
+                           )) "Optional arguments with shortname"))))
 
 
 ;; ===== DatabaseChangeLog =====
 
 
-(deftest test-make-db-changelog
-  (testing "make-db-changelog"
+(deftest test-make-changelog
+  (testing "make-changelog"
     (clb-setup)))
 
 
@@ -73,9 +112,8 @@
 (defn test-ns-hook []
   ;; ===== ChangeSet =====
   (test-make-changeset)
-  (test-changeset)
   ;; ===== DatabaseChangeLog =====
-  (test-make-db-changelog)
+  (test-make-changelog)
   (test-defchangelog)
   ;; ===== Actions =====
   (test-update)

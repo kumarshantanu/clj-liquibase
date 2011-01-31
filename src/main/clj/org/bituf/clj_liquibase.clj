@@ -6,7 +6,7 @@
     (java.io                     IOException Writer)
     (java.sql                    Connection)
     (java.text                   DateFormat)
-    (java.util                   Date)
+    (java.util                   Date List)
     (javax.sql                   DataSource)
     (liquibase.changelog         ChangeLogIterator ChangeSet ChangeLogParameters
                                  DatabaseChangeLog)
@@ -22,6 +22,7 @@
     (liquibase.exception         LiquibaseException LockException)
     (liquibase.lockservice       LockService)
     (liquibase.logging           LogFactory)
+    (liquibase.precondition.core PreconditionContainer)
     (liquibase.util              LiquibaseUtil))
   (:require
     [clojure.string         :as sr]
@@ -30,11 +31,52 @@
     [org.bituf.clj-liquibase.internal :as in]))
 
 
+;; ===== Dynamic vars for Integration =====
+
+
+(def ^{:doc "Logical filename use by ChangeSet and ChangeLog instances."
+       :dynamic true}
+      *logical-filepath* nil)
+
+
+(def ^{:doc "Database (liquibase.database.Database) instance."
+       :dynamic true}
+      *db-instance* nil)
+
+
+(def ^{:doc "Changelog params (liquibase.changelog.ChangeLogParameters) instance."
+       :dynamic true}
+      *changelog-params* nil)
+
+
+(defn verify-valid-logical-filepath
+  "Verify whether the *logical-filename* var has a valid value. Return true if
+  all OK, throw IllegalStateException otherwise."
+  []
+  (when (not (string? *logical-filepath*))
+    (throw (IllegalStateException.
+             (format "Expected %s but found %s - not wrapped in 'defchangelog'?"
+               "var *logical-filename* to be string"
+               (mu/var-dump *logical-filepath*)))))
+  true)
+
+
 ;; ===== ChangeSet =====
+
+
+(defn changeset?
+  "Return true if specified argument is a liquibase.changelog.ChangeSet
+  instance, false otherwise."
+  [x]
+  (instance? ChangeSet x))
+
 
 (defn ^ChangeSet make-changeset
   "Return a ChangeSet instance.
   Arguments:
+    id      (String)     Author-assigned ID, which can be sequential
+    author  (String)     Author name (must be kept same across changesets)
+    changes (collection) List of Change objects
   Optional arguments:
     :dbms                          ; String/Keyword/vector-of-multiple
     :run-always         :always    ; Boolean
@@ -48,8 +90,9 @@
     :valid-checksum     :valid-csum ; String
   See also:
     http://www.liquibase.org/manual/changeset"
-  [^String id ^String author ^String filepath changes
-   & {:keys [dbms
+  [^String id ^String author ^List changes
+   & {:keys [logical-filepath   filepath
+             dbms
              run-always         always
              run-on-change      on-change
              context            ctx
@@ -59,14 +102,33 @@
              pre-conditions     pre-cond
              rollback-changes   rollback
              valid-checksum     valid-csum
-             ]}]
-  (let [s-dbms     (in/as-dbident-names dbms)
-        b-always   (or run-always         always    false)
-        b-change   (or run-on-change      on-change false)
-        s-contxt   (or context            ctx)
+             ] :as opt}]
+  (mu/when-assert-cond
+    (mu/verify-opt #{:logical-filepath   :filepath
+                     :dbms
+                     :run-always         :always
+                     :run-on-change      :on-change
+                     :context            :ctx
+                     :run-in-transaction :in-txn
+                     :fail-on-error      :fail-err
+                     :comment
+                     :pre-conditions     :pre-cond
+                     :rollback-changes   :rollback
+                     :valid-checksum     :valid-csum} opt)
+    (mu/verify string?       id)
+    (mu/verify string?       author)
+    (mu/verify coll?         changes)
+    (mu/verify mu/not-empty? changes))
+  (when-not (or logical-filepath filepath)
+    (verify-valid-logical-filepath))
+  (let [s-filepath (or logical-filepath filepath *logical-filepath*)
+        s-dbms     (in/as-dbident-names dbms)
+        b-always   (or run-always       always    false)
+        b-change   (or run-on-change    on-change false)
+        s-contxt   (or context          ctx)
         b-in-txn   (let [x (or run-in-transaction in-txn)]
                      (if (nil? x) true (or x false)))
-        b-fail-err (or fail-on-error      fail-err  false)
+        b-fail-err (or fail-on-error    fail-err  false)
         ;; sub tags
         s-comment  comment
         v-pre-cond (or pre-conditions     pre-cond)
@@ -75,7 +137,7 @@
         _ (do
             (mu/verify string?       id)
             (mu/verify string?       author)
-            (mu/verify string?       filepath)
+            (mu/verify string?       s-filepath)
             (mu/verify mu/not-empty? changes)
             (doseq [each changes]
               (mu/verify #(instance? Change %) each))
@@ -88,8 +150,8 @@
         ;; String id, String author, boolean alwaysRun, boolean runOnChange,
         ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
         c-set (ChangeSet.
-                ^String id       ^String author   ^Boolean b-always ^Boolean b-change
-                ^String filepath ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn)]
+                ^String id         ^String author   ^Boolean b-always ^Boolean b-change
+                ^String s-filepath ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn)]
     (doseq [each changes]
       (.addChange c-set each))
     (if b-fail-err (.setFailOnError   c-set b-fail-err))
@@ -101,12 +163,6 @@
     (if s-val-csum (doseq [each (mu/as-vector s-val-csum)]
                      (.addValidCheckSum c-set each)))
     c-set))
-
-
-(defmacro changeset
-  ""
-  [^String id ^String author changes & more]
-  `(make-changeset ~id ~author *file* ~changes ~@more))
 
 
 ;; ===== DatabaseChangeLog helpers =====
@@ -134,15 +190,6 @@
 ;; ===== Integration =====
 
 
-(def ^{:doc "Database (liquibase.database.Database) instance."
-       :dynamic true}
-      *db-instance* nil)
-
-(def ^{:doc "Changelog params (liquibase.changelog.ChangeLogParameters) instance."
-       :dynamic true}
-      *changelog-params* nil)
-
-
 (defmacro do-initialized
   "Initialize global settings and execute body of code in that context. Ensure
   clj-dbspec/*dbspec* to have a valid :connection object as part of process."
@@ -166,33 +213,62 @@
 ;; ===== DatabaseChangeLog =====
 
 
-(defn ^DatabaseChangeLog make-db-changelog
+(defn changelog?
+  "Return true if specified argument is a liquibase.changelog.DatabaseChangeLog
+  instance, false otherwise."
+  [x]
+  (instance? DatabaseChangeLog x))
+
+
+(defn ^DatabaseChangeLog make-changelog
   "Return a DatabaseChangeLog instance.
+  Arguments:
+    change-sets  (collection/list) List of ChangeSet instances, or
+                                   List of arg-lists (for 'make-changeset' fn)
   See also:
     http://www.liquibase.org/manual/databasechangelog
     make-changelog-params"
-  [^String logical-filepath
-   change-sets
-   & {:keys [pre-conditions     pre-cond   ; vector
-             ]}]
-  (let [dbcl (DatabaseChangeLog.)
-        v-pc (or pre-conditions pre-cond)]
+  [change-sets
+   & {:keys [logical-filepath   filepath
+             pre-conditions     pre-cond   ; vector
+             ] :as opt}]
+  (mu/when-assert-cond
+    (mu/verify-opt #{:logical-filepath :filepath
+                     :pre-conditions   :pre-cond} opt)
+    (mu/verify coll?         change-sets)
+    (mu/verify mu/not-empty? change-sets))
+  (when-not (or logical-filepath filepath)
+    (verify-valid-logical-filepath))
+  (let [dbcl       (DatabaseChangeLog.)
+        s-filepath (or logical-filepath filepath *logical-filepath*)
+        v-pre-cond (or pre-conditions pre-cond)]
     (doto dbcl
-      (.setLogicalFilePath logical-filepath)
+      (.setLogicalFilePath ^String s-filepath)
       (.setChangeLogParameters ^ChangeLogParameters *changelog-params*))
     (doseq [each change-sets]
-      (.addChangeSet dbcl each))
-    (if v-pc (.setPreconditions dbcl v-pc)) ; TODO convert v-pre-cond
+      (cond
+        (changeset? each)    (.addChangeSet dbcl ^ChangeSet each)
+        (and (coll? each)
+          (not (map? each))) (.addChangeSet dbcl
+                               ^ChangeSet (apply make-changeset each))
+        :else
+        (mu/illegal-arg-value "change-sets#element"
+          "ChangeSet object or arg-lists for 'make-changeset' fn"
+          each)))
+    (if v-pre-cond
+      (.setPreconditions dbcl ^PreconditionContainer v-pre-cond)) ; TODO convert v-pre-cond
     dbcl))
 
 
 (defmacro defchangelog
-  "Define a function that when executed (with no arguments), returns a database
-  changelog (DatabaseChangeLog instance).
+  "Define a function that when executed with no arguments, returns a database
+  changelog (DatabaseChangeLog instance). Do so in the context where
+  *logical-filepath* is bound to *file* i.e. the current filename.
   See also:
-    db-change-log"
+    make-changelog"
   [var-name change-sets & var-args]
-  `(def ~var-name (partial make-db-changelog (str "hmm-" *file*) ~change-sets ~@var-args)))
+  `(binding [*logical-filepath* *file*]
+     (def ~var-name (partial make-changelog ~change-sets ~@var-args))))
 
 
 ;; ===== Actions helpers =====
