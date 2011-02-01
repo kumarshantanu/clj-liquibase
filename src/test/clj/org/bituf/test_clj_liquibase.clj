@@ -19,6 +19,11 @@
 (def make-ds dbcp/h2-memory-datasource)
 
 
+(defn dbspec
+  []
+  (spec/make-dbspec (make-ds)))
+
+
 (def ct-change1 (mu/! (ch/create-table :sample-table-1
                         [[:id     :int          :null false :pk true :autoinc true]
                          [:name   [:varchar 40] :null false]
@@ -28,6 +33,12 @@
                         [[:id     :int          :null false :pk true :autoinc true]
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
+
+
+(def changeset-1 ["id=1" "author=shantanu" [ct-change1]])
+
+
+(def changeset-2 ["id=2" "author=shantanu" [ct-change2]])
 
 
 ;; ===== ChangeSet =====
@@ -68,12 +79,30 @@
 
 (deftest test-make-changelog
   (testing "make-changelog"
-    (clb-setup)))
+    (let [cl? lb/changelog?
+          fp  "dummy"
+          mcl lb/make-changelog]
+      (is (thrown? IllegalArgumentException (cl? (mcl fp []))) "No changeset")
+      (is (cl? (mcl fp [changeset-1]            )) "1 changeset")
+      (is (cl? (mcl fp [changeset-1 changeset-2])) "2 changesets")
+      (is (cl? (mcl fp [changeset-1 changeset-2]
+                 :pre-conditions     nil))
+        "With optional args - long names")
+      (is (cl? (mcl fp [changeset-1 changeset-2]
+                 :pre-cond   nil))
+        "With optional args - short names"))))
+
+
+(lb/defchangelog clog-1 [changeset-1])
+
+
+(lb/defchangelog clog-2 [changeset-1 changeset-2])
 
 
 (deftest test-defchangelog
   (testing "defchangelog"
-    (clb-setup)))
+    (is (fn? clog-1))
+    (is (fn? clog-2))))
 
 
 ;; ===== Actions =====
@@ -81,7 +110,10 @@
 
 (deftest test-update
   (testing "update"
-    (clb-setup)))
+    (lb/with-dbspec (dbspec)
+      (lb/update clog-1)
+      ;; TODO find tables
+      )))
 
 
 (deftest test-update-by-count

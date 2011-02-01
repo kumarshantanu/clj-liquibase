@@ -34,7 +34,7 @@
 ;; ===== Dynamic vars for Integration =====
 
 
-(def ^{:doc "Logical filename use by ChangeSet and ChangeLog instances."
+(def ^{:doc "Logical filepath use by ChangeSet and ChangeLog instances."
        :dynamic true}
       *logical-filepath* nil)
 
@@ -50,13 +50,13 @@
 
 
 (defn verify-valid-logical-filepath
-  "Verify whether the *logical-filename* var has a valid value. Return true if
+  "Verify whether the *logical-filepath* var has a valid value. Return true if
   all OK, throw IllegalStateException otherwise."
   []
   (when (not (string? *logical-filepath*))
     (throw (IllegalStateException.
              (format "Expected %s but found %s - not wrapped in 'defchangelog'?"
-               "var *logical-filename* to be string"
+               "var *logical-filepath* to be string"
                (mu/var-dump *logical-filepath*)))))
   true)
 
@@ -228,33 +228,30 @@
   See also:
     http://www.liquibase.org/manual/databasechangelog
     make-changelog-params"
-  [change-sets
-   & {:keys [logical-filepath   filepath
-             pre-conditions     pre-cond   ; vector
+  [^String filepath ^List change-sets
+   & {:keys [pre-conditions     pre-cond   ; vector
              ] :as opt}]
   (mu/when-assert-cond
-    (mu/verify-opt #{:logical-filepath :filepath
-                     :pre-conditions   :pre-cond} opt)
+    (mu/verify-opt #{:pre-conditions   :pre-cond} opt)
+    (mu/verify string?       filepath)
     (mu/verify coll?         change-sets)
     (mu/verify mu/not-empty? change-sets))
-  (when-not (or logical-filepath filepath)
-    (verify-valid-logical-filepath))
   (let [dbcl       (DatabaseChangeLog.)
-        s-filepath (or logical-filepath filepath *logical-filepath*)
         v-pre-cond (or pre-conditions pre-cond)]
     (doto dbcl
-      (.setLogicalFilePath ^String s-filepath)
+      (.setLogicalFilePath filepath)
       (.setChangeLogParameters ^ChangeLogParameters *changelog-params*))
     (doseq [each change-sets]
-      (cond
-        (changeset? each)    (.addChangeSet dbcl ^ChangeSet each)
-        (and (coll? each)
-          (not (map? each))) (.addChangeSet dbcl
-                               ^ChangeSet (apply make-changeset each))
-        :else
-        (mu/illegal-arg-value "change-sets#element"
-          "ChangeSet object or arg-lists for 'make-changeset' fn"
-          each)))
+      (binding [*logical-filepath* filepath]
+        (cond
+          (changeset? each)    (.addChangeSet dbcl ^ChangeSet each)
+          (and (coll? each)
+            (not (map? each))) (.addChangeSet dbcl
+                                 ^ChangeSet (apply make-changeset each))
+          :else
+          (mu/illegal-arg-value "change-sets#element"
+            "ChangeSet object or arg-lists for 'make-changeset' fn"
+            each))))
     (if v-pre-cond
       (.setPreconditions dbcl ^PreconditionContainer v-pre-cond)) ; TODO convert v-pre-cond
     dbcl))
@@ -263,12 +260,13 @@
 (defmacro defchangelog
   "Define a function that when executed with no arguments, returns a database
   changelog (DatabaseChangeLog instance). Do so in the context where
-  *logical-filepath* is bound to *file* i.e. the current filename.
+  *logical-filepath* is bound to *file* i.e. name of the current file.
   See also:
     make-changelog"
   [var-name change-sets & var-args]
-  `(binding [*logical-filepath* *file*]
-     (def ~var-name (partial make-changelog ~change-sets ~@var-args))))
+  `(def ~var-name
+     (partial make-changelog (or *logical-filepath* *file*) ~change-sets
+       ~@var-args)))
 
 
 ;; ===== Actions helpers =====
