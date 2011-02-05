@@ -21,7 +21,7 @@
     (liquibase.executor          Executor ExecutorService LoggingExecutor)
     (liquibase.exception         LiquibaseException LockException)
     (liquibase.lockservice       LockService)
-    (liquibase.logging           LogFactory)
+    (liquibase.logging           LogFactory Logger)
     (liquibase.precondition.core PreconditionContainer)
     (liquibase.util              LiquibaseUtil))
   (:require
@@ -35,16 +35,19 @@
 
 
 (def ^{:doc "Logical filepath use by ChangeSet and ChangeLog instances."
+       :tag String
        :dynamic true}
       *logical-filepath* nil)
 
 
 (def ^{:doc "Database (liquibase.database.Database) instance."
+       :tag Database
        :dynamic true}
       *db-instance* nil)
 
 
 (def ^{:doc "Changelog params (liquibase.changelog.ChangeLogParameters) instance."
+       :tag ChangeLogParameters
        :dynamic true}
       *changelog-params* nil)
 
@@ -272,7 +275,8 @@
 ;; ===== Actions helpers =====
 
 
-(def ^{:doc "Liquibase logger"}
+(def ^{:doc "Liquibase logger"
+       :tag Logger}
       log (LogFactory/getLogger))
 
 (defn check-database-changelog-table
@@ -370,7 +374,7 @@
   ([changelog-fn ^List contexts]
     (do-locked
       (.setContexts *changelog-params* contexts)
-      (let [changelog (changelog-fn)]
+      (let [changelog ^DatabaseChangeLog (changelog-fn)]
         (check-database-changelog-table *db-instance* true changelog contexts)
         (.validate changelog *db-instance* (into-array String contexts))
         (let [changelog-it (make-changelog-iterator changelog
@@ -395,7 +399,7 @@
   ([changelog-fn ^Integer change-count ^List contexts]
     (.setContexts *changelog-params* contexts)
     (do-locked
-      (let [changelog (changelog-fn)]
+      (let [changelog ^DatabaseChangeLog (changelog-fn)]
         (check-database-changelog-table *db-instance* true changelog contexts)
         (.validate changelog *db-instance* (into-array String contexts))
         (let [changelog-it (make-changelog-iterator changelog
@@ -432,7 +436,7 @@
   ([changelog-fn ^String tag ^List contexts]
     (do-locked
       (.setContexts *changelog-params* contexts)
-      (let [changelog (changelog-fn)]
+      (let [changelog ^DatabaseChangeLog (changelog-fn)]
         (check-database-changelog-table *db-instance* false changelog contexts)
         (.validate changelog *db-instance* (into-array String contexts))
         (let [ran-changesets (.getRanChangeSetList *db-instance*)
@@ -462,7 +466,7 @@
   ([changelog-fn ^Date date ^List contexts]
     (do-locked
       (.setContexts *changelog-params* contexts)
-      (let [changelog (changelog-fn)]
+      (let [changelog ^DatabaseChangeLog (changelog-fn)]
         (check-database-changelog-table *db-instance* false changelog contexts)
         (.validate changelog *db-instance* (into-array String contexts))
         (let [ran-changesets (.getRanChangeSetList *db-instance*)
@@ -492,7 +496,7 @@
   ([changelog-fn ^Integer change-count ^List contexts]
     (.setContexts *changelog-params* contexts)
     (do-locked
-      (let [changelog (changelog-fn)]
+      (let [changelog ^DatabaseChangeLog (changelog-fn)]
         (check-database-changelog-table *db-instance* false changelog contexts)
         (.validate changelog *db-instance* (into-array String contexts))
         (let [ran-changesets (.getRanChangeSetList *db-instance*)

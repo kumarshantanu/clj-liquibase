@@ -18,7 +18,7 @@
 
 
 (defn ^String as-coltype
-  "Create column-type (string - subject to sp/clj-to-dbident).
+  "Create column-type (string - subject to sp/db-iden).
   Examples:
     (coltype :int)        => \"INT\"
     (coltype \"BIGINT\")  => \"BIGINT\"
@@ -27,7 +27,7 @@
   Note: This function is called during constructing column-config.
   See also: http://www.liquibase.org/manual/column"
   [t & more]
-  (str (sp/clj-to-dbident t)
+  (str (sp/db-iden t)
     (if (mu/not-empty? more) (apply str "(" (mu/comma-sep-str more) ")"))))
 
 
@@ -59,7 +59,7 @@
   "Return a ColumnConfig instance with column name and value set."
   [colname value]
   (let [col (ColumnConfig.)]
-    (.setName col (sp/clj-to-dbident colname))
+    (.setName col (sp/db-iden colname))
     (set-column-value col value)
     col))
 
@@ -84,7 +84,7 @@
         "Either of \"STRING\", \"NUMERIC\", \"DATE\" or \"BOOLEAN\"" coltype))
     (let [ldcc (LoadDataColumnConfig.)]
       (doto ldcc
-        (.setName (sp/clj-to-dbident colname))
+        (.setName (sp/db-iden colname))
         (.setType (sr/upper-case s-coltype)))
       (if index  (.setIndex  ldcc index))
       (if header (.setHeader ldcc header))
@@ -111,7 +111,7 @@
 (defn ^ColumnConfig as-column-config
   "Create column-configuration. This function is called by change/create-table.
   Arguments:
-    colname  (String/Keyword) column name - subject to clj-to-dbident
+    colname  (String/Keyword) column name - subject to db-iden
     coltype  (String/Keyword/Vector) column type
   Optional arguments (can use either long/short name):
     Long name              |Short name |Allowed types
@@ -122,14 +122,14 @@
     ;; constraints (s.t. = subject to)
     :nullable              |:null      | Boolean
     :primary-key           |:pk        | Boolean
-    :primary-key-name      |:pkname    | String/Keyword - s.t. clj-to-dbident
-    :primary-key-tablespace|:pktspace  | String/Keyword - s.t. clj-to-dbident
+    :primary-key-name      |:pkname    | String/Keyword - s.t. db-iden
+    :primary-key-tablespace|:pktspace  | String/Keyword - s.t. db-iden
     :references            |:refs      | String (Foreign key definition)
     :unique                |:uniq      | Boolean
-    :unique-constraint-name|:ucname    | String/Keyword - s.t. clj-to-dbident
+    :unique-constraint-name|:ucname    | String/Keyword - s.t. db-iden
     :check                 |           | String
     :delete-cascade        |:dcascade  | Boolean
-    :foreign-key-name      |:fkname    | String/Keyword - s.t. clj-to-dbident
+    :foreign-key-name      |:fkname    | String/Keyword - s.t. db-iden
     :initially-deferred    |:idefer    | Boolean
     :deferrable            |:defer     | Boolean
   Examples (when used inside 'change/create-table'):
@@ -140,21 +140,21 @@
   See also:
     as-coltype
     http://www.liquibase.org/manual/column"
-  [colname coltype ; coltype (mixed) - keyword, string, vector (1st arg: clj-to-dbident)
+  [colname coltype ; coltype (mixed) - keyword, string, vector (1st arg: db-iden)
    & {:keys [default-value          default  ; String/Number/Date/Boolean/DatabaseFunction
              auto-increment         autoinc  ; Boolean
              remarks                         ; String
              ;; constraints
              nullable               null     ; Boolean
              primary-key            pk       ; Boolean
-             primary-key-name       pkname   ; String/Keyword - s.t. clj-to-dbident
-             primary-key-tablespace pktspace ; String/Keyword - s.t. clj-to-dbident
+             primary-key-name       pkname   ; String/Keyword - s.t. db-iden
+             primary-key-tablespace pktspace ; String/Keyword - s.t. db-iden
              references             refs     ; String (Foreign key definition)
              unique                 uniq     ; Boolean
-             unique-constraint-name ucname   ; String/Keyword - s.t. clj-to-dbident
+             unique-constraint-name ucname   ; String/Keyword - s.t. db-iden
              check                           ; String
              delete-cascade         dcascade ; Boolean
-             foreign-key-name       fkname   ; String/Keyword - s.t. clj-to-dbident
+             foreign-key-name       fkname   ; String/Keyword - s.t. db-iden
              initially-deferred     idefer   ; Boolean
              deferrable             defer    ; Boolean
              ]}]
@@ -180,7 +180,7 @@
         ]
     ;; set base column properties
     (doto col
-      (.setName (sp/clj-to-dbident colname))
+      (.setName (sp/db-iden colname))
       (.setType (apply as-coltype (mu/as-vector coltype))))
     ;; set optional column properties
     (if-nn c-default (set-default-value col c-default))
@@ -189,17 +189,17 @@
     ;; set constraints
     (if-nn c-null     (.setNullable             con ^Boolean   c-null     ))
     (if-nn c-pk       (.setPrimaryKey           con ^Boolean   c-pk       ))
-    (if-nn c-pkname   (.setPrimaryKeyName       con ^String  (sp/clj-to-dbident
+    (if-nn c-pkname   (.setPrimaryKeyName       con ^String  (sp/db-iden
                                                                c-pkname  )))
-    (if-nn c-pktspace (.setPrimaryKeyTablespace con ^String  (sp/clj-to-dbident
+    (if-nn c-pktspace (.setPrimaryKeyTablespace con ^String  (sp/db-iden
                                                                c-pktspace)))
     (if-nn c-refs     (.setReferences           con ^String    c-refs     ))
     (if-nn c-uniq     (.setUnique               con ^Boolean   c-uniq     ))
-    (if-nn c-ucname   (.setUniqueConstraintName con ^String  (sp/clj-to-dbident
+    (if-nn c-ucname   (.setUniqueConstraintName con ^String  (sp/db-iden
                                                                c-ucname  )))
     (if-nn c-check    (.setCheck                con ^String    c-check    ))
     (if-nn c-dcascade (.setDeleteCascade        con ^Boolean   c-dcascade ))
-    (if-nn c-fkname   (.setForeignKeyName       con ^String  (sp/clj-to-dbident
+    (if-nn c-fkname   (.setForeignKeyName       con ^String  (sp/db-iden
                                                                c-fkname  )))
     (if-nn c-idefer   (.setInitiallyDeferred    con ^Boolean   c-idefer   ))
     (if-nn c-defer    (.setDeferrable           con ^Boolean   c-defer    ))
@@ -211,4 +211,4 @@
   "Return comma-separated name string for a given bunch of potentially
   Clojure-oriented names."
   [names]
-  (mu/comma-sep-str (map sp/clj-to-dbident (mu/as-vector names))))
+  (mu/comma-sep-str (map sp/db-iden (mu/as-vector names))))

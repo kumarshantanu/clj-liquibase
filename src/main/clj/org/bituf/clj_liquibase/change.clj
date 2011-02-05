@@ -68,7 +68,7 @@
     http://www.liquibase.org/manual/add_column
     http://www.liquibase.org/manual/column"
   [table-name ^List columns
-   & {:keys [schema-name schema ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -77,8 +77,8 @@
     (mu/verify mu/not-empty? columns))
   (let [change (AddColumnChange.)
         s-name (or schema-name schema *schema*)]
-    (.setTableName change (sp/clj-to-dbident table-name))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (.setTableName change (sp/db-iden table-name))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     (doseq [each columns]
       (.addColumn change (apply in/as-column-config each)))
     change))
@@ -92,8 +92,8 @@
   See also:
     http://www.liquibase.org/manual/rename_column"
   [table-name old-column-name new-column-name
-   & {:keys [schema-name      schema    ; String/Keyword - s.t. clj-to-dbident
-             column-data-type data-type ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
+             column-data-type data-type ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name      :schema
@@ -105,10 +105,10 @@
         s-name  (or schema-name      schema *schema*)
         cd-type (or column-data-type data-type)]
     (doto change
-      (.setTableName     (sp/clj-to-dbident table-name))
-      (.setOldColumnName (sp/clj-to-dbident old-column-name))
-      (.setNewColumnName (sp/clj-to-dbident new-column-name)))
-    (if s-name  (.setSchemaName     change (sp/clj-to-dbident s-name)))
+      (.setTableName     (sp/db-iden table-name))
+      (.setOldColumnName (sp/db-iden old-column-name))
+      (.setNewColumnName (sp/db-iden new-column-name)))
+    (if s-name  (.setSchemaName     change (sp/db-iden s-name)))
     (if cd-type (.setColumnDataType change (in/as-coltype cd-type)))
     change))
 
@@ -121,7 +121,7 @@
   See also:
     http://www.liquibase.org/manual/modify_column"
   [table-name column-name new-data-type
-   & {:keys [schema-name schema ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -131,10 +131,10 @@
   (let [change (ModifyDataTypeChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setTableName   (sp/clj-to-dbident table-name))
-      (.setColumnName  (sp/clj-to-dbident column-name))
+      (.setTableName   (sp/db-iden table-name))
+      (.setColumnName  (sp/db-iden column-name))
       (.setNewDataType (in/as-coltype new-data-type)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -146,7 +146,7 @@
   See also:
     http://www.liquibase.org/manual/drop_column"
   [table-name column-name
-   & {:keys [schema-name schema ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -155,9 +155,9 @@
   (let [change (DropColumnChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setTableName  (sp/clj-to-dbident table-name))
-      (.setColumnName (sp/clj-to-dbident column-name)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+      (.setTableName  (sp/db-iden table-name))
+      (.setColumnName (sp/db-iden column-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -168,7 +168,7 @@
   See also:
     http://www.liquibase.org/manual/alter_sequence"
   [seq-name increment-by
-   & {:keys [schema-name schema ; string/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema ; string/Keyword - s.t. db-iden
              max-value   max    ; number or string
              min-value   min    ; number or string
              ordered     ord    ; Boolean
@@ -186,9 +186,9 @@
         min-v  (or min-value   min)
         ord-v  (or ordered     ord)]
     (doto change
-      (.setSequenceName (sp/clj-to-dbident seq-name))
+      (.setSequenceName (sp/db-iden seq-name))
       (.setIncrementBy (bigint increment-by)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     (if max-v  (.setMaxValue   change (bigint max-v)))
     (if min-v  (.setMinValue   change (bigint min-v)))
     (if ord-v  (.setOrdered    change ord-v))
@@ -203,8 +203,8 @@
     http://www.liquibase.org/manual/create_table
     http://www.liquibase.org/manual/column"
   [table-name ^List columns
-   & {:keys [schema-name schema ; String/Keyword - s.t. clj-to-dbident
-             table-space tspace ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
+             table-space tspace ; String/Keyword - s.t. db-iden
              remarks] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema
@@ -216,9 +216,9 @@
   (let [change  (CreateTableChange.)
         s-name  (or schema-name schema *schema*)
         t-space (or table-space tspace)]
-    (.setTableName change (sp/clj-to-dbident table-name))
-    (if s-name  (.setSchemaName change (sp/clj-to-dbident s-name)))
-    (if t-space (.setTablespace change (sp/clj-to-dbident t-space)))
+    (.setTableName change (sp/db-iden table-name))
+    (if s-name  (.setSchemaName change (sp/db-iden s-name)))
+    (if t-space (.setTablespace change (sp/db-iden t-space)))
     (if remarks (.setRemarks    change remarks))
     (doseq [each columns]
       (.addColumn change (apply in/as-column-config each)))
@@ -232,7 +232,7 @@
   See also:
     http://www.liquibase.org/manual/rename_table"
   [old-table-name new-table-name
-   & {:keys [schema-name schema ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -241,9 +241,9 @@
   (let [change (RenameTableChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setOldTableName (sp/clj-to-dbident old-table-name))
-      (.setNewTableName (sp/clj-to-dbident new-table-name)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+      (.setOldTableName (sp/db-iden old-table-name))
+      (.setNewTableName (sp/db-iden new-table-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -254,7 +254,7 @@
   See also:
     http://www.liquibase.org/manual/drop_table"
   [table-name
-   & {:keys [schema-name         schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name         schema  ; String/Keyword - s.t. db-iden
              cascade-constraints cascade ; Boolean
              ] :as opt}]
   (mu/when-assert-cond
@@ -264,8 +264,8 @@
   (let [change (DropTableChange.)
         s-name (or schema-name         schema   *schema*)
         casc-c (or cascade-constraints cascade)]
-    (.setTableName change (sp/clj-to-dbident table-name))
-    (if s-name (.setSchemaName         change (sp/clj-to-dbident s-name)))
+    (.setTableName change (sp/db-iden table-name))
+    (if s-name (.setSchemaName         change (sp/db-iden s-name)))
     (if casc-c (.setCascadeConstraints change casc-c))
     change))
 
@@ -277,7 +277,7 @@
   See also:
     http://www.liquibase.org/manual/create_view"
   [view-name ^String select-query
-   & {:keys [schema-name       schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name       schema  ; String/Keyword - s.t. db-iden
              replace-if-exists replace ; Boolean
              ] :as opt}]
   (mu/when-assert-cond
@@ -289,9 +289,9 @@
         s-name (or schema-name       schema  *schema*)
         repl-v (or replace-if-exists replace)]
     (doto change
-      (.setViewName    (sp/clj-to-dbident view-name))
+      (.setViewName    (sp/db-iden view-name))
       (.setSelectQuery select-query))
-    (if s-name (.setSchemaName      change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName      change (sp/db-iden s-name)))
     (if repl-v (.setReplaceIfExists change repl-v))
     change))
 
@@ -303,7 +303,7 @@
   See also:
     http://www.liquibase.org/manual/rename_view"
   [old-view-name new-view-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -312,9 +312,9 @@
   (let [change (RenameViewChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setOldViewName (sp/clj-to-dbident old-view-name))
-      (.setNewViewName (sp/clj-to-dbident new-view-name)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+      (.setOldViewName (sp/db-iden old-view-name))
+      (.setNewViewName (sp/db-iden new-view-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -325,15 +325,15 @@
   See also:
     http://www.liquibase.org/manual/drop_view"
   [view-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
     (mu/verify mu/not-nil?   view-name))
   (let [change (DropViewChange.)
         s-name (or schema-name schema *schema*)]
-    (.setViewName change (sp/clj-to-dbident view-name))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (.setViewName change (sp/db-iden view-name))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -345,7 +345,7 @@
     http://www.liquibase.org/manual/merge_columns"
   [table-name column1-name ^String join-string
    column2-name final-column-name final-column-type
-   & {:keys [schema-name schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -358,13 +358,13 @@
   (let [change (MergeColumnChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setTableName       (sp/clj-to-dbident table-name))
-      (.setColumn1Name     (sp/clj-to-dbident column1-name))
+      (.setTableName       (sp/db-iden table-name))
+      (.setColumn1Name     (sp/db-iden column1-name))
       (.setJoinString      join-string)
-      (.setColumn2Name     (sp/clj-to-dbident column2-name))
-      (.setFinalColumnName (sp/clj-to-dbident final-column-name))
+      (.setColumn2Name     (sp/db-iden column2-name))
+      (.setFinalColumnName (sp/db-iden final-column-name))
       (.setFinalColumnType (in/as-coltype final-column-type)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -398,8 +398,8 @@
   [existing-table-name existing-column-name
    new-table-name      new-column-name
    constraint-name
-   & {:keys [existing-table-schema-name existing-schema ; String/Keyword - s.t. clj-to-dbident
-             new-table-schema-name      new-schema      ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [existing-table-schema-name existing-schema ; String/Keyword - s.t. db-iden
+             new-table-schema-name      new-schema      ; String/Keyword - s.t. db-iden
              new-column-data-type       new-data-type   ; String/vector - s.t. as-coltype
              ] :as opt}]
   (mu/when-assert-cond
@@ -416,13 +416,13 @@
         nws-name (or new-table-schema-name      new-schema)
         nwd-type (or new-column-data-type       new-data-type)]
     (doto change
-      (.setExistingTableName  (sp/clj-to-dbident existing-table-name))
-      (.setExistingColumnName (sp/clj-to-dbident existing-column-name))
-      (.setNewTableName       (sp/clj-to-dbident new-table-name))
-      (.setNewColumnName      (sp/clj-to-dbident new-column-name))
-      (.setConstraintName     (sp/clj-to-dbident constraint-name)))
-    (if exs-name (.setExistingTableSchemaName change (sp/clj-to-dbident exs-name)))
-    (if nws-name (.setNewTableSchemaName      change (sp/clj-to-dbident nws-name)))
+      (.setExistingTableName  (sp/db-iden existing-table-name))
+      (.setExistingColumnName (sp/db-iden existing-column-name))
+      (.setNewTableName       (sp/db-iden new-table-name))
+      (.setNewColumnName      (sp/db-iden new-column-name))
+      (.setConstraintName     (sp/db-iden constraint-name)))
+    (if exs-name (.setExistingTableSchemaName change (sp/db-iden exs-name)))
+    (if nws-name (.setNewTableSchemaName      change (sp/db-iden nws-name)))
     (if nwd-type (.setNewColumnDataType       change (in/as-coltype nwd-type)))
     change))
 
@@ -435,7 +435,7 @@
   See also:
     http://www.liquibase.org/manual/add_not-null_constraint"
   [table-name column-name column-data-type
-   & {:keys [schema-name        schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name        schema  ; String/Keyword - s.t. db-iden
              default-null-value default ; String
              ] :as opt}]
   (mu/when-assert-cond
@@ -448,10 +448,10 @@
         s-name  (or schema-name        schema  *schema*)
         n-value (or default-null-value default)]
     (doto change
-      (.setTableName      (sp/clj-to-dbident table-name))
-      (.setColumnName     (sp/clj-to-dbident column-name))
+      (.setTableName      (sp/db-iden table-name))
+      (.setColumnName     (sp/db-iden column-name))
       (.setColumnDataType (in/as-coltype column-data-type)))
-    (if s-name  (.setSchemaName       change (sp/clj-to-dbident s-name)))
+    (if s-name  (.setSchemaName       change (sp/db-iden s-name)))
     (if n-value (.setDefaultNullValue change n-value))
     change))
 
@@ -464,7 +464,7 @@
   See also:
     http://www.liquibase.org/manual/remove_not-null_constraint"
   [table-name column-name
-   & {:keys [schema-name      schema    ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
              column-data-type data-type ; String/vector - s.t. as-coltype
              ] :as opt}]
   (mu/when-assert-cond
@@ -476,9 +476,9 @@
         s-name (or schema-name      schema    *schema*)
         d-type (or column-data-type data-type)]
     (doto change
-      (.setTableName  (sp/clj-to-dbident table-name))
-      (.setColumnName (sp/clj-to-dbident column-name)))
-    (if s-name (.setSchemaName     change (sp/clj-to-dbident s-name)))
+      (.setTableName  (sp/db-iden table-name))
+      (.setColumnName (sp/db-iden column-name)))
+    (if s-name (.setSchemaName     change (sp/db-iden s-name)))
     (if d-type (.setColumnDataType change (in/as-coltype d-type)))
     change))
 
@@ -491,8 +491,8 @@
   See also:
     http://www.liquibase.org/manual/add_unique_constraint"
   [table-name column-names constraint-name
-   & {:keys [schema-name        schema ; String/Keyword - s.t. clj-to-dbident
-             table-space        tspace ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name        schema ; String/Keyword - s.t. db-iden
+             table-space        tspace ; String/Keyword - s.t. db-iden
              deferrable         defer  ; Boolean
              initially-deferred idefer ; Boolean
              disabled                  ; Boolean
@@ -513,11 +513,11 @@
         id-val (or initially-deferred idefer)
         di-val disabled]
     (doto change
-      (.setTableName      (sp/clj-to-dbident table-name))
+      (.setTableName      (sp/db-iden table-name))
       (.setColumnNames    (in/as-dbident-names column-names))
-      (.setConstraintName (sp/clj-to-dbident constraint-name)))
-    (if s-name (.setSchemaName        change (sp/clj-to-dbident s-name)))
-    (if t-name (.setTablespace        change (sp/clj-to-dbident t-name)))
+      (.setConstraintName (sp/db-iden constraint-name)))
+    (if s-name (.setSchemaName        change (sp/db-iden s-name)))
+    (if t-name (.setTablespace        change (sp/db-iden t-name)))
     (if df-val (.setDeferrable        change df-val))
     (if id-val (.setInitiallyDeferred change id-val))
     (if di-val (.setDisabled          change di-val))
@@ -532,7 +532,7 @@
   See also:
     http://www.liquibase.org/manual/drop_unique_constraint"
   [table-name constraint-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -541,9 +541,9 @@
   (let [change (DropUniqueConstraintChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setTableName      (sp/clj-to-dbident table-name))
-      (.setConstraintName (sp/clj-to-dbident constraint-name)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+      (.setTableName      (sp/db-iden table-name))
+      (.setConstraintName (sp/db-iden constraint-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -554,7 +554,7 @@
   See also:
     http://www.liquibase.org/manual/create_sequence"
   [sequence-name
-   & {:keys [schema-name  schema ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name  schema ; String/Keyword - s.t. db-iden
              start-value  start  ; BigInteger
              increment-by incby  ; BigInteger
              max-value    max    ; BigInteger
@@ -579,8 +579,8 @@
         min-v  (or min-value    min)
         ord-v  (or ordered      ord)
         cyc-v  (or cycle        cyc)]
-    (.setSequenceName change (sp/clj-to-dbident sequence-name))
-    (if s-name (.setSchemaName  change (sp/clj-to-dbident s-name)))
+    (.setSequenceName change (sp/db-iden sequence-name))
+    (if s-name (.setSchemaName  change (sp/db-iden s-name)))
     (if str-v  (.setStartValue  change (bigint str-v)))
     (if inc-v  (.setIncrementBy change (bigint inc-v)))
     (if max-v  (.setMaxValue    change (bigint max-v)))
@@ -595,15 +595,15 @@
 (defn ^DropSequenceChange drop-sequence
   "Return a Change instance that drops a sequence (DropSequenceChange)."
   [sequence-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
     (mu/verify mu/not-nil? sequence-name))
   (let [change (DropSequenceChange.)
         s-name (or schema-name schema *schema*)]
-    (.setSequenceName change (sp/clj-to-dbident sequence-name))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (.setSequenceName change (sp/db-iden sequence-name))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -615,7 +615,7 @@
   See also:
     http://www.liquibase.org/manual/add_auto-increment"
   [table-name column-name column-data-type
-   & {:keys [schema-name schema  ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
              ] :as opt}]
   (mu/when-assert-cond
     (mu/verify-opt #{:schema-name :schema} opt)
@@ -625,10 +625,10 @@
   (let [change (AddAutoIncrementChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setTableName      (sp/clj-to-dbident table-name))
-      (.setColumnName     (sp/clj-to-dbident column-name))
+      (.setTableName      (sp/db-iden table-name))
+      (.setColumnName     (sp/db-iden column-name))
       (.setColumnDataType (in/as-coltype column-data-type)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -640,7 +640,7 @@
   See also:
     http://www.liquibase.org/manual/add_default_value"
   [table-name column-name default-value
-   & {:keys [schema-name      schema    ; String/Keyword - s.t. clj-to-dbident
+   & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
              column-data-type data-type
              ] :as opt}]
   (mu/when-assert-cond
@@ -652,10 +652,10 @@
         s-name (or schema-name      schema    *schema*)
         d-type (or column-data-type data-type)]
     (doto change
-      (.setTableName  (sp/clj-to-dbident table-name))
-      (.setColumnName (sp/clj-to-dbident column-name)))
+      (.setTableName  (sp/db-iden table-name))
+      (.setColumnName (sp/db-iden column-name)))
     (in/set-default-value change default-value) ; TODO - fn to set value serialized-as-string/boolean
-    (if s-name (.setSchemaName     change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName     change (sp/db-iden s-name)))
     (if d-type (.setColumnDataType change (apply in/as-coltype
                                             (mu/as-vector d-type))))
     change))
@@ -681,9 +681,9 @@
         s-name (or schema-name      schema    *schema*)
         d-type (or column-data-type data-type)]
     (doto change
-      (.setTableName  (sp/clj-to-dbident table-name))
-      (.setColumnName (sp/clj-to-dbident column-name)))
-    (if s-name (.setSchemaName     change (sp/clj-to-dbident s-name)))
+      (.setTableName  (sp/db-iden table-name))
+      (.setColumnName (sp/db-iden column-name)))
+    (if s-name (.setSchemaName     change (sp/db-iden s-name)))
     (if d-type (.setColumnDataType change (apply in/as-coltype
                                             (mu/as-vector d-type))))
     change))
@@ -727,13 +727,13 @@
         od-v    (or on-delete          ondel)
         ou-v    (or on-update          onupd)]
     (doto change
-      (.setConstraintName        (sp/clj-to-dbident constraint-name))
-      (.setBaseTableName         (sp/clj-to-dbident base-table-name))
+      (.setConstraintName        (sp/db-iden constraint-name))
+      (.setBaseTableName         (sp/db-iden base-table-name))
       (.setBaseColumnNames       (in/as-dbident-names base-column-names))
-      (.setReferencedTableName   (sp/clj-to-dbident referenced-table-name))
+      (.setReferencedTableName   (sp/db-iden referenced-table-name))
       (.setReferencedColumnNames (in/as-dbident-names referenced-column-names)))
-    (if bs-name (.setBaseTableSchemaName       change (sp/clj-to-dbident bs-name)))
-    (if rs-name (.setReferencedTableSchemaName change (sp/clj-to-dbident rs-name)))
+    (if bs-name (.setBaseTableSchemaName       change (sp/db-iden bs-name)))
+    (if rs-name (.setReferencedTableSchemaName change (sp/db-iden rs-name)))
     (if df-v    (.setDeferrable                change df-v))
     (if id-v    (.setInitiallyDeferred         change id-v))
     (if od-v    (.setOnDelete                  change ^String od-v))
@@ -758,9 +758,9 @@
   (let [change (DropForeignKeyConstraintChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
-      (.setConstraintName (sp/clj-to-dbident constraint-name))
-      (.setBaseTableName  (sp/clj-to-dbident base-table-name)))
-    (if s-name (.setBaseTableSchemaName change (sp/clj-to-dbident s-name)))
+      (.setConstraintName (sp/db-iden constraint-name))
+      (.setBaseTableName  (sp/db-iden base-table-name)))
+    (if s-name (.setBaseTableSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -785,11 +785,11 @@
         s-name (or schema-name schema *schema*)
         t-name (or table-space tspace)]
     (doto change
-      (.setTableName      (sp/clj-to-dbident table-name))
+      (.setTableName      (sp/db-iden table-name))
       (.setColumnNames    (in/as-dbident-names column-names))
-      (.setConstraintName (sp/clj-to-dbident constraint-name)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
-    (if t-name (.setTablespace change (sp/clj-to-dbident t-name)))
+      (.setConstraintName (sp/db-iden constraint-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
+    (if t-name (.setTablespace change (sp/db-iden t-name)))
     change))
 
 
@@ -811,9 +811,9 @@
   (let [change (DropPrimaryKeyChange.)
         s-name (or schema-name     schema *schema*)
         c-name (or constraint-name constr)]
-    (.setTableName change (sp/clj-to-dbident table-name))
-    (if s-name (.setSchemaName     change (sp/clj-to-dbident s-name)))
-    (if c-name (.setConstraintName change (sp/clj-to-dbident c-name)))
+    (.setTableName change (sp/db-iden table-name))
+    (if s-name (.setSchemaName     change (sp/db-iden s-name)))
+    (if c-name (.setConstraintName change (sp/db-iden c-name)))
     change))
 
 
@@ -836,10 +836,10 @@
   (let [change (InsertDataChange.)
         s-name (or schema-name schema *schema*)
         cols-v (map (fn [[n v]] (in/new-column-value n v)) column-value-map)]
-    (.setTableName change (sp/clj-to-dbident table-name))
+    (.setTableName change (sp/db-iden table-name))
     (doseq [each cols-v]
       (.addColumn change ^ColumnConfig each))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 
@@ -873,11 +873,11 @@
         s-name (or schema-name schema *schema*)
         enc-v  (or encoding    enc)]
     (doto change
-      (.setTableName (sp/clj-to-dbident table-name))
+      (.setTableName (sp/db-iden table-name))
       (.setFile      csv-filename))
     (doseq [each columns-spec]
       (.addColumn change (apply in/load-data-column-config each)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     (if enc-v  (.setEncoding   change (mu/as-string enc-v)))
     change))
 
@@ -917,12 +917,12 @@
         s-name (or schema-name schema *schema*)
         enc-v  (or encoding    enc)]
     (doto change
-      (.setTableName  (sp/clj-to-dbident table-name))
+      (.setTableName  (sp/db-iden table-name))
       (.setFile       csv-filename)
       (.setPrimaryKey (in/as-dbident-names primary-key-cols)))
     (doseq [each columns-spec]
       (.addColumn change (apply in/load-data-column-config each)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     (if enc-v  (.setEncoding   change (mu/as-string enc-v)))
     change))
 
@@ -946,10 +946,10 @@
   (let [change   (UpdateDataChange.)
         s-name   (or schema-name  schema *schema*)
         w-clause (or where-clause where)]
-    (.setTableName change (sp/clj-to-dbident table-name))
+    (.setTableName change (sp/db-iden table-name))
     (doseq [[n v] column-name-value-map]
       (.addColumn change (in/new-column-value n v)))
-    (if s-name   (.setSchemaName change (sp/clj-to-dbident s-name)))
+    (if s-name   (.setSchemaName change (sp/db-iden s-name)))
     (if w-clause (.setWhereClause change w-clause))
     change))
 
@@ -972,8 +972,8 @@
   (let [change   (DeleteDataChange.)
         s-name   (or schema-name  schema *schema*)
         w-clause (or where-clause where)]
-    (.setTableName change (sp/clj-to-dbident table-name))
-    (if s-name   (.setWhereClause change (sp/clj-to-dbident s-name)))
+    (.setTableName change (sp/db-iden table-name))
+    (if s-name   (.setWhereClause change (sp/db-iden s-name)))
     (if w-clause (.setSchemaName  change w-clause))
     change))
 
@@ -1036,11 +1036,11 @@
         i-name  (or index-name   index)
         uniq-v  (or unique       uniq)
         t-space (or table-space  tspace)]
-    (.setTableName change (sp/clj-to-dbident table-name))
+    (.setTableName change (sp/db-iden table-name))
     (doseq [each column-names]
       (.addColumn change (in/new-column-value each "")))
-    (if s-name  (.setSchemaName change (sp/clj-to-dbident s-name)))
-    (if i-name  (.setIndexName  change (sp/clj-to-dbident i-name)))
+    (if s-name  (.setSchemaName change (sp/db-iden s-name)))
+    (if i-name  (.setIndexName  change (sp/db-iden i-name)))
     (if uniq-v  (.setUnique     change uniq-v))
     (if t-space (.setTablespace change t-space))
     change))
@@ -1062,9 +1062,9 @@
   (let [change (DropIndexChange.)
         s-name (or schema-name  schema *schema*)]
     (doto change
-      (.setIndexName (sp/clj-to-dbident index-name))
-      (.setTableName (sp/clj-to-dbident table-name)))
-    (if s-name (.setSchemaName change (sp/clj-to-dbident s-name)))
+      (.setIndexName (sp/db-iden index-name))
+      (.setTableName (sp/db-iden table-name)))
+    (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
 

@@ -1,5 +1,9 @@
 (ns org.bituf.test-clj-liquibase
+  (:import
+    (org.bituf.clj_dbspec IRow)
+    (org.bituf.clj-dbspec Row))
   (:require
+    [clojure.string                 :as sr]
     [clojure.pprint                 :as pp]
     [org.bituf.clj-miscutil         :as mu]
     [org.bituf.clj-liquibase        :as lb]
@@ -16,7 +20,11 @@
   (todo))
 
 
-(def make-ds dbcp/h2-memory-datasource)
+(defn make-ds
+  []
+  (dbcp/h2-memory-datasource)
+  ;(dbcp/mysql-datasource "localhost" "bituf" "root" "root")
+  )
 
 
 (defn dbspec
@@ -113,6 +121,34 @@
     (lb/with-dbspec (dbspec)
       (lb/update clog-1)
       ;; TODO find tables
+      (mu/!
+        (let [conn ^java.sql.Connection (:connection spec/*dbspec*)
+              _        (assert (mu/not-nil? conn))
+              dbmdata  (.getMetaData conn)
+              _        (assert (mu/not-nil? dbmdata))
+              catalogs (spec/get-catalogs dbmdata)
+              schemas  (spec/get-schemas  dbmdata)
+              tables   (spec/get-tables   dbmdata)
+              columns  (spec/get-columns dbmdata :table-pattern "SAMPLE_TABLE_1"
+                         )]
+          (println "\n**** All catalogs ****")
+          (mu/! (mu/print-table (map #(.asMap ^IRow %) catalogs)))
+          
+          (println "\n**** All schemas ****")
+          (mu/! (mu/print-table (map #(.asMap ^IRow %) schemas)))
+          
+          (println "\n**** All tables ****")
+          (when (not (empty? tables))
+            (pp/pprint (keys (.asMap ^IRow (first tables))))
+            (mu/! (mu/print-table (map #(.asVec ^IRow %) tables)))
+            )
+          
+          (println "\n**** All columns ****")
+          (when (not (empty? columns))
+            (pp/pprint (keys (.asMap ^IRow (first columns))))
+            (mu/! (mu/print-table (map #(.asVec ^IRow %) columns)))
+            )
+          ))
       )))
 
 
