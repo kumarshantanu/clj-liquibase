@@ -130,15 +130,15 @@
               tables   (spec/get-tables   dbmdata)
               columns  (spec/get-columns  dbmdata :table-pattern "SAMPLE_TABLE_1")]
           (println "\n**** All catalogs ****")
-          (mu/! (mu/print-table (map #(spec/asMap ^IRow %) catalogs)))
+          (mu/! (mu/print-table (map #(.asMap ^IRow %) catalogs)))
           
           (println "\n**** All schemas ****")
-          (mu/! (mu/print-table (map #(spec/asMap ^IRow %) schemas)))
+          (mu/! (mu/print-table (map #(.asMap ^IRow %) schemas)))
           
           (println "\n**** All tables ****")
           (when (not (empty? tables))
             (pp/pprint (keys (.asMap ^IRow (first tables))))
-            (mu/! (mu/print-table (map #(spec/asVec ^IRow %) tables))))
+            (mu/! (mu/print-table (map #(.asVec ^IRow %) tables))))
           
           (is (-> (spec/table-names tables)
                 (mu/includes? "SAMPLE_TABLE_1")))
@@ -150,7 +150,7 @@
           
           (let [sel-cols [:table-name :column-name :type-name :is-nullable :is-autoincrement]
                 act-cols (into []
-                           (map #(select-keys (spec/asMap %) sel-cols) columns))
+                           (map #(select-keys (.asMap %) sel-cols) columns))
                 exp-cols (into []
                            (map #(zipmap sel-cols %)
                              [["SAMPLE_TABLE_1" "ID"     "INTEGER" "NO" "YES"]
