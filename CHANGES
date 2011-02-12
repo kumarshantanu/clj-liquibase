@@ -20,8 +20,9 @@
 
 ## 0.1 / 2011-Feb-??
 
-- [TODO - Unit tests] Liquibase Functionality (commands)
+- Liquibase Functionality (commands)
   # Update
+  # Tagging
   # Rollback
 - Dynamic vars - DataSource/Connection, schema(name), etc.
 - Clojuresque schema/table/column names, data types, attributes and constraints

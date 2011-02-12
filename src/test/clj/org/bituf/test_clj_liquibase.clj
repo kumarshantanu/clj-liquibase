@@ -1,5 +1,6 @@
 (ns org.bituf.test-clj-liquibase
   (:import
+    (java.sql             Connection SQLException)
     (org.bituf.clj_dbspec IRow)
     (org.bituf.clj-dbspec Row))
   (:require
@@ -17,14 +18,35 @@
 (defn clb-setup
   "Setup database for running tests"
   []
-  (todo))
+  (spec/with-connection
+    (let [conn (:connection spec/*dbspec*)]
+      (assert (or (println "Testing connection") conn (println "= NULL")))
+      (with-open [stmt (.createStatement ^Connection conn)]
+        (doseq [each [:sample-table-1 :sample-table-2 "sampletable3"
+                      :databasechangelog :databasechangeloglock]]
+          (try
+            (.executeUpdate stmt (format "DROP TABLE %s"
+                                   (spec/db-iden each)))
+            (println "Deleted table " (spec/db-iden each))
+            (catch SQLException e
+              (println "Ignoring exception: " e))))))))
 
 
-(defn make-ds
-  []
-  (dbcp/h2-memory-datasource)
-  ;(dbcp/mysql-datasource "localhost" "bituf" "root" "root")
-  )
+(def db {:h2-mem {:dbcp #(dbcp/h2-memory-datasource)
+                  :int  "INTEGER"}
+         :mysql  {:dbcp #(dbcp/mysql-datasource "localhost" "bituf" "root" "root")
+                  :int  "INT"}})
+
+
+(def dialect :h2-mem)
+;(def dialect :mysql)
+
+
+(defn make-ds []
+  ((:dbcp (dialect db))))
+
+
+(defn db-int [] (:int (dialect db)))
 
 
 (defn dbspec
@@ -37,16 +59,27 @@
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
 
-(def ct-change2 (mu/! (ch/create-table "sampletable2"
+(def ct-change2 (mu/! (ch/create-table :sample-table-2
+                        [[:id     :int          :null false :pk true :autoinc true]
+                         [:name   [:varchar 40] :null false]
+                         [:gender [:char 1]     :null false]])))
+
+(def ct-change3 (mu/! (ch/create-table "sampletable3"
                         [[:id     :int          :null false :pk true :autoinc true]
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
 
 
-(def changeset-1 ["id=1" "author=shantanu" [ct-change1]])
+(def changeset-1 ["id=1" "author=shantanu" [ct-change1 ct-change2]])
 
 
-(def changeset-2 ["id=2" "author=shantanu" [ct-change2]])
+(def changeset-2 ["id=2" "author=shantanu" [ct-change3]])
+
+
+(lb/defchangelog clog-1 [changeset-1])
+
+
+(lb/defchangelog clog-2 [changeset-1 changeset-2])
 
 
 ;; ===== ChangeSet =====
@@ -101,12 +134,6 @@
         "With optional args - short names"))))
 
 
-(lb/defchangelog clog-1 [changeset-1])
-
-
-(lb/defchangelog clog-2 [changeset-1 changeset-2])
-
-
 (deftest test-defchangelog
   (testing "defchangelog"
     (is (fn? clog-1))
@@ -116,73 +143,145 @@
 ;; ===== Actions =====
 
 
+(defn update-test-helper
+  "Example table-desc is below:
+  [:table-name
+   [:id     :int          :null false :pk true :autoinc true]
+   [:name   [:varchar 40] :null false]
+   [:gender [:char 1]     :null false]]"
+  [table-desc & more]
+  (let [u-tables (into [table-desc] more)]
+    (mu/!
+      (doseq [each u-tables]
+        (let [[^String t-name & t-cols] each
+              conn ^java.sql.Connection (:connection spec/*dbspec*)
+                _        (assert (mu/not-nil? conn))
+                dbmdata  (.getMetaData conn)
+                _        (assert (mu/not-nil? dbmdata))
+                catalogs (spec/get-catalogs dbmdata)
+                schemas  (spec/get-schemas  dbmdata)
+                tables   (spec/get-tables   dbmdata)
+                tb-names (spec/table-names  tables)
+                columns  (spec/get-columns  dbmdata :table-pattern t-name)]
+            (println "\n**** All catalogs ****")
+            (mu/! (mu/print-table (map #(.asMap ^IRow %) catalogs)))
+            
+            (println "\n**** All schemas ****")
+            (mu/! (mu/print-table (map #(.asMap ^IRow %) schemas)))
+            
+            (println "\n**** All tables ****")
+            (when (not (empty? tables))
+              (pp/pprint (keys (.asMap ^IRow (first tables))))
+              (mu/! (mu/print-table (map #(.asVec ^IRow %) tables))))
+            
+            (is (= (count u-tables) (- (count tb-names) 2)))
+            
+            (is (-> tb-names
+                  (mu/includes? t-name)))
+            
+            (println "\n**** All columns ****")
+            (when (not (empty? columns))
+              (pp/pprint (keys (.asMap ^IRow (first columns))))
+              (mu/! (mu/print-table (map #(.asVec ^IRow %) columns))))
+            
+            (let [sel-cols [:table-name :column-name :type-name :is-nullable
+                            :is-autoincrement]
+                  act-cols (vec (map #(select-keys (.asMap ^IRow %) sel-cols)
+                                  columns))
+                  exp-cols (vec (map #(zipmap sel-cols %) t-cols))]
+              (is (= (count act-cols) (count exp-cols)))
+              (dorun (map #(is (= %1 %2)) act-cols exp-cols))))))))
+
+
 (deftest test-update
   (testing "update"
     (lb/with-dbspec (dbspec)
+      (clb-setup)
       (lb/update clog-1)
-      (mu/!
-        (let [conn ^java.sql.Connection (:connection spec/*dbspec*)
-              _        (assert (mu/not-nil? conn))
-              dbmdata  (.getMetaData conn)
-              _        (assert (mu/not-nil? dbmdata))
-              catalogs (spec/get-catalogs dbmdata)
-              schemas  (spec/get-schemas  dbmdata)
-              tables   (spec/get-tables   dbmdata)
-              columns  (spec/get-columns  dbmdata :table-pattern "SAMPLE_TABLE_1")]
-          (println "\n**** All catalogs ****")
-          (mu/! (mu/print-table (map #(.asMap ^IRow %) catalogs)))
-          
-          (println "\n**** All schemas ****")
-          (mu/! (mu/print-table (map #(.asMap ^IRow %) schemas)))
-          
-          (println "\n**** All tables ****")
-          (when (not (empty? tables))
-            (pp/pprint (keys (.asMap ^IRow (first tables))))
-            (mu/! (mu/print-table (map #(.asVec ^IRow %) tables))))
-          
-          (is (-> (spec/table-names tables)
-                (mu/includes? "SAMPLE_TABLE_1")))
-          
-          (println "\n**** All columns ****")
-          (when (not (empty? columns))
-            (pp/pprint (keys (.asMap ^IRow (first columns))))
-            (mu/! (mu/print-table (map #(.asVec ^IRow %) columns))))
-          
-          (let [sel-cols [:table-name :column-name :type-name :is-nullable :is-autoincrement]
-                act-cols (into []
-                           (map #(select-keys (.asMap %) sel-cols) columns))
-                exp-cols (into []
-                           (map #(zipmap sel-cols %)
-                             [["SAMPLE_TABLE_1" "ID"     "INTEGER" "NO" "YES"]
-                              ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO"]
-                              ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO"]]))]
-            (is (= (count act-cols) (count exp-cols)))
-            (dorun (map #(is (= %1 %2)) act-cols exp-cols))))))))
+      (update-test-helper
+        ["SAMPLE_TABLE_1"
+         ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
+         ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
+         ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
+        ["SAMPLE_TABLE_2"
+         ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+         ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
+         ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))))
 
 
 (deftest test-update-by-count
   (testing "update-by-count"
-    (clb-setup)))
+    (lb/with-dbspec (dbspec)
+      (clb-setup)
+      (lb/update-by-count clog-2 1)
+      (update-test-helper
+        ["SAMPLE_TABLE_1"
+         ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
+         ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
+         ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
+        ["SAMPLE_TABLE_2"
+         ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+         ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
+         ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))))
 
 
 (deftest test-tag
   (testing "tag"
-    (clb-setup)))
+    (lb/with-dbspec (dbspec)
+      (clb-setup)
+      (lb/update clog-1)
+      (lb/tag    "mytag")
+      (is (= "mytag" (mu/! (query-value "SELECT tag FROM databasechangelog")))
+        "Tag name should match"))))
 
 
 (deftest test-rollback-to-tag
   (testing "rollback-to-tag"
-    (clb-setup)))
+    (lb/with-dbspec (dbspec)
+      (clb-setup)
+      (lb/update clog-1)
+      (lb/tag    "mytag")
+      (lb/update clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3"))))
+      (lb/rollback-to-tag clog-2 "mytag")
+      (is (thrown? SQLException
+            (query "SELECT * FROM sampletable3")) "Table should not exist"))))
 
 
 (deftest test-rollback-to-date
   (testing "rollback-to-date"
-    (clb-setup)))
+    (lb/with-dbspec (dbspec)
+      (clb-setup)
+      (lb/update clog-1)
+      (lb/tag    "mytag")
+      (lb/update clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3"))))
+      (lb/rollback-to-date clog-2 (java.util.Date.))
+      (is (zero? (count (query "SELECT * FROM sampletable3")))))))
 
 
 (deftest test-rollback-by-count
   (testing "rollback-by-count"
-    (clb-setup)))
+    (lb/with-dbspec (dbspec)
+      (clb-setup)
+      (lb/update clog-1)
+      (lb/tag    "tag1")
+      (lb/update clog-2)
+      (lb/tag    "tag2")
+      (let [tt (fn [f tables] ; test table
+                 (doseq [each tables]
+                   (is (zero? (count (query (format "SELECT * FROM %s" each))))
+                     (format "Table %s should exist having no rows" each)))
+                 (f)
+                 (doseq [each tables]
+                   (is (thrown? SQLException
+                         (query (format "SELECT * FROM %s" each)))
+                     (format "Table %s should not exist" each))))]
+        ;; rollback 1 changeset
+        (tt #(lb/rollback-by-count clog-2 1) ["sampletable3"])
+        ;; rollback 1 more changeset
+        (tt #(lb/rollback-by-count clog-2 1) ["sample_table_1"
+                                              "sample_table_2"])))))
 
 
 (defn test-ns-hook []

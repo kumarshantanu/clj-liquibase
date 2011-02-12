@@ -31,6 +31,10 @@
     [org.bituf.clj-liquibase.internal :as in]))
 
 
+(def ^{:doc "Clj-Liquibase version (only major and minor)"}
+      version 0.1)
+
+
 ;; ===== Dynamic vars for Integration =====
 
 
@@ -393,10 +397,14 @@
 
 
 (defn update-by-count
-  ""
-  ([changelog-fn ^Integer change-count]
-    (update-by-count changelog-fn change-count []))
-  ([changelog-fn ^Integer change-count ^List contexts]
+  "Run Liquibase Update command restricting number of changes to howmany-changesets.
+  See also:
+    liquibase.Liquibase/update
+    make-db-instance
+    http://www.liquibase.org/manual/update"
+  ([changelog-fn ^Integer howmany-changesets]
+    (update-by-count changelog-fn howmany-changesets []))
+  ([changelog-fn ^Integer howmany-changesets ^List contexts]
     (.setContexts *changelog-params* contexts)
     (do-locked
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -408,14 +416,14 @@
                                 (into-array String
                                   [(mu/comma-sep-str contexts)]))
                               (DbmsChangeSetFilter. *db-instance*)
-                              (CountChangeSetFilter. change-count)
+                              (CountChangeSetFilter. howmany-changesets)
                               ])]
           (.run changelog-it (UpdateVisitor. *db-instance*) *db-instance*)))))
-  ([changelog-fn ^Integer change-count ^List contexts ^Writer output]
+  ([changelog-fn ^Integer howmany-changesets ^List contexts ^Writer output]
     (.setContexts *changelog-params* contexts)
     (with-writer output
-      (output-header (str "Update " change-count " Change Sets Database Script"))
-      (update-by-count changelog-fn change-count contexts))))
+      (output-header (str "Update " howmany-changesets " Change-sets Database Script"))
+      (update-by-count changelog-fn howmany-changesets contexts))))
 
 
 (defn tag
@@ -491,9 +499,9 @@
   See also:
     liquibase.Liquibase/rollback
     http://www.liquibase.org/manual/rollback"
-  ([changelog-fn ^Integer change-count]
-    (rollback-by-count changelog-fn ^Integer change-count []))
-  ([changelog-fn ^Integer change-count ^List contexts]
+  ([changelog-fn ^Integer howmany-changesets]
+    (rollback-by-count changelog-fn ^Integer howmany-changesets []))
+  ([changelog-fn ^Integer howmany-changesets ^List contexts]
     (.setContexts *changelog-params* contexts)
     (do-locked
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -506,11 +514,11 @@
                                 (into-array String
                                   [(mu/comma-sep-str contexts)]))
                               (DbmsChangeSetFilter. *db-instance*)
-                              (CountChangeSetFilter. change-count)
+                              (CountChangeSetFilter. howmany-changesets)
                               ])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
-  ([changelog-fn ^Integer change-count ^List contexts ^Writer output]
+  ([changelog-fn ^Integer howmany-changesets ^List contexts ^Writer output]
     (.setContexts *changelog-params* contexts)
     (with-writer output
-      (output-header (str "Rollback to " change-count " Change(s) Script"))
-      (rollback-by-count changelog-fn change-count contexts))))
+      (output-header (str "Rollback to " howmany-changesets " Change-sets Script"))
+      (rollback-by-count changelog-fn howmany-changesets contexts))))
