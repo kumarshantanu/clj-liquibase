@@ -194,95 +194,131 @@
               (dorun (map #(is (= %1 %2)) act-cols exp-cols))))))))
 
 
+(defn update-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (update-test-helper
+    ["SAMPLE_TABLE_1"
+     ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
+     ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
+    ["SAMPLE_TABLE_2"
+     ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
+     ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))
+
+
 (deftest test-update
   (testing "update"
-    (lb/with-dbspec (dbspec)
-      (clb-setup)
-      (lb/update clog-1)
-      (update-test-helper
-        ["SAMPLE_TABLE_1"
-         ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
-         ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
-         ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
-        ["SAMPLE_TABLE_2"
-         ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
-         ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
-         ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))))
+    ((spec/wrap-dbspec (dbspec)
+       (lb/wrap-lb-init
+         update-test)))))
+
+
+(defn update-by-count-test
+  []
+  (clb-setup)
+  (lb/update-by-count clog-2 1)
+  (update-test-helper
+    ["SAMPLE_TABLE_1"
+     ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
+     ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
+    ["SAMPLE_TABLE_2"
+     ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
+     ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))
 
 
 (deftest test-update-by-count
   (testing "update-by-count"
-    (lb/with-dbspec (dbspec)
-      (clb-setup)
-      (lb/update-by-count clog-2 1)
-      (update-test-helper
-        ["SAMPLE_TABLE_1"
-         ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
-         ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
-         ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
-        ["SAMPLE_TABLE_2"
-         ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
-         ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
-         ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))))
+    ((spec/wrap-dbspec (dbspec)
+       (lb/wrap-lb-init
+         update-by-count-test)))))
+
+
+(defn tag-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (lb/tag    "mytag")
+  (is (= "mytag" (mu/! (query-value "SELECT tag FROM databasechangelog")))
+    "Tag name should match"))
 
 
 (deftest test-tag
   (testing "tag"
-    (lb/with-dbspec (dbspec)
-      (clb-setup)
-      (lb/update clog-1)
-      (lb/tag    "mytag")
-      (is (= "mytag" (mu/! (query-value "SELECT tag FROM databasechangelog")))
-        "Tag name should match"))))
+    ((spec/wrap-dbspec (dbspec)
+       (lb/wrap-lb-init
+         tag-test)))))
+
+
+(defn rollback-to-tag-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (lb/tag    "mytag")
+  (lb/update clog-2)
+  (is (zero? (count (query "SELECT * FROM sampletable3"))))
+  (lb/rollback-to-tag clog-2 "mytag")
+  (is (thrown? SQLException
+        (query "SELECT * FROM sampletable3")) "Table should not exist"))
 
 
 (deftest test-rollback-to-tag
   (testing "rollback-to-tag"
-    (lb/with-dbspec (dbspec)
-      (clb-setup)
-      (lb/update clog-1)
-      (lb/tag    "mytag")
-      (lb/update clog-2)
-      (is (zero? (count (query "SELECT * FROM sampletable3"))))
-      (lb/rollback-to-tag clog-2 "mytag")
-      (is (thrown? SQLException
-            (query "SELECT * FROM sampletable3")) "Table should not exist"))))
+    ((spec/wrap-dbspec (dbspec)
+       (lb/wrap-lb-init
+         rollback-to-tag-test)))))
+
+
+(defn rollback-to-date-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (lb/tag    "mytag")
+  (lb/update clog-2)
+  (is (zero? (count (query "SELECT * FROM sampletable3"))))
+  (lb/rollback-to-date clog-2 (java.util.Date.))
+  (is (zero? (count (query "SELECT * FROM sampletable3")))))
 
 
 (deftest test-rollback-to-date
   (testing "rollback-to-date"
-    (lb/with-dbspec (dbspec)
-      (clb-setup)
-      (lb/update clog-1)
-      (lb/tag    "mytag")
-      (lb/update clog-2)
-      (is (zero? (count (query "SELECT * FROM sampletable3"))))
-      (lb/rollback-to-date clog-2 (java.util.Date.))
-      (is (zero? (count (query "SELECT * FROM sampletable3")))))))
+    ((spec/wrap-dbspec (dbspec)
+       (lb/wrap-lb-init
+         rollback-to-date-test)))))
+
+
+(defn rollback-by-count-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (lb/tag    "tag1")
+  (lb/update clog-2)
+  (lb/tag    "tag2")
+  (let [tt (fn [f tables] ; test table
+             (doseq [each tables]
+               (is (zero? (count (query (format "SELECT * FROM %s" each))))
+                 (format "Table %s should exist having no rows" each)))
+             (f)
+             (doseq [each tables]
+               (is (thrown? SQLException
+                     (query (format "SELECT * FROM %s" each)))
+                 (format "Table %s should not exist" each))))]
+    ;; rollback 1 changeset
+    (tt #(lb/rollback-by-count clog-2 1) ["sampletable3"])
+    ;; rollback 1 more changeset
+    (tt #(lb/rollback-by-count clog-2 1) ["sample_table_1"
+                                          "sample_table_2"])))
 
 
 (deftest test-rollback-by-count
   (testing "rollback-by-count"
-    (lb/with-dbspec (dbspec)
-      (clb-setup)
-      (lb/update clog-1)
-      (lb/tag    "tag1")
-      (lb/update clog-2)
-      (lb/tag    "tag2")
-      (let [tt (fn [f tables] ; test table
-                 (doseq [each tables]
-                   (is (zero? (count (query (format "SELECT * FROM %s" each))))
-                     (format "Table %s should exist having no rows" each)))
-                 (f)
-                 (doseq [each tables]
-                   (is (thrown? SQLException
-                         (query (format "SELECT * FROM %s" each)))
-                     (format "Table %s should not exist" each))))]
-        ;; rollback 1 changeset
-        (tt #(lb/rollback-by-count clog-2 1) ["sampletable3"])
-        ;; rollback 1 more changeset
-        (tt #(lb/rollback-by-count clog-2 1) ["sample_table_1"
-                                              "sample_table_2"])))))
+    ((spec/wrap-dbspec (dbspec)
+       (lb/wrap-lb-init
+         rollback-by-count-test)))))
 
 
 (defn test-ns-hook []

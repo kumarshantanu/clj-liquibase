@@ -42,31 +42,23 @@
 
 (defn update-1
   []
-  ;(lb/with-datasource ds
-  ;  (lb/update changelog-1)
-  ;  (lb/tag "tag1"))
-  (lb/with-dbspec dbspec
-    (lb/update changelog-1)
-    (lb/tag "tag1"))
-  )
+  ((spec/wrap-dbspec dbspec
+     (lb/wrap-lb-init (fn []
+                        (lb/update changelog-1)
+                        (lb/tag "tag1"))))))
 
 (defn update-2
   []
-  ;(lb/with-datasource ds
-  ;  (lb/update changelog-2)
-  ;  (lb/tag "tag2"))
-  (lb/with-dbspec dbspec
-    (lb/update changelog-2)
-    (lb/tag "tag2"))
-  )
+  ((spec/wrap-dbspec dbspec
+     (lb/wrap-lb-init (fn []
+                        (lb/update changelog-2)
+                        (lb/tag "tag2"))))))
 
 (defn rollback-to-1
   []
-  ;(lb/with-datasource ds
-  ;  (lb/rollback-to-tag changelog-2 "tag1" []))
-  (lb/with-dbspec dbspec
-    (lb/rollback-to-tag changelog-2 "tag1" []))
-  )
+  ((spec/wrap-dbspec dbspec
+     (lb/wrap-lb-init (fn []
+                        (lb/rollback-to-tag changelog-2 "tag1" []))))))
 
 
 ;(mu/! (update-1))

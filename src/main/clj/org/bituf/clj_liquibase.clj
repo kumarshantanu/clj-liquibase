@@ -197,24 +197,16 @@
 ;; ===== Integration =====
 
 
-(defmacro do-initialized
-  "Initialize global settings and execute body of code in that context. Ensure
-  clj-dbspec/*dbspec* to have a valid :connection object as part of process."
-  [& body]
-  `(if (mu/not-nil? *db-instance*)
-     (do ~@body)
-     ((sp/wrap-connection
+(defn wrap-lb-init
+  "Initialize global settings and wrap f with that context."
+  [f] {:post [(fn? %)]
+       :pre  [(fn? f)]}
+  (fn [& args]
+    (if (mu/not-nil? *db-instance*) f
+      (sp/wrap-connection
         #(binding [*db-instance* (make-db-instance (:connection sp/*dbspec*))
                    *changelog-params* (make-changelog-params *db-instance*)]
-           ~@body)))))
-
-
-(defmacro with-dbspec
-  "Entry point"
-  [dbspec & body]
-  `(sp/with-dbspec ~dbspec
-     (do-initialized
-       ~@body)))
+           (apply f args))))))
 
 
 ;; ===== DatabaseChangeLog =====
