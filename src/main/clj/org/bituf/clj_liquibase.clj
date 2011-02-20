@@ -203,10 +203,10 @@
   [& body]
   `(if (mu/not-nil? *db-instance*)
      (do ~@body)
-     (sp/with-connection
-       (binding [*db-instance* (make-db-instance (:connection sp/*dbspec*))
-                 *changelog-params* (make-changelog-params *db-instance*)]
-         ~@body))))
+     ((sp/wrap-connection
+        #(binding [*db-instance* (make-db-instance (:connection sp/*dbspec*))
+                   *changelog-params* (make-changelog-params *db-instance*)]
+           ~@body)))))
 
 
 (defmacro with-dbspec
