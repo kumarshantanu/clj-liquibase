@@ -333,7 +333,10 @@
 
 (deftest test-add-default-value
   (testing "add-default-value"
-    (doseq [each ["default-value" 100 (Date.) true (change/dbfn "NOW")]]
+    (doseq [each ["default-value" 100 (Date.) true (change/dbfn "NOW")
+                  (java.sql.Date. (.getTime (Date.)))
+                  (java.sql.Time. (.getTime (Date.)))
+                  (java.sql.Timestamp. (.getTime (Date.)))]]
       (test-change AddDefaultValueChange
         (partial change/add-default-value :table-name :column-name each)
         min-args

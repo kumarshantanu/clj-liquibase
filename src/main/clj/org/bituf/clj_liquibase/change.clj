@@ -654,7 +654,7 @@
     (doto change
       (.setTableName  (sp/db-iden table-name))
       (.setColumnName (sp/db-iden column-name)))
-    (in/set-default-value change default-value) ; TODO - fn to set value serialized-as-string/boolean
+    (in/add-default-value change default-value)
     (if s-name (.setSchemaName     change (sp/db-iden s-name)))
     (if d-type (.setColumnDataType change (apply in/as-coltype
                                             (mu/as-vector d-type))))

@@ -91,6 +91,76 @@
       ldcc)))
 
 
+(defn- ^DatabaseFunction dbfn
+  [^String value]
+  (DatabaseFunction. value))
+
+
+(defn- ^java.util.Date iso-date
+  "Parse date from ISO-date-format string."
+  [^String date-str]
+  (.parse (ISODateFormat.) date-str))
+
+
+(defmacro ^String iso-date-str
+  "Generate ISO-Date string from the following types:
+  java.sql.Date
+  java.sql.Time
+  java.sql.Timestamp"
+  [date]
+  `(let [idf# ^ISODateFormat (ISODateFormat.)
+         sd# (cond
+               (instance? java.sql.Date ~date)      (.format idf# ~(with-meta date {:tag 'java.sql.Date}))
+               (instance? java.sql.Time ~date)      (.format idf# ~(with-meta date {:tag 'java.sql.Time}))
+               (instance? java.sql.Timestamp ~date) (.format idf# ~(with-meta date {:tag 'java.sql.Timestamp}))
+               :else (mu/illegal-arg
+                       "Allowed types: java.sql.Date, java.sql.Time, java.sql.Timestamp"
+                       " -- Found: " (class ~date)))]
+     (str \" sd# \")))
+
+
+(defn any-sqldate?
+  [d]
+  (or
+    (instance? java.sql.Timestamp d)
+    (instance? java.sql.Date d)
+    (instance? java.sql.Time d)))
+
+
+(defn sqldate
+  [^Date d]
+  (java.sql.Date.
+    (.getTime d)))
+
+
+(defmacro add-default-value
+  "Add default value for a container object.
+  (Meant for add-default-value change.)
+  Arguments:
+    cont    The container object
+    default The default value"
+  [cont default]
+  `(cond
+     (string?      ~default) (let [s-default#
+                                   (str \" ~default \")]  (.setDefaultValue        ~cont s-default#))
+     (number?      ~default) (let [n-default#
+                                   (str ~default)]        (.setDefaultValueNumeric ~cont n-default#))
+     (mu/boolean?  ~default) (.setDefaultValueBoolean
+                               ~cont ~(with-meta default {:tag 'Boolean}))
+     (mu/date?     ~default) (let [d-default#
+                                   (iso-date-str
+                                     (sqldate ~default))] (.setDefaultValueDate    ~cont d-default#))
+     (any-sqldate? ~default) (let [d-default#
+                                   (iso-date-str
+                                     ~default)]           (.setDefaultValueDate    ~cont d-default#))
+     (dbfn?        ~default) (.setDefaultValueComputed
+                               ~cont ~(with-meta default {:tag 'DatabaseFunction}))
+     :else (mu/illegal-arg "Bad default value: " ~default (type ~default)
+             ", allowed types are: String, Number, Boolean"
+             ", java.util.Date/java.sql.Date/java.sql.Time/java.sql.Timestamp"
+             ", liquibase.statement.DatabaseFunction (see 'dbfn' function)")))
+
+
 (defmacro set-default-value
   "Set default value for a container object.
   Arguments:
