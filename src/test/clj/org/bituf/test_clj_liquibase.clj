@@ -178,7 +178,7 @@
             (is (= (count u-tables) (- (count tb-names) 2)))
             
             (is (-> tb-names
-                  (mu/includes? t-name)))
+                  (mu/contains-val? t-name)))
             
             (println "\n**** All columns ****")
             (when (not (empty? columns))

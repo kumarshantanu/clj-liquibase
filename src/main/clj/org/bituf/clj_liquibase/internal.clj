@@ -80,7 +80,7 @@
              ]}]
   (let [s-coltype ^String (mu/as-string coltype)]
     (when-not (some #(.equalsIgnoreCase s-coltype %) ["STRING" "NUMERIC" "DATE" "BOOLEAN"])
-      (mu/illegal-arg-value "coltype"
+      (mu/illegal-argval "coltype"
         "Either of \"STRING\", \"NUMERIC\", \"DATE\" or \"BOOLEAN\"" coltype))
     (let [ldcc (LoadDataColumnConfig.)]
       (doto ldcc

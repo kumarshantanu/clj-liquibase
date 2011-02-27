@@ -69,12 +69,11 @@
     http://www.liquibase.org/manual/column"
   [table-name ^List columns
    & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify coll? columns)
-    (mu/verify mu/not-empty? columns))
+             ] :as opt}] {:post [(instance? AddColumnChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (coll? columns))
+                                 (mu/verify-arg (mu/not-empty? columns))]}
   (let [change (AddColumnChange.)
         s-name (or schema-name schema *schema*)]
     (.setTableName change (sp/db-iden table-name))
@@ -94,13 +93,12 @@
   [table-name old-column-name new-column-name
    & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
              column-data-type data-type ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name      :schema
-                     :column-data-type :data-type} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? old-column-name)
-    (mu/verify mu/not-nil? new-column-name))
+             ] :as opt}] {:post [(instance? RenameColumnChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name      :schema
+                                                  :column-data-type :data-type} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? old-column-name))
+                                 (mu/verify-arg (mu/not-nil? new-column-name))]}
   (let [change  (RenameColumnChange.)
         s-name  (or schema-name      schema *schema*)
         cd-type (or column-data-type data-type)]
@@ -122,12 +120,11 @@
     http://www.liquibase.org/manual/modify_column"
   [table-name column-name new-data-type
    & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name)
-    (mu/verify mu/not-nil? new-data-type))
+             ] :as opt}] {:post [(instance? ModifyDataTypeChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))
+                                 (mu/verify-arg (mu/not-nil? new-data-type))]}
   (let [change (ModifyDataTypeChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -147,11 +144,10 @@
     http://www.liquibase.org/manual/drop_column"
   [table-name column-name
    & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name))
+             ] :as opt}] {:post [(instance? DropColumnChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))]}
   (let [change (DropColumnChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -172,14 +168,13 @@
              max-value   max    ; number or string
              min-value   min    ; number or string
              ordered     ord    ; Boolean
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema
-                     :max-value   :max
-                     :min-value   :min
-                     :ordered     :ord} opt)
-    (mu/verify mu/not-nil? seq-name)
-    (mu/verify mu/not-nil? increment-by))
+             ] :as opt}] {:post [(instance? AlterSequenceChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema
+                                                  :max-value   :max
+                                                  :min-value   :min
+                                                  :ordered     :ord} opt)
+                                 (mu/verify-arg (mu/not-nil? seq-name))
+                                 (mu/verify-arg (mu/not-nil? increment-by))]}
   (let [change (AlterSequenceChange.)
         s-name (or schema-name schema *schema*)
         max-v  (or max-value   max)
@@ -205,14 +200,13 @@
   [table-name ^List columns
    & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
              table-space tspace ; String/Keyword - s.t. db-iden
-             remarks] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema
-                     :table-space :tspace
-                     :remarks} opt)
-    (mu/verify mu/not-nil?   table-name)
-    (mu/verify coll?         columns)
-    (mu/verify mu/not-empty? columns))
+             remarks] :as opt}] {:post [(instance? CreateTableChange %)]
+                                 :pre  [(mu/verify-opt #{:schema-name :schema
+                                                         :table-space :tspace
+                                                         :remarks} opt)
+                                        (mu/verify-arg (mu/not-nil?   table-name))
+                                        (mu/verify-arg (coll?         columns))
+                                        (mu/verify-arg (mu/not-empty? columns))]}
   (let [change  (CreateTableChange.)
         s-name  (or schema-name schema *schema*)
         t-space (or table-space tspace)]
@@ -233,11 +227,10 @@
     http://www.liquibase.org/manual/rename_table"
   [old-table-name new-table-name
    & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? old-table-name)
-    (mu/verify mu/not-nil? new-table-name))
+             ] :as opt}] {:post [(instance? RenameTableChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? old-table-name))
+                                 (mu/verify-arg (mu/not-nil? new-table-name))]}
   (let [change (RenameTableChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -256,11 +249,10 @@
   [table-name
    & {:keys [schema-name         schema  ; String/Keyword - s.t. db-iden
              cascade-constraints cascade ; Boolean
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name         :schema
-                     :cascade-constraints :cascade} opt)
-    (mu/verify mu/not-nil? table-name))
+             ] :as opt}] {:post [(instance? DropTableChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name         :schema
+                                                  :cascade-constraints :cascade} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))]}
   (let [change (DropTableChange.)
         s-name (or schema-name         schema   *schema*)
         casc-c (or cascade-constraints cascade)]
@@ -279,12 +271,11 @@
   [view-name ^String select-query
    & {:keys [schema-name       schema  ; String/Keyword - s.t. db-iden
              replace-if-exists replace ; Boolean
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name       :schema
-                     :replace-if-exists :replace} opt)
-    (mu/verify mu/not-nil? view-name)
-    (mu/verify string?     select-query))
+             ] :as opt}] {:post [(instance? CreateViewChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name       :schema
+                                                  :replace-if-exists :replace} opt)
+                                 (mu/verify-arg (mu/not-nil? view-name))
+                                 (mu/verify-arg (string?     select-query))]}
   (let [change (CreateViewChange.)
         s-name (or schema-name       schema  *schema*)
         repl-v (or replace-if-exists replace)]
@@ -304,11 +295,10 @@
     http://www.liquibase.org/manual/rename_view"
   [old-view-name new-view-name
    & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? old-view-name)
-    (mu/verify mu/not-nil? new-view-name))
+             ] :as opt}] {:post [(instance? RenameViewChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? old-view-name))
+                                 (mu/verify-arg (mu/not-nil? new-view-name))]}
   (let [change (RenameViewChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -326,10 +316,9 @@
     http://www.liquibase.org/manual/drop_view"
   [view-name
    & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil?   view-name))
+             ] :as opt}] {:post [(instance? DropViewChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil?   view-name))]}
   (let [change (DropViewChange.)
         s-name (or schema-name schema *schema*)]
     (.setViewName change (sp/db-iden view-name))
@@ -346,15 +335,14 @@
   [table-name column1-name ^String join-string
    column2-name final-column-name final-column-type
    & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column1-name)
-    (mu/verify string?     join-string)
-    (mu/verify mu/not-nil? column2-name)
-    (mu/verify mu/not-nil? final-column-name)
-    (mu/verify mu/not-nil? final-column-type))
+             ] :as opt}] {:post [(instance? MergeColumnChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column1-name))
+                                 (mu/verify-arg (string?     join-string))
+                                 (mu/verify-arg (mu/not-nil? column2-name))
+                                 (mu/verify-arg (mu/not-nil? final-column-name))
+                                 (mu/verify-arg (mu/not-nil? final-column-type))]}
   (let [change (MergeColumnChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -377,10 +365,9 @@
     http://www.liquibase.org/manual/create_stored_procedure"
   [^String procedure-body
    & {:keys [comments  ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:comments} opt)
-    (mu/verify string? procedure-body))
+             ] :as opt}] {:post [(instance? CreateProcedureChange %)]
+                          :pre  [(mu/verify-opt #{:comments} opt)
+                                 (mu/verify-arg (string? procedure-body))]}
   (let [change (CreateProcedureChange.)]
     (.setProcedureBody change procedure-body)
     (if comments (.setComments change comments))
@@ -401,16 +388,15 @@
    & {:keys [existing-table-schema-name existing-schema ; String/Keyword - s.t. db-iden
              new-table-schema-name      new-schema      ; String/Keyword - s.t. db-iden
              new-column-data-type       new-data-type   ; String/vector - s.t. as-coltype
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:existing-table-schema-name :existing-schema
-                     :new-table-schema-name      :new-schema
-                     :new-column-data-type       :new-data-type} opt)
-    (mu/verify mu/not-nil? existing-table-name)
-    (mu/verify mu/not-nil? existing-column-name)
-    (mu/verify mu/not-nil? new-table-name)
-    (mu/verify mu/not-nil? new-column-name)
-    (mu/verify mu/not-nil? constraint-name))
+             ] :as opt}] {:post [(instance? AddLookupTableChange %)]
+                          :pre  [(mu/verify-opt #{:existing-table-schema-name :existing-schema
+                                                  :new-table-schema-name      :new-schema
+                                                  :new-column-data-type       :new-data-type} opt)
+                                 (mu/verify-arg (mu/not-nil? existing-table-name))
+                                 (mu/verify-arg (mu/not-nil? existing-column-name))
+                                 (mu/verify-arg (mu/not-nil? new-table-name))
+                                 (mu/verify-arg (mu/not-nil? new-column-name))
+                                 (mu/verify-arg (mu/not-nil? constraint-name))]}
   (let [change  (AddLookupTableChange.)
         exs-name (or existing-table-schema-name existing-schema)
         nws-name (or new-table-schema-name      new-schema)
@@ -437,13 +423,12 @@
   [table-name column-name column-data-type
    & {:keys [schema-name        schema  ; String/Keyword - s.t. db-iden
              default-null-value default ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name        :schema
-                     :default-null-value :default} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name)
-    (mu/verify mu/not-nil? column-data-type))
+             ] :as opt}] {:post [(instance? AddNotNullConstraintChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name        :schema
+                                                  :default-null-value :default} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))
+                                 (mu/verify-arg (mu/not-nil? column-data-type))]}
   (let [change (AddNotNullConstraintChange.)
         s-name  (or schema-name        schema  *schema*)
         n-value (or default-null-value default)]
@@ -466,12 +451,11 @@
   [table-name column-name
    & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
              column-data-type data-type ; String/vector - s.t. as-coltype
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name      :schema
-                     :column-data-type :data-type} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name))
+             ] :as opt}] {:post [(instance? DropNotNullConstraintChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name      :schema
+                                                  :column-data-type :data-type} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))]}
   (let [change (DropNotNullConstraintChange.)
         s-name (or schema-name      schema    *schema*)
         d-type (or column-data-type data-type)]
@@ -496,16 +480,15 @@
              deferrable         defer  ; Boolean
              initially-deferred idefer ; Boolean
              disabled                  ; Boolean
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name        :schema
-                     :table-space        :tspace
-                     :deferrable         :defer
-                     :initially-deferred :idefer
-                     :disabled} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-names)
-    (mu/verify mu/not-nil? constraint-name))
+             ] :as opt}] {:post [(instance? AddUniqueConstraintChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name        :schema
+                                                  :table-space        :tspace
+                                                  :deferrable         :defer
+                                                  :initially-deferred :idefer
+                                                  :disabled} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-names))
+                                 (mu/verify-arg (mu/not-nil? constraint-name))]}
   (let [change (AddUniqueConstraintChange.)
         s-name (or schema-name        schema *schema*)
         t-name (or table-space        tspace)
@@ -533,11 +516,10 @@
     http://www.liquibase.org/manual/drop_unique_constraint"
   [table-name constraint-name
    & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? constraint-name))
+             ] :as opt}] {:post [(instance? DropUniqueConstraintChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? constraint-name))]}
   (let [change (DropUniqueConstraintChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -561,16 +543,15 @@
              min-value    min    ; BigInteger
              ordered      ord    ; Boolean
              cycle        cyc    ; Boolean
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name  :schema
-                     :start-value  :start
-                     :increment-by :incby
-                     :max-value    :max
-                     :min-value    :min
-                     :ordered      :ord
-                     :cycle        :cyc} opt)
-    (mu/verify mu/not-nil? sequence-name))
+             ] :as opt}] {:post [(instance? CreateSequenceChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name  :schema
+                                                  :start-value  :start
+                                                  :increment-by :incby
+                                                  :max-value    :max
+                                                  :min-value    :min
+                                                  :ordered      :ord
+                                                  :cycle        :cyc} opt)
+                                 (mu/verify-arg (mu/not-nil? sequence-name))]}
   (let [change (CreateSequenceChange.)
         s-name (or schema-name  schema *schema*)
         str-v  (or start-value  start)
@@ -596,10 +577,9 @@
   "Return a Change instance that drops a sequence (DropSequenceChange)."
   [sequence-name
    & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? sequence-name))
+             ] :as opt}] {:post [(instance? DropSequenceChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? sequence-name))]}
   (let [change (DropSequenceChange.)
         s-name (or schema-name schema *schema*)]
     (.setSequenceName change (sp/db-iden sequence-name))
@@ -616,12 +596,11 @@
     http://www.liquibase.org/manual/add_auto-increment"
   [table-name column-name column-data-type
    & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name)
-    (mu/verify mu/not-nil? column-data-type))
+             ] :as opt}] {:post [(instance? AddAutoIncrementChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))
+                                 (mu/verify-arg (mu/not-nil? column-data-type))]}
   (let [change (AddAutoIncrementChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -642,12 +621,11 @@
   [table-name column-name default-value
    & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
              column-data-type data-type
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name      :schema
-                     :column-data-type :data-type} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name))
+             ] :as opt}] {:post [(instance? AddDefaultValueChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name      :schema
+                                                  :column-data-type :data-type} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))]}
   (let [change (AddDefaultValueChange.)
         s-name (or schema-name      schema    *schema*)
         d-type (or column-data-type data-type)]
@@ -671,12 +649,11 @@
   [table-name column-name
    & {:keys [schema-name      schema  ; String
              column-data-type data-type
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name      :schema
-                     :column-data-type :data-type} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-name))
+             ] :as opt}] {:post [(instance? DropDefaultValueChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name      :schema
+                                                  :column-data-type :data-type} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-name))]}
   (let [change (DropDefaultValueChange.)
         s-name (or schema-name      schema    *schema*)
         d-type (or column-data-type data-type)]
@@ -706,19 +683,18 @@
              initially-deferred           idefer ; Boolean
              on-delete                    ondel  ; String
              on-update                    onupd  ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:base-table-schema-name       :base-schema
-                     :referenced-table-schema-name :ref-schema
-                     :deferrable                   :defer
-                     :initially-deferred           :idefer
-                     :on-delete                    :ondel
-                     :on-update                    :onupd} opt)
-    (mu/verify mu/not-nil? constraint-name)
-    (mu/verify mu/not-nil? base-table-name)
-    (mu/verify mu/not-nil? base-column-names)
-    (mu/verify mu/not-nil? referenced-table-name)
-    (mu/verify mu/not-nil? referenced-column-names))
+             ] :as opt}] {:post [(instance? AddForeignKeyConstraintChange %)]
+                          :pre  [(mu/verify-opt #{:base-table-schema-name       :base-schema
+                                                  :referenced-table-schema-name :ref-schema
+                                                  :deferrable                   :defer
+                                                  :initially-deferred           :idefer
+                                                  :on-delete                    :ondel
+                                                  :on-update                    :onupd} opt)
+                                 (mu/verify-arg (mu/not-nil? constraint-name))
+                                 (mu/verify-arg (mu/not-nil? base-table-name))
+                                 (mu/verify-arg (mu/not-nil? base-column-names))
+                                 (mu/verify-arg (mu/not-nil? referenced-table-name))
+                                 (mu/verify-arg (mu/not-nil? referenced-column-names))]}
   (let [change (AddForeignKeyConstraintChange.)
         bs-name (or base-table-schema-name       base-schema)
         rs-name (or referenced-table-schema-name ref-schema)
@@ -750,11 +726,10 @@
     http://www.liquibase.org/manual/drop_foreign_key_constraint"
   [constraint-name base-table-name
    & {:keys [schema-name schema  ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? constraint-name)
-    (mu/verify mu/not-nil? base-table-name))
+             ] :as opt}] {:post [(instance? DropForeignKeyConstraintChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? constraint-name))
+                                 (mu/verify-arg (mu/not-nil? base-table-name))]}
   (let [change (DropForeignKeyConstraintChange.)
         s-name (or schema-name schema *schema*)]
     (doto change
@@ -774,13 +749,12 @@
   [table-name column-names constraint-name
    & {:keys [schema-name schema ; String
              table-space tspace ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema
-                     :table-space :tspace} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify mu/not-nil? column-names)
-    (mu/verify mu/not-nil? constraint-name))
+             ] :as opt}] {:post [(instance? AddPrimaryKeyChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema
+                                                  :table-space :tspace} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (mu/not-nil? column-names))
+                                 (mu/verify-arg (mu/not-nil? constraint-name))]}
   (let [change (AddPrimaryKeyChange.)
         s-name (or schema-name schema *schema*)
         t-name (or table-space tspace)]
@@ -803,11 +777,10 @@
   [table-name
    & {:keys [schema-name     schema ; String
              constraint-name constr ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name     :schema
-                     :constraint-name :constr} opt)
-    (mu/verify mu/not-nil? table-name))
+             ] :as opt}] {:post [(instance? DropPrimaryKeyChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name     :schema
+                                                  :constraint-name :constr} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))]}
   (let [change (DropPrimaryKeyChange.)
         s-name (or schema-name     schema *schema*)
         c-name (or constraint-name constr)]
@@ -828,11 +801,10 @@
     http://www.liquibase.org/manual/insert_data"
   [table-name column-value-map
    & {:keys [schema-name schema ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify map?        column-value-map))
+             ] :as opt}] {:post [(instance? InsertDataChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (map?        column-value-map))]}
   (let [change (InsertDataChange.)
         s-name (or schema-name schema *schema*)
         cols-v (map (fn [[n v]] (in/new-column-value n v)) column-value-map)]
@@ -862,13 +834,12 @@
   [table-name ^String csv-filename columns-spec
    & {:keys [schema-name schema ; String
              encoding    enc    ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema
-                     :encoding    :enc} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify string?     csv-filename)
-    (mu/verify coll?       columns-spec))
+             ] :as opt}] {:post [(instance? LoadDataChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema
+                                                  :encoding    :enc} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (string?     csv-filename))
+                                 (mu/verify-arg (coll?       columns-spec))]}
   (let [change (LoadDataChange.)
         s-name (or schema-name schema *schema*)
         enc-v  (or encoding    enc)]
@@ -905,14 +876,13 @@
   [table-name ^String csv-filename primary-key-cols columns-spec
    & {:keys [schema-name schema ; String
              encoding    enc    ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema
-                     :encoding    :enc} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify string?     csv-filename)
-    (mu/verify mu/not-nil? primary-key-cols)
-    (mu/verify coll?       columns-spec))
+             ] :as opt}] {:post [(instance? LoadUpdateDataChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema
+                                                  :encoding    :enc} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (string?     csv-filename))
+                                 (mu/verify-arg (mu/not-nil? primary-key-cols))
+                                 (mu/verify-arg (coll?       columns-spec))]}
   (let [change (LoadUpdateDataChange.)
         s-name (or schema-name schema *schema*)
         enc-v  (or encoding    enc)]
@@ -937,12 +907,11 @@
   [table-name column-name-value-map
    & {:keys [schema-name  schema ; String
              where-clause where  ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name  :schema
-                     :where-clause :where} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify map?        column-name-value-map))
+             ] :as opt}] {:post [(instance? UpdateDataChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name  :schema
+                                                  :where-clause :where} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (map?        column-name-value-map))]}
   (let [change   (UpdateDataChange.)
         s-name   (or schema-name  schema *schema*)
         w-clause (or where-clause where)]
@@ -964,11 +933,10 @@
   [table-name
    & {:keys [schema-name  schema ; String
              where-clause where  ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name  :schema
-                     :where-clause :where} opt)
-    (mu/verify mu/not-nil? table-name))
+             ] :as opt}] {:post [(instance? DeleteDataChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name  :schema
+                                                  :where-clause :where} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))]}
   (let [change   (DeleteDataChange.)
         s-name   (or schema-name  schema *schema*)
         w-clause (or where-clause where)]
@@ -985,9 +953,8 @@
   rollback (TagDatabaseChange).
   See also:
     http://www.liquibase.org/manual/tag_database"
-  [tag]
-  (mu/when-assert-cond
-    (mu/verify mu/not-nil? tag))
+  [tag] {:post [(instance? TagDatabaseChange %)]
+         :pre  [(mu/verify-arg (mu/not-nil? tag))]}
   (let [change (TagDatabaseChange.)]
     (.setTag change (mu/as-string tag))
     change))
@@ -1000,10 +967,10 @@
   (StopChange). Mainly useful for debugging and stepping through a changelog.
   See also:
     http://www.liquibase.org/manual/stop"
-  ([] (StopChange.))
-  ([^String message]
-    (mu/when-assert-cond
-      (mu/verify string? message))
+  ([] {:post [(instance? StopChange %)]}
+    (StopChange.))
+  ([^String message] {:post [(instance? StopChange %)]
+                      :pre  [(mu/verify-arg (string? message))]}
     (let [change (StopChange.)]
       (.setMessage change message)
       change)))
@@ -1023,14 +990,13 @@
              index-name   index  ; String
              unique       uniq   ; Boolean
              table-space  tspace ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema
-                     :index-name  :index
-                     :unique      :uniq
-                     :table-space :tspace} opt)
-    (mu/verify mu/not-nil? table-name)
-    (mu/verify coll? column-names))
+             ] :as opt}] {:post [(instance? CreateIndexChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema
+                                                  :index-name  :index
+                                                  :unique      :uniq
+                                                  :table-space :tspace} opt)
+                                 (mu/verify-arg (mu/not-nil? table-name))
+                                 (mu/verify-arg (coll? column-names))]}
   (let [change  (CreateIndexChange.)
         s-name  (or schema-name  schema *schema*)
         i-name  (or index-name   index)
@@ -1054,11 +1020,10 @@
     http://www.liquibase.org/manual/drop_index"
   [index-name table-name
    & {:keys [schema-name  schema ; String
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:schema-name :schema} opt)
-    (mu/verify mu/not-nil? index-name)
-    (mu/verify mu/not-nil? table-name))
+             ] :as opt}] {:post [(instance? DropIndexChange %)]
+                          :pre  [(mu/verify-opt #{:schema-name :schema} opt)
+                                 (mu/verify-arg (mu/not-nil? index-name))
+                                 (mu/verify-arg (mu/not-nil? table-name))]}
   (let [change (DropIndexChange.)
         s-name (or schema-name  schema *schema*)]
     (doto change

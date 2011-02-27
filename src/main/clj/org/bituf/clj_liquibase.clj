@@ -64,7 +64,7 @@
     (throw (IllegalStateException.
              (format "Expected %s but found %s - not wrapped in 'defchangelog'?"
                "var *logical-filepath* to be string"
-               (mu/var-dump *logical-filepath*)))))
+               (mu/val-dump *logical-filepath*)))))
   true)
 
 
@@ -109,23 +109,22 @@
              pre-conditions     pre-cond
              rollback-changes   rollback
              valid-checksum     valid-csum
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:logical-filepath   :filepath
-                     :dbms
-                     :run-always         :always
-                     :run-on-change      :on-change
-                     :context            :ctx
-                     :run-in-transaction :in-txn
-                     :fail-on-error      :fail-err
-                     :comment
-                     :pre-conditions     :pre-cond
-                     :rollback-changes   :rollback
-                     :valid-checksum     :valid-csum} opt)
-    (mu/verify string?       id)
-    (mu/verify string?       author)
-    (mu/verify coll?         changes)
-    (mu/verify mu/not-empty? changes))
+             ] :as opt}] {:post [(instance? ChangeSet %)]
+                          :pre  [(mu/verify-opt #{:logical-filepath   :filepath
+                                                  :dbms
+                                                  :run-always         :always
+                                                  :run-on-change      :on-change
+                                                  :context            :ctx
+                                                  :run-in-transaction :in-txn
+                                                  :fail-on-error      :fail-err
+                                                  :comment
+                                                  :pre-conditions     :pre-cond
+                                                  :rollback-changes   :rollback
+                                                  :valid-checksum     :valid-csum} opt)
+                                 (mu/verify-arg (string?       id))
+                                 (mu/verify-arg (string?       author))
+                                 (mu/verify-arg (coll?         changes))
+                                 (mu/verify-arg (mu/not-empty? changes))]}
   (when-not (or logical-filepath filepath)
     (verify-valid-logical-filepath))
   (let [s-filepath (or logical-filepath filepath *logical-filepath*)
@@ -142,18 +141,17 @@
         v-rollback (or rollback-changes   rollback)
         s-val-csum (or valid-checksum     valid-csum)
         _ (do
-            (mu/verify string?       id)
-            (mu/verify string?       author)
-            (mu/verify string?       s-filepath)
-            (mu/verify mu/not-empty? changes)
+            (mu/verify-arg (string?       id))
+            (mu/verify-arg (string?       author))
+            (mu/verify-arg (string?       s-filepath))
+            (mu/verify-arg (mu/not-empty? changes))
             (doseq [each changes]
-              (mu/verify #(instance? Change %) each))
-            (mu/verify mu/boolean? b-always)
-            (mu/verify mu/boolean? b-change)
-            (mu/verify #(or (nil? %) (string? %))
-              s-contxt)
-            (mu/verify string?     s-dbms)
-            (mu/verify mu/boolean? b-in-txn))
+              (mu/verify-arg (instance? Change each)))
+            (mu/verify-arg (mu/boolean? b-always))
+            (mu/verify-arg (mu/boolean? b-change))
+            (mu/verify-arg (or (nil? s-contxt) (string? s-contxt)))
+            (mu/verify-arg (string?     s-dbms))
+            (mu/verify-arg (mu/boolean? b-in-txn)))
         ;; String id, String author, boolean alwaysRun, boolean runOnChange,
         ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
         c-set (ChangeSet.
@@ -229,12 +227,11 @@
     make-changelog-params"
   [^String filepath ^List change-sets
    & {:keys [pre-conditions     pre-cond   ; vector
-             ] :as opt}]
-  (mu/when-assert-cond
-    (mu/verify-opt #{:pre-conditions   :pre-cond} opt)
-    (mu/verify string?       filepath)
-    (mu/verify coll?         change-sets)
-    (mu/verify mu/not-empty? change-sets))
+             ] :as opt}] {:post [(instance? DatabaseChangeLog %)]
+                          :pre  [(mu/verify-opt #{:pre-conditions   :pre-cond} opt)
+                                 (mu/verify-arg (string?       filepath))
+                                 (mu/verify-arg (coll?         change-sets))
+                                 (mu/verify-arg (mu/not-empty? change-sets))]}
   (let [dbcl       (DatabaseChangeLog.)
         v-pre-cond (or pre-conditions pre-cond)]
     (doto dbcl
@@ -248,7 +245,7 @@
             (not (map? each))) (.addChangeSet dbcl
                                  ^ChangeSet (apply make-changeset each))
           :else
-          (mu/illegal-arg-value "change-sets#element"
+          (mu/illegal-argval "change-sets#element"
             "ChangeSet object or arg-lists for 'make-changeset' fn"
             each))))
     (if v-pre-cond
