@@ -52,10 +52,21 @@ You can use Clj-Liquibase after including its namespace in your project:
     (use 'org.bituf.clj-liquibase)
     (use 'org.bituf.clj-liquibase.change)
 
+
 ## Quickstart
+
+
+Create a new project and include the following dependencies:
+
+
+    [org.bituf/clj-dbcp "0.4"]
+    [org.bituf/oss-jdbc "0.4"]
+    [org.bituf/clj-liquibase "0.1-SNAPSHOT"]
+
 
 To use Clj-Liquibase you need to include the required namespace in your application and define a
 changelog.
+
 
     ;; filename: fooapp/src/fooapp/dbchange.clj
     (ns fooapp.dbchange
@@ -72,10 +83,12 @@ changelog.
     
     (lb/defchangelog changelog [changeset-1])
 
+
 After defining the changelog, you need to apply the changes (see below).
 
-    ;; filename: fooapp/src/fooapp/dbmigrate.clj
-    (ns fooapp.dbmigrate.clj
+
+    ;; filename: fooapp/src/fooapp/dbmigrate
+    (ns fooapp.dbmigrate
       (:require [fooapp.dbchange :as dbch]
         [org.bituf.clj-dbcp :as dbcp]
         [org.bituf.clj-dbspec :as spec]
@@ -92,7 +105,11 @@ After defining the changelog, you need to apply the changes (see below).
     
     (defn do-update "Invoke this function to update the database"
       []
-      (do-lb-action #(lb/update dbch/changelog-1)))
+      (do-lb-action #(lb/update dbch/changelog)))
+
+
+Once you are done with these, you can invoke fooapp.dbmigrate/do-update to
+carry out the changes.
 
 
 ## Reference
