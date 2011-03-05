@@ -200,11 +200,14 @@
   [f] {:post [(fn? %)]
        :pre  [(fn? f)]}
   (fn [& args]
-    (if (mu/not-nil? *db-instance*) f
-      (sp/wrap-connection
-        #(binding [*db-instance* (make-db-instance (:connection sp/*dbspec*))
-                   *changelog-params* (make-changelog-params *db-instance*)]
-           (apply f args))))))
+    (if (mu/not-nil? *db-instance*) (apply f args)
+      (let [g (sp/wrap-connection
+                #(binding [*db-instance* (make-db-instance
+                                           (:connection sp/*dbspec*))
+                           *changelog-params* (make-changelog-params
+                                                *db-instance*)]
+                   (apply f args)))]
+        (g)))))
 
 
 ;; ===== DatabaseChangeLog =====
