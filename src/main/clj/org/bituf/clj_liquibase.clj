@@ -264,8 +264,9 @@
     make-changelog"
   [var-name change-sets & var-args]
   `(def ~var-name
-     (partial make-changelog (last (mu/split-filepath
-                                     (or *logical-filepath* *file*)))
+     (partial make-changelog (or (and *logical-filepath* (mu/java-filepath
+                                                           *logical-filepath*))
+                               (last (mu/split-filepath *file*)))
        ~change-sets ~@var-args)))
 
 
