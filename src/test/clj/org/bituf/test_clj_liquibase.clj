@@ -58,16 +58,12 @@
 
 (defn lb-action
   "Run Liquibase action"
-  [f] {:post [(do (println (mu/val-dump %))
-                (if (fn? %) (println "Is a function" %)
-                  (println "NOT a function"))
-                true)
-              (mu/not-fn? %)]
+  [f] {:post [(mu/not-fn? %)]
        :pre  [(fn? f)]}
   (let [g (spec/wrap-dbspec (dbspec)
             (lb/wrap-lb-init
               f))]
-    (g)))
+    (mu/! (g))))
 
 
 (def ct-change1 (mu/! (ch/create-table :sample-table-1
@@ -194,8 +190,10 @@
             
             (is (= (count u-tables) (- (count tb-names) 2)))
             
-            (is (-> tb-names
-                  (mu/contains-val? t-name)))
+            (is (-> (map sr/upper-case tb-names)
+                  (mu/contains-val? t-name)) (format "%s does not contain %s"
+                                               (map sr/upper-case tb-names)
+                                               t-name))
             
             (println "\n**** All columns ****")
             (when (not (empty? columns))
@@ -208,7 +206,11 @@
                                   columns))
                   exp-cols (vec (map #(zipmap sel-cols %) t-cols))]
               (is (= (count act-cols) (count exp-cols)))
-              (dorun (map #(is (= %1 %2)) act-cols exp-cols))))))))
+              ;(dorun (map #(is (= %1 %2)) act-cols exp-cols))
+              (dorun (map #(is (= (mu/map-vals sr/upper-case %1)
+                                 (mu/map-vals sr/upper-case %2)))
+                       act-cols exp-cols))
+              ))))))
 
 
 (defn update-test
