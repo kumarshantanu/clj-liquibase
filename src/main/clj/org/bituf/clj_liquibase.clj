@@ -155,8 +155,9 @@
         ;; String id, String author, boolean alwaysRun, boolean runOnChange,
         ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
         c-set (ChangeSet.
-                ^String id         ^String author   ^Boolean b-always ^Boolean b-change
-                ^String s-filepath ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn)]
+                ^String id ^String author   ^Boolean b-always ^Boolean b-change
+                ^String (mu/java-filepath s-filepath)
+                ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn)]
     (doseq [each changes]
       (.addChange c-set each))
     (if b-fail-err (.setFailOnError   c-set b-fail-err))
@@ -238,10 +239,10 @@
   (let [dbcl       (DatabaseChangeLog.)
         v-pre-cond (or pre-conditions pre-cond)]
     (doto dbcl
-      (.setLogicalFilePath filepath)
+      (.setLogicalFilePath (mu/java-filepath filepath))
       (.setChangeLogParameters ^ChangeLogParameters *changelog-params*))
     (doseq [each change-sets]
-      (binding [*logical-filepath* filepath]
+      (binding [*logical-filepath* (mu/java-filepath filepath)]
         (cond
           (changeset? each)    (.addChangeSet dbcl ^ChangeSet each)
           (and (coll? each)
@@ -266,7 +267,7 @@
   `(def ~var-name
      (partial make-changelog (or (and *logical-filepath* (mu/java-filepath
                                                            *logical-filepath*))
-                               (last (mu/split-filepath *file*)))
+                               (mu/pick-filename *file*))
        ~change-sets ~@var-args)))
 
 
