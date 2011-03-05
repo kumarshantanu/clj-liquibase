@@ -1,6 +1,7 @@
 (ns org.bituf.test-clj-liquibase
   (:import
     (java.sql             Connection SQLException)
+    (javax.sql            DataSource)
     (org.bituf.clj_dbspec IRow)
     (org.bituf.clj-dbspec Row))
   (:require
@@ -43,16 +44,30 @@
 ;(def dialect :mysql)
 
 
-(defn make-ds []
+(defn make-ds [] {:post [(instance? DataSource %)]}
   ((:dbcp (dialect db))))
 
 
-(defn db-int [] (:int (dialect db)))
+(defn db-int [] {:post [(string? %)]}
+  (:int (dialect db)))
 
 
-(defn dbspec
-  []
+(defn dbspec [] {:post [(map? %)]}
   (spec/make-dbspec (make-ds)))
+
+
+(defn lb-action
+  "Run Liquibase action"
+  [f] {:post [(do (println (mu/val-dump %))
+                (if (fn? %) (println "Is a function" %)
+                  (println "NOT a function"))
+                true)
+              (mu/not-fn? %)]
+       :pre  [(fn? f)]}
+  (let [g (spec/wrap-dbspec (dbspec)
+            (lb/wrap-lb-init
+              f))]
+    (g)))
 
 
 (def ct-change1 (mu/! (ch/create-table :sample-table-1
@@ -151,7 +166,9 @@
    [:name   [:varchar 40] :null false]
    [:gender [:char 1]     :null false]]"
   [table-desc & more]
+  (println "Entered uth")
   (let [u-tables (into [table-desc] more)]
+    (println (format "Asserting %d tables" (count u-tables)))
     (mu/!
       (doseq [each u-tables]
         (let [[^String t-name & t-cols] each
@@ -211,9 +228,30 @@
 
 (deftest test-update
   (testing "update"
-    ((spec/wrap-dbspec (dbspec)
-       (lb/wrap-lb-init
-         update-test)))))
+    (lb-action
+      update-test)))
+
+
+(defn update-idempotency-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (lb/update clog-1)
+  (update-test-helper
+    ["SAMPLE_TABLE_1"
+     ["SAMPLE_TABLE_1" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
+     ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
+    ["SAMPLE_TABLE_2"
+     ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
+     ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))
+
+
+(deftest test-update-idempotency
+  (testing "update(idempotency)"
+    (lb-action
+      update-idempotency-test)))
 
 
 (defn update-by-count-test
@@ -233,9 +271,8 @@
 
 (deftest test-update-by-count
   (testing "update-by-count"
-    ((spec/wrap-dbspec (dbspec)
-       (lb/wrap-lb-init
-         update-by-count-test)))))
+    (lb-action
+      update-by-count-test)))
 
 
 (defn tag-test
@@ -249,9 +286,8 @@
 
 (deftest test-tag
   (testing "tag"
-    ((spec/wrap-dbspec (dbspec)
-       (lb/wrap-lb-init
-         tag-test)))))
+    (lb-action
+      tag-test)))
 
 
 (defn rollback-to-tag-test
@@ -268,9 +304,8 @@
 
 (deftest test-rollback-to-tag
   (testing "rollback-to-tag"
-    ((spec/wrap-dbspec (dbspec)
-       (lb/wrap-lb-init
-         rollback-to-tag-test)))))
+    (lb-action
+      rollback-to-tag-test)))
 
 
 (defn rollback-to-date-test
@@ -286,9 +321,8 @@
 
 (deftest test-rollback-to-date
   (testing "rollback-to-date"
-    ((spec/wrap-dbspec (dbspec)
-       (lb/wrap-lb-init
-         rollback-to-date-test)))))
+    (lb-action
+      rollback-to-date-test)))
 
 
 (defn rollback-by-count-test
@@ -316,9 +350,8 @@
 
 (deftest test-rollback-by-count
   (testing "rollback-by-count"
-    ((spec/wrap-dbspec (dbspec)
-       (lb/wrap-lb-init
-         rollback-by-count-test)))))
+    (lb-action
+      rollback-by-count-test)))
 
 
 (defn test-ns-hook []
@@ -329,6 +362,7 @@
   (test-defchangelog)
   ;; ===== Actions =====
   (test-update)
+  (test-update-idempotency)
   (test-update-by-count)
   (test-tag)
   (test-rollback-to-tag)
