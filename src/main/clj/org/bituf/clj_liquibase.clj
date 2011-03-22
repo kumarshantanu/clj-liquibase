@@ -23,6 +23,9 @@
     (liquibase.lockservice       LockService)
     (liquibase.logging           LogFactory Logger)
     (liquibase.precondition.core PreconditionContainer)
+    (liquibase.sql               Sql)
+    (liquibase.sqlgenerator      SqlGeneratorFactory)
+    (liquibase.statement         SqlStatement)
     (liquibase.util              LiquibaseUtil))
   (:require
     [clojure.string         :as sr]
@@ -362,6 +365,22 @@
 ;; ===== Actions =====
 
 
+(defn ^List change-sql
+  "Return a list of SQL statements (string) that would be required to execute
+  the given Change object instantly for current database without versioning."
+  [^Change change] {:post [(mu/verify-cond (vector? %))
+                           (mu/verify-cond (every? string? %))]
+                    :pre  [(mu/verify-arg  (instance? Change change))
+                           (mu/verify-cond (instance? Database *db-instance*))]}
+  (let [sgf (SqlGeneratorFactory/getInstance)
+        sql (map (fn [^SqlStatement stmt]
+                   (map (fn [^Sql sql]
+                          ^String (.toSql sql))
+                     (.generateSql sgf stmt *db-instance*)))
+              (.generateStatements change *db-instance*))]
+    (into [] (flatten sql))))
+
+
 (defn update
   "Run the Liquibase Update command.
   See also:
@@ -370,7 +389,9 @@
     http://www.liquibase.org/manual/update"
   ([changelog-fn]
     (update changelog-fn []))
-  ([changelog-fn ^List contexts]
+  ([changelog-fn ^List contexts] {:pre [(mu/verify-arg (fn? changelog-fn))
+                                        (mu/verify-arg (coll? contexts))]}
+    (sp/verify-writable)
     (do-locked
       (.setContexts *changelog-params* contexts)
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -385,6 +406,7 @@
                               ])]
           (.run changelog-it (UpdateVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^List contexts ^Writer output]
+    {:pre [(mu/verify-arg (instance? Writer output))]}
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header "Update Database Script")
@@ -400,6 +422,10 @@
   ([changelog-fn ^Integer howmany-changesets]
     (update-by-count changelog-fn howmany-changesets []))
   ([changelog-fn ^Integer howmany-changesets ^List contexts]
+    {:pre [(mu/verify-arg (fn? changelog-fn))
+           (mu/verify-arg (mu/posnum? howmany-changesets))
+           (mu/verify-arg (coll? contexts))]}
+    (sp/verify-writable)
     (.setContexts *changelog-params* contexts)
     (do-locked
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -423,7 +449,8 @@
 
 (defn tag
   "Tag the database schema with specified tag (coerced as string)."
-  [the-tag]
+  [the-tag] {:pre [(mu/verify-arg (or (string? the-tag) (keyword? the-tag)))]}
+  (sp/verify-writable)
   (do-locked
     (check-database-changelog-table *db-instance* false nil nil)
     (.tag *db-instance* (mu/as-string the-tag))))
@@ -437,6 +464,9 @@
   ([changelog-fn ^String tag]
     (rollback-to-tag changelog-fn tag []))
   ([changelog-fn ^String tag ^List contexts]
+    {:pre [(mu/verify-arg (fn? changelog-fn))
+           (mu/verify-arg (coll? contexts))]}
+    (sp/verify-writable)
     (do-locked
       (.setContexts *changelog-params* contexts)
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -453,6 +483,7 @@
                               ])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^String tag ^List contexts ^Writer output]
+    {:pre [(mu/verify-arg (instance? Writer output))]}
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Rollback to '" tag "' Script"))
@@ -467,6 +498,10 @@
   ([changelog-fn ^Date date]
     (rollback-to-date changelog-fn date []))
   ([changelog-fn ^Date date ^List contexts]
+    {:pre [(mu/verify-arg (fn? changelog-fn))
+           (mu/verify-arg (mu/date? date))
+           (mu/verify-arg (coll? contexts))]}
+    (sp/verify-writable)
     (do-locked
       (.setContexts *changelog-params* contexts)
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -483,6 +518,7 @@
                               ])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^Date date contexts ^Writer output]
+    {:pre [(mu/verify-arg (instance? Writer output))]}
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Rollback to " date " Script"))
@@ -497,6 +533,10 @@
   ([changelog-fn ^Integer howmany-changesets]
     (rollback-by-count changelog-fn ^Integer howmany-changesets []))
   ([changelog-fn ^Integer howmany-changesets ^List contexts]
+    {:pre [(mu/verify-arg (fn? changelog-fn))
+           (mu/verify-arg (mu/posnum? howmany-changesets))
+           (mu/verify-arg (coll? contexts))]}
+    (sp/verify-writable)
     (.setContexts *changelog-params* contexts)
     (do-locked
       (let [changelog ^DatabaseChangeLog (changelog-fn)]
@@ -513,6 +553,7 @@
                               ])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^Integer howmany-changesets ^List contexts ^Writer output]
+    {:pre [(mu/verify-arg (instance? Writer output))]}
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Rollback to " howmany-changesets " Change-sets Script"))

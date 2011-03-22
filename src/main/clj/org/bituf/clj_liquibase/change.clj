@@ -219,6 +219,18 @@
     change))
 
 
+(defn ^CreateTableChange create-table-withid
+  "Same as `create-table`, but includes an additional auto-generated primary
+  key column. The primary key column is named <table-name>_id - e.g. if the
+  table name is :sample or \"sample\", then primary key will be \"sample_id\".
+  See also:
+    create-table"
+  [table-name columns & args]
+  (let [idcol [(str (sp/db-iden table-name) "_id") :BIGINT :null false :pk true
+                                                           :autoinc true]]
+    (apply create-table table-name (cons idcol columns) args)))
+
+
 ;; Rename Table
 
 (defn ^RenameTableChange rename-table
