@@ -5,8 +5,6 @@
 - [TODO] Liquibase Functionality (commands)
   # Diff
   # Generate Changelog
-  # DBDoc
-  # SQL Output
 - [TODO] Building Change-Logs
   # <Preconditions>
 - [TODO] 'Change' implementations:
@@ -28,9 +26,9 @@
   # `create-table` variant that auto-include a primary key
   # [TODO] custom refactoring
 - Liquibase actions
-  # Get SQL statements for Change instances
-  # [TODO] DBDoc
-  # [TODO] SQL Output
+  # Generate SQL statements for individual Change instances
+  # DBDoc
+  # SQL Output
 
 
 ## 0.1 / 2011-Mar-06
