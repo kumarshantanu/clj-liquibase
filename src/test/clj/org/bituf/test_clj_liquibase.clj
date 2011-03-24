@@ -1,5 +1,6 @@
 (ns org.bituf.test-clj-liquibase
   (:import
+    (java.io              File)
     (java.sql             Connection SQLException)
     (javax.sql            DataSource)
     (org.bituf.clj_dbspec IRow)
@@ -356,6 +357,34 @@
       rollback-by-count-test)))
 
 
+(defn generate-doc-test
+  []
+  (clb-setup)
+  (lb/update clog-1)
+  (lb/generate-doc clog-2 "target/dbdoc"))
+
+
+(deftest test-generate-doc
+  (testing "generate-doc"
+    (lb-action generate-doc-test)
+    (is (.exists (File. "target/dbdoc/index.html")))))
+
+
+(defn generate-sql-test
+  []
+  (clb-setup)
+  (let [ddl-script (mu/with-stringwriter w
+                     (lb/update clog-1 [] w))]
+    (println ddl-script)
+    (is (and (string? ddl-script)
+          (mu/posnum? (.indexOf ddl-script "Update Database Script"))))))
+
+
+(deftest test-generate-sql
+  (testing "generate-sql"
+    (lb-action generate-sql-test)))
+
+
 (defn test-ns-hook []
   ;; ===== ChangeSet =====
   (test-make-changeset)
@@ -369,4 +398,6 @@
   (test-tag)
   (test-rollback-to-tag)
   (test-rollback-to-date)
-  (test-rollback-by-count))
+  (test-rollback-by-count)
+  (test-generate-doc)
+  (test-generate-sql))
