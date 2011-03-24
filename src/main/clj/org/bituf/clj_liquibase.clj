@@ -3,11 +3,12 @@
   See also:
     http://www.liquibase.org/manual/home"
   (:import
-    (java.io                     IOException Writer)
+    (java.io                     File IOException Writer)
     (java.sql                    Connection)
     (java.text                   DateFormat)
     (java.util                   Date List)
     (javax.sql                   DataSource)
+    (org.bituf.clj_liquibase     CustomDBDocVisitor)
     (liquibase.changelog         ChangeLogIterator ChangeSet ChangeLogParameters
                                  DatabaseChangeLog)
     (liquibase.change            Change)
@@ -15,7 +16,7 @@
                                  ChangeSetFilter              ContextChangeSetFilter
                                  CountChangeSetFilter         DbmsChangeSetFilter
                                  ExecutedAfterChangeSetFilter ShouldRunChangeSetFilter)
-    (liquibase.changelog.visitor RollbackVisitor UpdateVisitor)
+    (liquibase.changelog.visitor DBDocVisitor RollbackVisitor UpdateVisitor)
     (liquibase.database          Database DatabaseFactory)
     (liquibase.database.jvm      JdbcConnection)
     (liquibase.executor          Executor ExecutorService LoggingExecutor)
@@ -558,3 +559,28 @@
     (with-writer output
       (output-header (str "Rollback to " howmany-changesets " Change-sets Script"))
       (rollback-by-count changelog-fn howmany-changesets contexts))))
+
+
+(defn generate-doc
+  "Generate documentation for changelog.
+  See also:
+    http://www.liquibase.org/manual/dbdoc
+    http://www.liquibase.org/dbdoc/index.html"
+  ([changelog-fn ^String output-dir ^List contexts]
+    {:pre [(mu/verify-arg (fn? changelog-fn))
+           (mu/verify-arg (string? output-dir))
+           (mu/verify-arg (coll? contexts))
+           (mu/verify-cond (mu/not-nil? *db-instance*))]}
+    (.setContexts *changelog-params* contexts)
+    (do-locked
+      (let [changelog ^DatabaseChangeLog (changelog-fn)]
+        (check-database-changelog-table *db-instance* false changelog nil)
+        (.validate changelog *db-instance* (into-array String contexts))
+        (let [changelog-it (make-changelog-iterator changelog
+                             [(DbmsChangeSetFilter. *db-instance*)])
+              dbdoc-visitor (DBDocVisitor. *db-instance*)]
+          (.run changelog-it dbdoc-visitor *db-instance*)
+          (.writeHTML (CustomDBDocVisitor. *db-instance*)
+            (File. output-dir) nil)))))
+  ([changelog-fn ^String output-dir]
+    (generate-doc changelog-fn output-dir [])))
