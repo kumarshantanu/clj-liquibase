@@ -67,6 +67,12 @@
     (mu/! (g))))
 
 
+(defmacro with-lb-action
+  "Run body of code as Liquibase action"
+  [& body]
+  `(lb-action (fn [] ~@body)))
+
+
 (def ct-change1 (mu/! (ch/create-table :sample-table-1
                         [[:id     :int          :null false :pk true :autoinc true]
                          [:name   [:varchar 40] :null false]
@@ -207,11 +213,9 @@
                                   columns))
                   exp-cols (vec (map #(zipmap sel-cols %) t-cols))]
               (is (= (count act-cols) (count exp-cols)))
-              ;(dorun (map #(is (= %1 %2)) act-cols exp-cols))
               (dorun (map #(is (= (mu/map-vals sr/upper-case %1)
                                  (mu/map-vals sr/upper-case %2)))
-                       act-cols exp-cols))
-              ))))))
+                       act-cols exp-cols))))))))
 
 
 (defn update-test
@@ -370,19 +374,38 @@
     (is (.exists (File. "target/dbdoc/index.html")))))
 
 
-(defn generate-sql-test
-  []
-  (clb-setup)
-  (let [ddl-script (mu/with-stringwriter w
-                     (lb/update clog-1 [] w))]
-    (println ddl-script)
-    (is (and (string? ddl-script)
-          (mu/posnum? (.indexOf ddl-script "Update Database Script"))))))
-
-
 (deftest test-generate-sql
   (testing "generate-sql"
-    (lb-action generate-sql-test)))
+    (with-lb-action
+      (doseq [[each msg] [[(partial lb/update clog-1 [])
+                           "Update Database Script"]
+                          [(partial lb/update-by-count clog-2 1 [])
+                           "Update 1 Change-sets Database Script"]
+                          [(fn [w]
+                             (lb/update clog-1)
+                             (lb/tag    "mytag")
+                             (lb/update clog-2)
+                             (lb/rollback-to-tag clog-2 "mytag" [] w))
+                           "Rollback to 'mytag' Script"]
+                          [(fn [w]
+                             (lb/update clog-1)
+                             (lb/tag    "mytag")
+                             (lb/update clog-2)
+                             (lb/rollback-to-date clog-2 (java.util.Date.) [] w))
+                           "Rollback to"]
+                          [(fn [w]
+                             (lb/update clog-1)
+                             (lb/tag    "tag1")
+                             (lb/update clog-2)
+                             (lb/tag    "tag2")
+                             (lb/rollback-by-count clog-2 1 [] w))
+                           "Rollback to 1 Change-sets Script"]]]
+        (clb-setup)
+        (let [^String script (mu/with-stringwriter w
+                               (each w))]
+          (println "^^^^^^^^" script "$$$$$$$$")
+          (is (and (string? script)
+                (mu/posnum? (.indexOf ^String script ^String msg)))))))))
 
 
 (defn test-ns-hook []
