@@ -155,7 +155,9 @@
             (mu/verify-arg (mu/boolean? b-change))
             (mu/verify-arg (or (nil? s-contxt) (string? s-contxt)))
             (mu/verify-arg (string?     s-dbms))
-            (mu/verify-arg (mu/boolean? b-in-txn)))
+            (mu/verify-arg (mu/boolean? b-in-txn))
+            (mu/verify-arg (or (nil? v-pre-cond)
+                             (instance? PreconditionContainer v-pre-cond))))
         ;; String id, String author, boolean alwaysRun, boolean runOnChange,
         ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
         c-set (ChangeSet.
@@ -166,7 +168,7 @@
       (.addChange c-set each))
     (if b-fail-err (.setFailOnError   c-set b-fail-err))
     (if s-comment  (.setComments      c-set s-comment))
-    (if v-pre-cond (.setPreconditions c-set v-pre-cond)) ; TODO convert v-pre-cond
+    (if v-pre-cond (.setPreconditions c-set v-pre-cond))
     (if v-rollback (doseq [each (mu/as-vector v-rollback)]
                      (if (string? each) (.addRollBackSQL c-set ^String each)
                        (.addRollbackChange c-set ^Change each))))
@@ -241,7 +243,10 @@
                                  (mu/verify-arg (coll?         change-sets))
                                  (mu/verify-arg (mu/not-empty? change-sets))]}
   (let [dbcl       (DatabaseChangeLog.)
-        v-pre-cond (or pre-conditions pre-cond)]
+        v-pre-cond (or pre-conditions pre-cond)
+        _          (mu/verify-arg
+                     (or (nil? v-pre-cond)
+                       (instance? PreconditionContainer v-pre-cond)))]
     (doto dbcl
       (.setLogicalFilePath (mu/java-filepath filepath))
       (.setChangeLogParameters ^ChangeLogParameters *changelog-params*))
@@ -257,7 +262,7 @@
             "ChangeSet object or arg-lists for 'make-changeset' fn"
             each))))
     (if v-pre-cond
-      (.setPreconditions dbcl ^PreconditionContainer v-pre-cond)) ; TODO convert v-pre-cond
+      (.setPreconditions dbcl ^PreconditionContainer v-pre-cond))
     dbcl))
 
 
