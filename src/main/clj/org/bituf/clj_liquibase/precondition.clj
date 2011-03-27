@@ -122,7 +122,7 @@
 
 
 (defn ^PrimaryKeyExistsPrecondition primary-key-exists
-  [schema-name primary-key-name table-name] {:post [(mu/verify-cond (instance? PrimaryKeyExistsPrecondition %))]
+  [schema-name table-name primary-key-name] {:post [(mu/verify-cond (instance? PrimaryKeyExistsPrecondition %))]
                                              :pre  [(mu/verify-arg (or (keyword? schema-name)      (string? schema-name)))
                                                     (mu/verify-arg (or (keyword? primary-key-name) (string? primary-key-name)))
                                                     (mu/verify-arg (or (keyword? table-name)       (string? table-name)))]}
