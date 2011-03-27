@@ -20,19 +20,18 @@
 (defn clb-setup
   "Setup database for running tests"
   []
-  ((spec/wrap-connection
-     (fn []
-       (let [conn (:connection spec/*dbspec*)]
-         (assert (or (println "Testing connection") conn (println "= NULL")))
-         (with-open [stmt (.createStatement ^Connection conn)]
-           (doseq [each [:sample-table-1 :sample-table-2 "sampletable3"
-                         :databasechangelog :databasechangeloglock]]
-             (try
-               (.executeUpdate stmt (format "DROP TABLE %s"
-                                      (spec/db-iden each)))
-               (println "Deleted table " (spec/db-iden each))
-               (catch SQLException e
-                 (println "Ignoring exception: " e))))))))))
+  (spec/with-connection spec/*dbspec*
+    (let [conn (:connection spec/*dbspec*)]
+      (assert (or (println "Testing connection") conn (println "= NULL")))
+      (with-open [stmt (.createStatement ^Connection conn)]
+        (doseq [each [:sample-table-1 :sample-table-2 "sampletable3"
+                      :databasechangelog :databasechangeloglock]]
+          (try
+            (.executeUpdate stmt (format "DROP TABLE %s"
+                                   (spec/db-iden each)))
+            (println "Deleted table " (spec/db-iden each))
+            (catch SQLException e
+              (println "Ignoring exception: " e))))))))
 
 
 (def db {:h2-mem {:dbcp #(dbcp/h2-memory-datasource)
@@ -61,10 +60,9 @@
   "Run Liquibase action"
   [f] {:post [(mu/not-fn? %)]
        :pre  [(fn? f)]}
-  (let [g (spec/wrap-dbspec (dbspec)
-            (lb/wrap-lb-init
-              f))]
-    (mu/! (g))))
+  (spec/with-dbspec (dbspec)
+    (lb/with-lb
+      (mu/! (f)))))
 
 
 (defmacro with-lb-action
