@@ -72,12 +72,13 @@
 
 
 (def ct-change1 (mu/! (ch/create-table :sample-table-1
-                        [[:id     :int          :null false :pk true :autoinc true]
+                        [[:id     :int          :null false :pk true :autoinc true :pkname :pk-sample-table-1]
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
 
 (def ct-change2 (mu/! (ch/create-table :sample-table-2
                         [[:id     :int          :null false :pk true :autoinc true]
+                         [:f-id   :int          :null false]
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
 
