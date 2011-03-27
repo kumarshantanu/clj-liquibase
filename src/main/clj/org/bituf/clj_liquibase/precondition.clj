@@ -198,7 +198,8 @@
                                        (into [pc] more)))]}
   (let [pc (AndPrecondition.)]
     (doseq [each (into [pc] more)]
-      (.addNestedPrecondition pc each))))
+      (.addNestedPrecondition pc each))
+    pc))
 
 
 (defn  ^NotPrecondition pc-not
@@ -208,7 +209,8 @@
                                        (into [pc] more)))]}
   (let [pc (NotPrecondition.)]
     (doseq [each (into [pc] more)]
-      (.addNestedPrecondition pc each))))
+      (.addNestedPrecondition pc each))
+    pc))
 
 
 (defn  ^OrPrecondition pc-or
@@ -218,7 +220,8 @@
                                        (into [pc] more)))]}
   (let [pc (OrPrecondition.)]
     (doseq [each (into [pc] more)]
-      (.addNestedPrecondition pc each))))
+      (.addNestedPrecondition pc each))
+    pc))
 
 
 (def on-fail-error-values

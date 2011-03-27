@@ -21,7 +21,7 @@
 - Remove dependency on Clojure-contrib
 - argument verification in functions/macros - action, change etc.
 - [TODO] Improved documentation
-- [TODO] pre-conditions
+- Pre-conditions
 - 'Change' implementations
   # `create-table` variant that auto-include a primary key
   # [TODO] custom refactoring
