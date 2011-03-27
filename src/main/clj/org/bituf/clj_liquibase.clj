@@ -217,6 +217,13 @@
         (g)))))
 
 
+(defmacro with-lb
+  "Execute of code in the context of initialized Liquibase settings."
+  [& body]
+  `(let [g# (wrap-lb-init (fn [] ~@body))]
+     (g#)))
+
+
 ;; ===== DatabaseChangeLog =====
 
 
