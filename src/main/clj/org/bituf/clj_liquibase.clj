@@ -23,6 +23,7 @@
     (liquibase.exception         LiquibaseException LockException)
     (liquibase.lockservice       LockService)
     (liquibase.logging           LogFactory Logger)
+    (liquibase.precondition      Precondition)
     (liquibase.precondition.core PreconditionContainer)
     (liquibase.sql               Sql)
     (liquibase.sqlgenerator      SqlGeneratorFactory)
@@ -32,7 +33,8 @@
     [clojure.string         :as sr]
     [org.bituf.clj-dbspec   :as sp]
     [org.bituf.clj-miscutil :as mu]
-    [org.bituf.clj-liquibase.internal :as in]))
+    [org.bituf.clj-liquibase.internal     :as in]
+    [org.bituf.clj-liquibase.precondition :as pc]))
 
 
 (def ^{:doc "Clj-Liquibase version (only major and minor)"}
@@ -97,7 +99,7 @@
     :fail-on-error      :fail-err  ; Boolean
     ;; sub tags
     :comment                        ; String
-    :pre-conditions     :pre-cond   ; vector
+    :pre-conditions     :pre-cond   ; list of Precondition objects, or PreconditionContainer object
     :valid-checksum     :valid-csum ; String
   See also:
     http://www.liquibase.org/manual/changeset"
@@ -157,7 +159,9 @@
             (mu/verify-arg (string?     s-dbms))
             (mu/verify-arg (mu/boolean? b-in-txn))
             (mu/verify-arg (or (nil? v-pre-cond)
-                             (instance? PreconditionContainer v-pre-cond))))
+                             (instance? PreconditionContainer v-pre-cond)
+                             (and (coll? v-pre-cond)
+                               (every? #(instance? Precondition %) v-pre-cond)))))
         ;; String id, String author, boolean alwaysRun, boolean runOnChange,
         ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
         c-set (ChangeSet.
@@ -168,7 +172,9 @@
       (.addChange c-set each))
     (if b-fail-err (.setFailOnError   c-set b-fail-err))
     (if s-comment  (.setComments      c-set s-comment))
-    (if v-pre-cond (.setPreconditions c-set v-pre-cond))
+    (if v-pre-cond (.setPreconditions c-set (if (coll? v-pre-cond)
+                                              (pc/pre-cond v-pre-cond)
+                                              v-pre-cond)))
     (if v-rollback (doseq [each (mu/as-vector v-rollback)]
                      (if (string? each) (.addRollBackSQL c-set ^String each)
                        (.addRollbackChange c-set ^Change each))))
@@ -239,6 +245,8 @@
   Arguments:
     change-sets  (collection/list) List of ChangeSet instances, or
                                    List of arg-lists (for 'make-changeset' fn)
+  Optional args:
+    :pre-conditions :pre-cond  ; PreconditionContainer object, or list of Precondition objects
   See also:
     http://www.liquibase.org/manual/databasechangelog
     make-changelog-params"
@@ -253,7 +261,9 @@
         v-pre-cond (or pre-conditions pre-cond)
         _          (mu/verify-arg
                      (or (nil? v-pre-cond)
-                       (instance? PreconditionContainer v-pre-cond)))]
+                       (instance? PreconditionContainer v-pre-cond)
+                       (and (coll? v-pre-cond)
+                         (every? #(instance? Precondition %) v-pre-cond))))]
     (doto dbcl
       (.setLogicalFilePath (mu/java-filepath filepath))
       (.setChangeLogParameters ^ChangeLogParameters *changelog-params*))
@@ -269,7 +279,9 @@
             "ChangeSet object or arg-lists for 'make-changeset' fn"
             each))))
     (if v-pre-cond
-      (.setPreconditions dbcl ^PreconditionContainer v-pre-cond))
+      (.setPreconditions dbcl
+        ^PreconditionContainer (if (coll? v-pre-cond) (pc/pre-cond v-pre-cond)
+                                 v-pre-cond)))
     dbcl))
 
 
