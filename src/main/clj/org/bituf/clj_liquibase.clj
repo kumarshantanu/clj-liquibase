@@ -406,6 +406,13 @@
     (into [] (flatten sql))))
 
 
+(defmacro with-writable
+  "Set spec with :read-only as false and execute body of code in that context."
+  [& body]
+  `(sp/with-dbspec (sp/assoc-readonly sp/*dbspec* false)
+     ~@body))
+
+
 (defn update
   "Run the Liquibase Update command.
   See also:
@@ -435,7 +442,8 @@
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header "Update Database Script")
-      (update changelog-fn contexts))))
+      (with-writable
+        (update changelog-fn contexts)))))
 
 
 (defn update-by-count
@@ -469,7 +477,8 @@
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Update " howmany-changesets " Change-sets Database Script"))
-      (update-by-count changelog-fn howmany-changesets contexts))))
+      (with-writable
+        (update-by-count changelog-fn howmany-changesets contexts)))))
 
 
 (defn tag
@@ -512,7 +521,8 @@
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Rollback to '" tag "' Script"))
-      (rollback-to-tag changelog-fn tag contexts))))
+      (with-writable
+        (rollback-to-tag changelog-fn tag contexts)))))
 
 
 (defn rollback-to-date
@@ -547,7 +557,8 @@
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Rollback to " date " Script"))
-      (rollback-to-date changelog-fn date contexts))))
+      (with-writable
+        (rollback-to-date changelog-fn date contexts)))))
 
 
 (defn rollback-by-count
@@ -582,7 +593,8 @@
     (.setContexts *changelog-params* contexts)
     (with-writer output
       (output-header (str "Rollback to " howmany-changesets " Change-sets Script"))
-      (rollback-by-count changelog-fn howmany-changesets contexts))))
+      (with-writable
+        (rollback-by-count changelog-fn howmany-changesets contexts)))))
 
 
 (defn generate-doc

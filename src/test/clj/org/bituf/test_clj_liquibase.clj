@@ -78,7 +78,7 @@
 
 (def ct-change2 (mu/! (ch/create-table :sample-table-2
                         [[:id     :int          :null false :pk true :autoinc true]
-                         [:f-id   :int          :null false]
+                         [:f-id   :int]
                          [:name   [:varchar 40] :null false]
                          [:gender [:char 1]     :null false]])))
 
@@ -227,9 +227,10 @@
      ["SAMPLE_TABLE_1" "NAME"   "VARCHAR" "NO" "NO" ]
      ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
     ["SAMPLE_TABLE_2"
-     ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
-     ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
-     ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))
+     ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO"  "YES"]
+     ["SAMPLE_TABLE_2" "F_ID"   (db-int)  "YES" "NO"]
+     ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO"  "NO" ]
+     ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO"  "NO" ]]))
 
 
 (deftest test-update
@@ -250,6 +251,7 @@
      ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
     ["SAMPLE_TABLE_2"
      ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_2" "F_ID"   (db-int)  "YES" "NO"]
      ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
      ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))
 
@@ -271,6 +273,7 @@
      ["SAMPLE_TABLE_1" "GENDER" "CHAR"    "NO" "NO" ]]
     ["SAMPLE_TABLE_2"
      ["SAMPLE_TABLE_2" "ID"     (db-int)  "NO" "YES"]
+     ["SAMPLE_TABLE_2" "F_ID"   (db-int)  "YES" "NO"]
      ["SAMPLE_TABLE_2" "NAME"   "VARCHAR" "NO" "NO" ]
      ["SAMPLE_TABLE_2" "GENDER" "CHAR"    "NO" "NO" ]]))
 
@@ -373,31 +376,44 @@
     (is (.exists (File. "target/dbdoc/index.html")))))
 
 
+(defmacro with-readonly
+  [& body]
+  `(spec/with-dbspec (spec/assoc-readonly spec/*dbspec*)
+     ~@body))
+
+
 (deftest test-generate-sql
   (testing "generate-sql"
     (with-lb-action
-      (doseq [[each msg] [[(partial lb/update clog-1 [])
+      (doseq [[each msg] [[(fn [w]
+                             (with-readonly
+                               (lb/update clog-1 [] w)))
                            "Update Database Script"]
-                          [(partial lb/update-by-count clog-2 1 [])
+                          [(fn [w]
+                             (with-readonly
+                               (lb/update-by-count clog-2 1 [] w)))
                            "Update 1 Change-sets Database Script"]
                           [(fn [w]
                              (lb/update clog-1)
                              (lb/tag    "mytag")
                              (lb/update clog-2)
-                             (lb/rollback-to-tag clog-2 "mytag" [] w))
+                             (with-readonly
+                               (lb/rollback-to-tag clog-2 "mytag" [] w)))
                            "Rollback to 'mytag' Script"]
                           [(fn [w]
                              (lb/update clog-1)
                              (lb/tag    "mytag")
                              (lb/update clog-2)
-                             (lb/rollback-to-date clog-2 (java.util.Date.) [] w))
+                             (with-readonly
+                               (lb/rollback-to-date clog-2 (java.util.Date.) [] w)))
                            "Rollback to"]
                           [(fn [w]
                              (lb/update clog-1)
                              (lb/tag    "tag1")
                              (lb/update clog-2)
                              (lb/tag    "tag2")
-                             (lb/rollback-by-count clog-2 1 [] w))
+                             (with-readonly
+                               (lb/rollback-by-count clog-2 1 [] w)))
                            "Rollback to 1 Change-sets Script"]]]
         (clb-setup)
         (let [^String script (mu/with-stringwriter w
