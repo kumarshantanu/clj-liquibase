@@ -201,55 +201,70 @@
 
 
 (deftest test-pc-and
-  (sp/with-dbspec (tl/dbspec)
-    (lb/with-lb
-      (let [cs-1 changeset-1
-            cs-2 (into changeset-2
-                   [:pre-cond [(pc/pc-and
-                                 (pc/table-exists "" :sample-table-1)
-                                 (pc/view-exists  "" :sample-view-1))
-                               ]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
-        (tl/clb-setup)
-        (lb/update clog-1)
-        (lb/update clog-2)))))
+  (testing "pc-and"
+    (sp/with-dbspec (tl/dbspec)
+      (lb/with-lb
+        (let [cs-1 changeset-1
+              cs-2 (into changeset-2
+                     [:pre-cond [(pc/pc-and
+                                   (pc/table-exists "" :sample-table-1)
+                                   (pc/view-exists  "" :sample-view-1))
+                                 ]])]
+          (lb/defchangelog clog-1 [cs-1])
+          (lb/defchangelog clog-2 [cs-2])
+          (tl/clb-setup)
+          (lb/update clog-1)
+          (lb/update clog-2))))))
 
 
 (deftest test-pc-not
-  (sp/with-dbspec (tl/dbspec)
-    (lb/with-lb
-      (let [cs-1 changeset-1
-            cs-2 (into changeset-2
-                   [:pre-cond [(pc/pc-not
-                                 (pc/table-exists "" :sample-table-11)
-                                 (pc/view-exists  "" :sample-view-11))
-                               ]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
-        (tl/clb-setup)
-        (lb/update clog-1)
-        (lb/update clog-2)))))
+  (testing "pc-not"
+    (sp/with-dbspec (tl/dbspec)
+      (lb/with-lb
+        (let [cs-1 changeset-1
+              cs-2 (into changeset-2
+                     [:pre-cond [(pc/pc-not
+                                   (pc/table-exists "" :sample-table-11)
+                                   (pc/view-exists  "" :sample-view-11))
+                                 ]])]
+          (lb/defchangelog clog-1 [cs-1])
+          (lb/defchangelog clog-2 [cs-2])
+          (tl/clb-setup)
+          (lb/update clog-1)
+          (lb/update clog-2))))))
 
 
 (deftest test-pc-or
-  (sp/with-dbspec (tl/dbspec)
-    (lb/with-lb
-      (let [cs-1 changeset-1
-            cs-2 (into changeset-2
-                   [:pre-cond [(pc/pc-or
-                                 (pc/table-exists "" :sample-table-11)
-                                 (pc/view-exists  "" :sample-view-1))
-                               ]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
-        (tl/clb-setup)
-        (lb/update clog-1)
-        (lb/update clog-2)))))
+  (testing "pc-or"
+    (sp/with-dbspec (tl/dbspec)
+      (lb/with-lb
+        (let [cs-1 changeset-1
+              cs-2 (into changeset-2
+                     [:pre-cond [(pc/pc-or
+                                   (pc/table-exists "" :sample-table-11)
+                                   (pc/view-exists  "" :sample-view-1))
+                                 ]])]
+          (lb/defchangelog clog-1 [cs-1])
+          (lb/defchangelog clog-2 [cs-2])
+          (tl/clb-setup)
+          (lb/update clog-1)
+          (lb/update clog-2))))))
 
 
 (deftest test-pre-cond
-  (fail))
+  (testing "pre-cond"
+    (let [pcs [(pc/pre-cond [(pc/dbms :h2)] :on-error :halt     :on-error-msg "halt"     :on-fail :halt     :on-fail-msg "halt")
+               (pc/pre-cond [(pc/dbms :h2)] :on-error :continue :on-error-msg "continue" :on-fail :continue :on-fail-msg "continue")
+               (pc/pre-cond [(pc/dbms :h2)] :on-error :mark-ran :on-error-msg "mark_ran" :on-fail :mark-ran :on-fail-msg "mark_ran")
+               (pc/pre-cond [(pc/dbms :h2)] :on-error :warn     :on-error-msg "warn"     :on-fail :warn     :on-fail-msg "warn")
+               (pc/pre-cond [(pc/dbms :h2)] :on-update-sql :ignore)
+               (pc/pre-cond [(pc/dbms :h2)] :on-update-sql :test)
+               (pc/pre-cond [(pc/dbms :h2)] :on-update-sql :fail)]]
+      (doseq [each pcs]
+        (sp/with-dbspec (tl/dbspec)
+          (lb/with-lb
+            (lb/defchangelog cl [(into changeset-1 [:pre-cond each])])
+            (lb/update cl)))))))
 
 
 (defn test-ns-hook []
