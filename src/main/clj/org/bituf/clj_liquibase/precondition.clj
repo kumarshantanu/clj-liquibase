@@ -233,9 +233,9 @@
 
 
 (def on-update-sql-values
-  {:run    "RUN"    ; Run the changeSet in updateSQL mode
+  {:ignore "IGNORE" ; Ignore the preCondition in updateSQL mode
+   :test   "TEST"   ; Test the changeSet in updateSQL mode
    :fail   "FAIL"   ; Fail the preCondition in updateSQL mode
-   :ignore "IGNORE" ; Ignore the preCondition in updateSQL mode
    })
 
 
