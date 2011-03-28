@@ -196,10 +196,10 @@
   [pc & more] {:post [(mu/verify-cond (instance? AndPrecondition %))]
                :pre  [(mu/verify-arg (every? #(instance? Precondition %)
                                        (into [pc] more)))]}
-  (let [pc (AndPrecondition.)]
+  (let [pl (AndPrecondition.)]
     (doseq [each (into [pc] more)]
-      (.addNestedPrecondition pc each))
-    pc))
+      (.addNestedPrecondition pl each))
+    pl))
 
 
 (defn  ^NotPrecondition pc-not
@@ -207,10 +207,10 @@
   [pc & more] {:post [(mu/verify-cond (instance? NotPrecondition %))]
                :pre  [(mu/verify-arg (every? #(instance? Precondition %)
                                        (into [pc] more)))]}
-  (let [pc (NotPrecondition.)]
+  (let [pl (NotPrecondition.)]
     (doseq [each (into [pc] more)]
-      (.addNestedPrecondition pc each))
-    pc))
+      (.addNestedPrecondition pl each))
+    pl))
 
 
 (defn  ^OrPrecondition pc-or
@@ -218,10 +218,10 @@
   [pc & more] {:post [(mu/verify-cond (instance? OrPrecondition %))]
                :pre  [(mu/verify-arg (every? #(instance? Precondition %)
                                        (into [pc] more)))]}
-  (let [pc (OrPrecondition.)]
+  (let [pl (OrPrecondition.)]
     (doseq [each (into [pc] more)]
-      (.addNestedPrecondition pc each))
-    pc))
+      (.addNestedPrecondition pl each))
+    pl))
 
 
 (def on-fail-error-values
