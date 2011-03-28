@@ -5,8 +5,6 @@
 - [TODO] Liquibase Functionality (commands)
   # Diff
   # Generate Changelog
-- [TODO] Building Change-Logs
-  # <Preconditions>
 - [TODO] 'Change' implementations:
   # Custom Refactorings
     * Modifying Generated SQL
@@ -18,13 +16,13 @@
 
 ## 0.2 / 2011-Mar-??
 
+- Use Clj-DBSpec 0.2
 - Remove dependency on Clojure-contrib
-- argument verification in functions/macros - action, change etc.
+- Argument verification in functions/macros - action, change etc.
 - [TODO] Improved documentation
 - Pre-conditions
 - 'Change' implementations
-  # `create-table` variant that auto-include a primary key
-  # [TODO] custom refactoring
+  # `create-table` variant that auto-includes a bigint (auto-incr) primary key
 - Liquibase actions
   # Generate SQL statements for individual Change instances
   # DBDoc
