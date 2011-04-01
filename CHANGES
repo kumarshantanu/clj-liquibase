@@ -2,6 +2,7 @@
 
 # Changes and TODO
 
+- [TODO] Improve documentation
 - [TODO] Liquibase Functionality (commands)
   # Diff
   # Generate Changelog
@@ -14,12 +15,11 @@
     * Execute Shell Command
 
 
-## 0.2 / 2011-Mar-??
+## 0.2 / 2011-Apr-01
 
 - Use Clj-DBSpec 0.2
 - Remove dependency on Clojure-contrib
 - Argument verification in functions/macros - action, change etc.
-- [TODO] Improved documentation
 - Pre-conditions
 - 'Change' implementations
   # `create-table` variant that auto-includes a bigint (auto-incr) primary key

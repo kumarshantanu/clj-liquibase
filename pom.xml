@@ -4,7 +4,7 @@
   <groupId>org.bituf</groupId>
   <artifactId>clj-liquibase</artifactId>
   <packaging>jar</packaging>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <name>Clj-Liquibase</name>
   <description>
     Clj-Liquibase is a simple Clojure wrapper around the Liquibase library
@@ -47,12 +47,12 @@
     <dependency>
       <groupId>org.bituf</groupId>
       <artifactId>clj-miscutil</artifactId>
-      <version>0.3-SNAPSHOT</version>
+      <version>0.3</version>
     </dependency>
     <dependency>
       <groupId>org.bituf</groupId>
       <artifactId>clj-dbspec</artifactId>
-      <version>0.2-SNAPSHOT</version>
+      <version>0.2</version>
     </dependency>
     <!-- Test Dependencies -->
     <dependency><!-- All Open Source JDBC Drivers available via Maven -->
@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.bituf</groupId>
       <artifactId>clj-dbcp</artifactId>
-      <version>0.4</version>
+      <version>0.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

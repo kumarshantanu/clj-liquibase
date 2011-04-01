@@ -1,6 +1,6 @@
 -*- markdown -*-
 
-# Clj-Liquibase v0.1
+# Clj-Liquibase v0.2
 
 Clj-Liquibase is a simple Clojure wrapper around the Liquibase library for
 carrying out relational database change management and migrations.
@@ -10,6 +10,8 @@ Supported actions:
 * update
 * tag
 * rollback
+* generate SQL for actions
+* generate DB doc
 
 
 ## Usage
@@ -59,9 +61,9 @@ You can use Clj-Liquibase after including its namespace in your project:
 Create a new project and include the following dependencies:
 
 
-    [org.bituf/clj-dbcp "0.4"]
+    [org.bituf/clj-dbcp "0.5"]
     [org.bituf/oss-jdbc "0.4"]
-    [org.bituf/clj-liquibase "0.1"]
+    [org.bituf/clj-liquibase "0.2"]
 
 
 To use Clj-Liquibase you need to include the required namespace in your application and define a
