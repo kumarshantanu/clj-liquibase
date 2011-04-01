@@ -38,7 +38,7 @@
 
 
 (def ^{:doc "Clj-Liquibase version (only major and minor)"}
-      version 0.1)
+      version [0 2])
 
 
 ;; ===== Dynamic vars for Integration =====
