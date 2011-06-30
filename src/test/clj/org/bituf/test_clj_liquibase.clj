@@ -4,7 +4,7 @@
     (java.sql             Connection SQLException)
     (javax.sql            DataSource)
     (org.bituf.clj_dbspec IRow)
-    (org.bituf.clj-dbspec Row))
+    (org.bituf.clj_dbspec Row))
   (:require
     [clojure.string                 :as sr]
     [clojure.pprint                 :as pp]

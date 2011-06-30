@@ -3,6 +3,7 @@
   See also:
     http://www.liquibase.org/manual/home (Available Database Refactorings)"
   (:import
+    (java.math BigInteger)
     (java.util List)
     (liquibase.change.core
       ;; Structural Refactorings
@@ -107,7 +108,8 @@
       (.setOldColumnName (sp/db-iden old-column-name))
       (.setNewColumnName (sp/db-iden new-column-name)))
     (if s-name  (.setSchemaName     change (sp/db-iden s-name)))
-    (if cd-type (.setColumnDataType change (in/as-coltype cd-type)))
+    (if cd-type (.setColumnDataType change (apply in/as-coltype
+                                                  (mu/as-vector cd-type))))
     change))
 
 
@@ -119,7 +121,7 @@
   See also:
     http://www.liquibase.org/manual/modify_column"
   [table-name column-name new-data-type
-   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema ; String/Keyword - subject to `db-iden`
              ] :as opt}] {:post [(instance? ModifyDataTypeChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? table-name))
@@ -130,7 +132,7 @@
     (doto change
       (.setTableName   (sp/db-iden table-name))
       (.setColumnName  (sp/db-iden column-name))
-      (.setNewDataType (in/as-coltype new-data-type)))
+      (.setNewDataType (apply in/as-coltype (mu/as-vector new-data-type))))
     (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
@@ -182,10 +184,10 @@
         ord-v  (or ordered     ord)]
     (doto change
       (.setSequenceName (sp/db-iden seq-name))
-      (.setIncrementBy (bigint increment-by)))
+      (.setIncrementBy (BigInteger. (str increment-by))))
     (if s-name (.setSchemaName change (sp/db-iden s-name)))
-    (if max-v  (.setMaxValue   change (bigint max-v)))
-    (if min-v  (.setMinValue   change (bigint min-v)))
+    (if max-v  (.setMaxValue   change (BigInteger. (str max-v))))
+    (if min-v  (.setMinValue   change (BigInteger. (str min-v))))
     (if ord-v  (.setOrdered    change ord-v))
     change))
 
@@ -363,7 +365,8 @@
       (.setJoinString      join-string)
       (.setColumn2Name     (sp/db-iden column2-name))
       (.setFinalColumnName (sp/db-iden final-column-name))
-      (.setFinalColumnType (in/as-coltype final-column-type)))
+      (.setFinalColumnType (apply in/as-coltype
+                                  (mu/as-vector final-column-type))))
     (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
@@ -397,9 +400,9 @@
   [existing-table-name existing-column-name
    new-table-name      new-column-name
    constraint-name
-   & {:keys [existing-table-schema-name existing-schema ; String/Keyword - s.t. db-iden
-             new-table-schema-name      new-schema      ; String/Keyword - s.t. db-iden
-             new-column-data-type       new-data-type   ; String/vector - s.t. as-coltype
+   & {:keys [existing-table-schema-name existing-schema ; String/Keyword - subject to db-iden
+             new-table-schema-name      new-schema      ; String/Keyword - subject to db-iden
+             new-column-data-type       new-data-type   ; String/vector  - subject to as-coltype
              ] :as opt}] {:post [(instance? AddLookupTableChange %)]
                           :pre  [(mu/verify-opt #{:existing-table-schema-name :existing-schema
                                                   :new-table-schema-name      :new-schema
@@ -421,7 +424,8 @@
       (.setConstraintName     (sp/db-iden constraint-name)))
     (if exs-name (.setExistingTableSchemaName change (sp/db-iden exs-name)))
     (if nws-name (.setNewTableSchemaName      change (sp/db-iden nws-name)))
-    (if nwd-type (.setNewColumnDataType       change (in/as-coltype nwd-type)))
+    (if nwd-type (.setNewColumnDataType       change (apply in/as-coltype
+                                                            (mu/as-vector nwd-type))))
     change))
 
 
@@ -447,7 +451,8 @@
     (doto change
       (.setTableName      (sp/db-iden table-name))
       (.setColumnName     (sp/db-iden column-name))
-      (.setColumnDataType (in/as-coltype column-data-type)))
+      (.setColumnDataType (apply in/as-coltype
+                                 (mu/as-vector column-data-type))))
     (if s-name  (.setSchemaName       change (sp/db-iden s-name)))
     (if n-value (.setDefaultNullValue change n-value))
     change))
@@ -475,7 +480,8 @@
       (.setTableName  (sp/db-iden table-name))
       (.setColumnName (sp/db-iden column-name)))
     (if s-name (.setSchemaName     change (sp/db-iden s-name)))
-    (if d-type (.setColumnDataType change (in/as-coltype d-type)))
+    (if d-type (.setColumnDataType change (apply in/as-coltype
+                                                 (mu/as-vector d-type))))
     change))
 
 
@@ -574,10 +580,10 @@
         cyc-v  (or cycle        cyc)]
     (.setSequenceName change (sp/db-iden sequence-name))
     (if s-name (.setSchemaName  change (sp/db-iden s-name)))
-    (if str-v  (.setStartValue  change (bigint str-v)))
-    (if inc-v  (.setIncrementBy change (bigint inc-v)))
-    (if max-v  (.setMaxValue    change (bigint max-v)))
-    (if min-v  (.setMinValue    change (bigint min-v)))
+    (if str-v  (.setStartValue  change (BigInteger. (str str-v))))
+    (if inc-v  (.setIncrementBy change (BigInteger. (str inc-v))))
+    (if max-v  (.setMaxValue    change (BigInteger. (str max-v))))
+    (if min-v  (.setMinValue    change (BigInteger. (str min-v))))
     (if ord-v  (.setOrdered     change ord-v))
     (if cyc-v  (.setCycle       change cyc-v))
     change))
@@ -618,7 +624,8 @@
     (doto change
       (.setTableName      (sp/db-iden table-name))
       (.setColumnName     (sp/db-iden column-name))
-      (.setColumnDataType (in/as-coltype column-data-type)))
+      (.setColumnDataType (apply in/as-coltype
+                                 (mu/as-vector column-data-type))))
     (if s-name (.setSchemaName change (sp/db-iden s-name)))
     change))
 
