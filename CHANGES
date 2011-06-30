@@ -4,7 +4,7 @@
 
 - [TODO] Improve documentation
 - [TODO] Liquibase Functionality (commands)
-  # Diff
+  # Diff Changelog
   # Generate Changelog
 - [TODO] 'Change' implementations:
   # Custom Refactorings
@@ -13,6 +13,15 @@
     * Custom SQL File
     * Custom Refactoring Class
     * Execute Shell Command
+
+
+## 0.3 / 2011-Jul-??
+
+* Use Clj-DBSpec 0.3
+* Liquibase Functionality (commands)
+  * [TODO] Diff (regular)
+* Cleanup implementations
+  * [TODO] (..list them..)
 
 
 ## 0.2 / 2011-Apr-01
