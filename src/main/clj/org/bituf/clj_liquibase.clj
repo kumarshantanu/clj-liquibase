@@ -3,32 +3,33 @@
   See also:
     http://www.liquibase.org/manual/home"
   (:import
-    (java.io                     File IOException Writer)
-    (java.sql                    Connection)
-    (java.text                   DateFormat)
-    (java.util                   Date List)
-    (javax.sql                   DataSource)
-    (org.bituf.clj_liquibase     CustomDBDocVisitor)
-    (liquibase.changelog         ChangeLogIterator ChangeSet ChangeLogParameters
-                                 DatabaseChangeLog)
-    (liquibase.change            Change)
-    (liquibase.changelog.filter  AfterTagChangeSetFilter      AlreadyRanChangeSetFilter
-                                 ChangeSetFilter              ContextChangeSetFilter
-                                 CountChangeSetFilter         DbmsChangeSetFilter
-                                 ExecutedAfterChangeSetFilter ShouldRunChangeSetFilter)
-    (liquibase.changelog.visitor DBDocVisitor RollbackVisitor UpdateVisitor)
-    (liquibase.database          Database DatabaseFactory)
-    (liquibase.database.jvm      JdbcConnection)
-    (liquibase.executor          Executor ExecutorService LoggingExecutor)
-    (liquibase.exception         LiquibaseException LockException)
-    (liquibase.lockservice       LockService)
-    (liquibase.logging           LogFactory Logger)
-    (liquibase.precondition      Precondition)
-    (liquibase.precondition.core PreconditionContainer)
-    (liquibase.sql               Sql)
-    (liquibase.sqlgenerator      SqlGeneratorFactory)
-    (liquibase.statement         SqlStatement)
-    (liquibase.util              LiquibaseUtil))
+    (java.io                           File IOException Writer)
+    (java.sql                          Connection)
+    (java.text                         DateFormat)
+    (java.util                         Date List)
+    (javax.sql                         DataSource)
+    (org.bituf.clj_liquibase           CustomDBDocVisitor)
+    (liquibase.changelog               ChangeLogIterator ChangeSet ChangeLogParameters
+                                       DatabaseChangeLog)
+    (liquibase.change                  Change)
+    (liquibase.changelog.filter        AfterTagChangeSetFilter      AlreadyRanChangeSetFilter
+                                       ChangeSetFilter              ContextChangeSetFilter
+                                       CountChangeSetFilter         DbmsChangeSetFilter
+                                       ExecutedAfterChangeSetFilter ShouldRunChangeSetFilter)
+    (liquibase.changelog.visitor       DBDocVisitor RollbackVisitor UpdateVisitor)
+    (liquibase.database                Database DatabaseFactory)
+    (liquibase.database.jvm            JdbcConnection)
+    (liquibase.executor                Executor ExecutorService LoggingExecutor)
+    (liquibase.exception               LiquibaseException LockException)
+    (liquibase.integration.commandline CommandLineUtils)
+    (liquibase.lockservice             LockService)
+    (liquibase.logging                 LogFactory Logger)
+    (liquibase.precondition            Precondition)
+    (liquibase.precondition.core       PreconditionContainer)
+    (liquibase.sql                     Sql)
+    (liquibase.sqlgenerator            SqlGeneratorFactory)
+    (liquibase.statement               SqlStatement)
+    (liquibase.util                    LiquibaseUtil))
   (:require
     [clojure.string         :as sr]
     [org.bituf.clj-dbspec   :as sp]
@@ -620,3 +621,11 @@
             (File. output-dir) nil)))))
   ([changelog-fn ^String output-dir]
     (generate-doc changelog-fn output-dir [])))
+
+
+(defn diff
+  "Report a description of the differences between two databases to standard out.
+  See also:
+    http://www.liquibase.org/manual/diff"
+  [^Database ref-db-instance]
+  (CommandLineUtils/doDiff ref-db-instance *db-instance*))

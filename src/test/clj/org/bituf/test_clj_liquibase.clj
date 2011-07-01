@@ -423,6 +423,17 @@
                 (mu/posnum? (.indexOf ^String script ^String msg)))))))))
 
 
+(defn diff-test
+  []
+  (clb-setup)
+  (lb/diff lb/*db-instance*))
+
+
+(deftest test-diff
+  (testing "diff"
+           (lb-action diff-test)))
+
+
 (defn test-ns-hook []
   ;; ===== ChangeSet =====
   (test-make-changeset)
@@ -438,4 +449,5 @@
   (test-rollback-to-date)
   (test-rollback-by-count)
   (test-generate-doc)
-  (test-generate-sql))
+  (test-generate-sql)
+  (test-diff))

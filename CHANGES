@@ -19,7 +19,7 @@
 
 * Use Clj-DBSpec 0.3
 * Liquibase Functionality (commands)
-  * [TODO] Diff (regular)
+  * Diff (Regular database diff - output to STDOUT)
 * Cleanup implementations
   * [TODO] (..list them..)
 
