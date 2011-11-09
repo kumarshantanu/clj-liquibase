@@ -69,7 +69,7 @@
     http://www.liquibase.org/manual/add_column
     http://www.liquibase.org/manual/column"
   [table-name ^List columns
-   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? AddColumnChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? table-name))
@@ -92,8 +92,8 @@
   See also:
     http://www.liquibase.org/manual/rename_column"
   [table-name old-column-name new-column-name
-   & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
-             column-data-type data-type ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name      schema    ; String/Keyword - subject to db-iden
+             column-data-type data-type ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? RenameColumnChange %)]
                           :pre  [(mu/verify-opt #{:schema-name      :schema
                                                   :column-data-type :data-type} opt)
@@ -145,7 +145,7 @@
   See also:
     http://www.liquibase.org/manual/drop_column"
   [table-name column-name
-   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? DropColumnChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? table-name))
@@ -166,7 +166,7 @@
   See also:
     http://www.liquibase.org/manual/alter_sequence"
   [seq-name increment-by
-   & {:keys [schema-name schema ; string/Keyword - s.t. db-iden
+   & {:keys [schema-name schema ; string/Keyword - subject to db-iden
              max-value   max    ; number or string
              min-value   min    ; number or string
              ordered     ord    ; Boolean
@@ -200,8 +200,8 @@
     http://www.liquibase.org/manual/create_table
     http://www.liquibase.org/manual/column"
   [table-name ^List columns
-   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
-             table-space tspace ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema ; String/Keyword - subject to db-iden
+             table-space tspace ; String/Keyword - subject to db-iden
              remarks] :as opt}] {:post [(instance? CreateTableChange %)]
                                  :pre  [(mu/verify-opt #{:schema-name :schema
                                                          :table-space :tspace
@@ -240,7 +240,7 @@
   See also:
     http://www.liquibase.org/manual/rename_table"
   [old-table-name new-table-name
-   & {:keys [schema-name schema ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? RenameTableChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? old-table-name))
@@ -261,7 +261,7 @@
   See also:
     http://www.liquibase.org/manual/drop_table"
   [table-name
-   & {:keys [schema-name         schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name         schema  ; String/Keyword - subject to db-iden
              cascade-constraints cascade ; Boolean
              ] :as opt}] {:post [(instance? DropTableChange %)]
                           :pre  [(mu/verify-opt #{:schema-name         :schema
@@ -283,7 +283,7 @@
   See also:
     http://www.liquibase.org/manual/create_view"
   [view-name ^String select-query
-   & {:keys [schema-name       schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name       schema  ; String/Keyword - subject to db-iden
              replace-if-exists replace ; Boolean
              ] :as opt}] {:post [(instance? CreateViewChange %)]
                           :pre  [(mu/verify-opt #{:schema-name       :schema
@@ -308,7 +308,7 @@
   See also:
     http://www.liquibase.org/manual/rename_view"
   [old-view-name new-view-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? RenameViewChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? old-view-name))
@@ -329,7 +329,7 @@
   See also:
     http://www.liquibase.org/manual/drop_view"
   [view-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? DropViewChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil?   view-name))]}
@@ -348,7 +348,7 @@
     http://www.liquibase.org/manual/merge_columns"
   [table-name column1-name ^String join-string
    column2-name final-column-name final-column-type
-   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? MergeColumnChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? table-name))
@@ -437,7 +437,7 @@
   See also:
     http://www.liquibase.org/manual/add_not-null_constraint"
   [table-name column-name column-data-type
-   & {:keys [schema-name        schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name        schema  ; String/Keyword - subject to db-iden
              default-null-value default ; String
              ] :as opt}] {:post [(instance? AddNotNullConstraintChange %)]
                           :pre  [(mu/verify-opt #{:schema-name        :schema
@@ -466,8 +466,8 @@
   See also:
     http://www.liquibase.org/manual/remove_not-null_constraint"
   [table-name column-name
-   & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
-             column-data-type data-type ; String/vector - s.t. as-coltype
+   & {:keys [schema-name      schema    ; String/Keyword - subject to db-iden
+             column-data-type data-type ; String/vector - subject to as-coltype
              ] :as opt}] {:post [(instance? DropNotNullConstraintChange %)]
                           :pre  [(mu/verify-opt #{:schema-name      :schema
                                                   :column-data-type :data-type} opt)
@@ -493,8 +493,8 @@
   See also:
     http://www.liquibase.org/manual/add_unique_constraint"
   [table-name column-names constraint-name
-   & {:keys [schema-name        schema ; String/Keyword - s.t. db-iden
-             table-space        tspace ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name        schema ; String/Keyword - subject to db-iden
+             table-space        tspace ; String/Keyword - subject to db-iden
              deferrable         defer  ; Boolean
              initially-deferred idefer ; Boolean
              disabled                  ; Boolean
@@ -533,7 +533,7 @@
   See also:
     http://www.liquibase.org/manual/drop_unique_constraint"
   [table-name constraint-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? DropUniqueConstraintChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? table-name))
@@ -554,7 +554,7 @@
   See also:
     http://www.liquibase.org/manual/create_sequence"
   [sequence-name
-   & {:keys [schema-name  schema ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name  schema ; String/Keyword - subject to db-iden
              start-value  start  ; BigInteger
              increment-by incby  ; BigInteger
              max-value    max    ; BigInteger
@@ -594,7 +594,7 @@
 (defn ^DropSequenceChange drop-sequence
   "Return a Change instance that drops a sequence (DropSequenceChange)."
   [sequence-name
-   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? DropSequenceChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? sequence-name))]}
@@ -613,7 +613,7 @@
   See also:
     http://www.liquibase.org/manual/add_auto-increment"
   [table-name column-name column-data-type
-   & {:keys [schema-name schema  ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? AddAutoIncrementChange %)]
                           :pre  [(mu/verify-opt #{:schema-name :schema} opt)
                                  (mu/verify-arg (mu/not-nil? table-name))
@@ -638,7 +638,7 @@
   See also:
     http://www.liquibase.org/manual/add_default_value"
   [table-name column-name default-value
-   & {:keys [schema-name      schema    ; String/Keyword - s.t. db-iden
+   & {:keys [schema-name      schema    ; String/Keyword - subject to db-iden
              column-data-type data-type
              ] :as opt}] {:post [(instance? AddDefaultValueChange %)]
                           :pre  [(mu/verify-opt #{:schema-name      :schema
@@ -839,7 +839,7 @@
 (defn ^LoadDataChange load-data
   "Return a Change instance that Loads data from a CSV file into an existing
   table (LoadDataChange). A value of NULL in a cell will be converted to a
-  database NULL rather than the string “NULL”.
+  database NULL rather than the string NULL.
   Arguments:
     table-name   (keyword/String) table name
     csv-filename (String) CSV file name
@@ -880,7 +880,7 @@
   batch that checks for the existence of a record. If found, the record is
   UPDATEd, else the record is INSERTed. Also, generates DELETE statements for a
   rollback. A value of NULL in a cell will be converted to a database NULL
-  rather than the string “NULL”.
+  rather than the string NULL.
   Arguments:
     table-name       (keyword/String) table name
     csv-filename     (String) CSV file name
