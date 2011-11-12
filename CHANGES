@@ -8,20 +8,23 @@
   # Generate Changelog
 - [TODO] 'Change' implementations:
   # Custom Refactorings
-    * Modifying Generated SQL
     * Custom SQL
     * Custom SQL File
     * Custom Refactoring Class
     * Execute Shell Command
 
 
-## 0.3 / 2011-Jul-??
+## 0.3 / 2011-Nov-??
 
 * Use Clj-DBSpec 0.3
 * Liquibase Functionality (commands)
-  * Diff (Regular database diff - output to STDOUT)
+  # Diff (Regular database diff - output to STDOUT)
+* 'Change' implementations
+  # Custom Refactorings
+    * Modifying Generated SQL (Append, Prepend, Replace SQL visitors)
+    * [TODO] tests for SQL visitors
 * Cleanup implementations
-  * [TODO] (..list them..)
+  # [TODO] `create-table-changeset`; deprecate `create-table` for external use
 
 
 ## 0.2 / 2011-Apr-01

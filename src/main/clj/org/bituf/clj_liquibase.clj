@@ -27,6 +27,7 @@
     (liquibase.precondition            Precondition)
     (liquibase.precondition.core       PreconditionContainer)
     (liquibase.sql                     Sql)
+    (liquibase.sql.visitor             SqlVisitor)
     (liquibase.sqlgenerator            SqlGeneratorFactory)
     (liquibase.statement               SqlStatement)
     (liquibase.util                    LiquibaseUtil))
@@ -35,7 +36,8 @@
     [org.bituf.clj-dbspec   :as sp]
     [org.bituf.clj-miscutil :as mu]
     [org.bituf.clj-liquibase.internal     :as in]
-    [org.bituf.clj-liquibase.precondition :as pc]))
+    [org.bituf.clj-liquibase.precondition :as pc]
+    [org.bituf.clj-liquibase.sql-visitor  :as vis]))
 
 
 (def ^{:doc "Clj-Liquibase version (only major and minor)"}
@@ -69,9 +71,10 @@
   []
   (when (not (string? *logical-filepath*))
     (throw (IllegalStateException.
-             (format "Expected %s but found %s - not wrapped in 'defchangelog'?"
-               "var *logical-filepath* to be string"
-               (mu/val-dump *logical-filepath*)))))
+             ^String (format
+                       "Expected %s but found %s - not wrapped in 'defchangelog'?"
+                       "var *logical-filepath* to be string"
+                       (mu/val-dump *logical-filepath*)))))
   true)
 
 
@@ -102,6 +105,7 @@
     :comment                        ; String
     :pre-conditions     :pre-cond   ; list of Precondition objects, or PreconditionContainer object
     :valid-checksum     :valid-csum ; String
+    :visitors                       ; list of SqlVisitor objects
   See also:
     http://www.liquibase.org/manual/changeset"
   [^String id ^String author ^List changes
@@ -116,6 +120,7 @@
              pre-conditions     pre-cond
              rollback-changes   rollback
              valid-checksum     valid-csum
+             visitors
              ] :as opt}] {:post [(instance? ChangeSet %)]
                           :pre  [(mu/verify-opt #{:logical-filepath   :filepath
                                                   :dbms
@@ -127,11 +132,13 @@
                                                   :comment
                                                   :pre-conditions     :pre-cond
                                                   :rollback-changes   :rollback
-                                                  :valid-checksum     :valid-csum} opt)
+                                                  :valid-checksum     :valid-csum
+                                                  :visitors} opt)
                                  (mu/verify-arg (string?       id))
                                  (mu/verify-arg (string?       author))
                                  (mu/verify-arg (coll?         changes))
-                                 (mu/verify-arg (mu/not-empty? changes))]}
+                                 (mu/verify-arg (mu/not-empty? changes))
+                                 (mu/verify-arg (every? vis/visitor? visitors))]}
   (when-not (or logical-filepath filepath)
     (verify-valid-logical-filepath))
   (let [s-filepath (or logical-filepath filepath *logical-filepath*)
@@ -181,6 +188,8 @@
                        (.addRollbackChange c-set ^Change each))))
     (if s-val-csum (doseq [each (mu/as-vector s-val-csum)]
                      (.addValidCheckSum c-set each)))
+    (doseq [each visitors]
+      (.addSqlVisitor c-set ^SqlVisitor each))
     c-set))
 
 
