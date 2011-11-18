@@ -73,7 +73,7 @@
 (defn make-visitors
   "Return a list of visitors from a DSL-like fluent list of arguments.
   Example:
-    (make-visitors :asitis  (map (partial for-dbms! :mysql)
+    (make-visitors :include (map (partial for-dbms! :mysql)
                                  (make-visitors :append \"engine=InnoDB\"))
                    :append  \" -- creating table\n\"
                    :replace [:integer :bigint]
@@ -85,7 +85,7 @@
   (let [pairs (partition 2 (into [k v] args))
         makev (fn [k v]
                 (case k
-                  :asitis  (mu/as-vector v)
+                  :include (mu/as-vector v)
                   :append  [(make-append-visitor  v)]
                   :prepend [(make-prepend-visitor v)]
                   :replace (if (map? v)
@@ -96,5 +96,5 @@
                                  'v "list of 2 arguments (needle, new-text)"
                                  v)))
                   (mu/illegal-argval
-                    'k ":append/:prepend/:replace" k)))]
+                    'k ":include/:append/:prepend/:replace" k)))]
     (into [] (reduce concat (map (fn [[k v]] (makev k v)) pairs)))))
