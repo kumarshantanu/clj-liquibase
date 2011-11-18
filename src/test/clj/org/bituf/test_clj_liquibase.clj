@@ -133,6 +133,26 @@
                            )) "Optional arguments with shortname"))))
 
 
+(deftest test-create-table-changeset
+  (let [args ["id=1" "author=shantanu" :sample-table
+              [[:first-name [:varchar 40] :null false]
+               [:last-name  [:varchar 40]]
+               [:date-born  :date]]
+              :filepath "dummy"]]
+    (doseq [[f n] [[lb/create-table-changeset        "create-table"]
+                   [lb/create-table-withid-changeset "create-table-withid"]]]
+      (is (lb/changeset? (apply f args))
+          (str n " with no optional arg"))
+      (is (lb/changeset? (apply f (into args [:schema "some"])))
+          (str n " with one optional arg for " n))
+      (is (lb/changeset? (apply f (into args [:always true :in-txn true])))
+          (str n " with 2 optional args for make-changeset")))
+    (is (lb/changeset? (apply lb/create-table-withid-changeset
+                              (into args [:always true :idcol :id])))
+        (format "%s with an optional arg for make-changeset and :idcol for %s"
+                "create-table-withid" "create-table-withid"))))
+
+
 ;; ===== DatabaseChangeLog =====
 
 
@@ -437,6 +457,7 @@
 (defn test-ns-hook []
   ;; ===== ChangeSet =====
   (test-make-changeset)
+  (test-create-table-changeset)
   ;; ===== DatabaseChangeLog =====
   (test-make-changelog)
   (test-defchangelog)
