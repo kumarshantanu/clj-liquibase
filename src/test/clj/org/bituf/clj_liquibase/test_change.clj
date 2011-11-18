@@ -32,9 +32,9 @@
 (defn test-change
   "Assert Change instance by running 'pch' partial function through arg colls.
   Each arg coll is a list where the first element is test description (string)."
-  [^Class ch-class pch & argcolls]
+  [^Class ch-class pch argcoll & argcolls]
   (let [ch? #(instance? ch-class %)]
-    (doseq [each argcolls]
+    (doseq [each (into [argcoll] argcolls)]
       (let [desc (first each)
             args (rest each)]
         (is (ch? (apply pch args)) desc)))))
@@ -134,7 +134,16 @@
         [short-names
          :tspace  :go-air  ; string/Keyword - s.t. clj-to-dbident
          :remarks "Notnow" ; string
-         ]))))
+         ])))
+  (testing "create-table-withid"
+           (test-change CreateTableChange
+                        (partial change/create-table-withid :emp
+                                 [[:c1 :int] [:c2 [:varchar 30]]])
+                        min-args)
+           (test-change CreateTableChange
+                        (partial change/create-table-withid :emp
+                                 [[:c1 :int] [:c2 [:varchar 30]]])
+                        ["With :idcol" :idcol "id"])))
 
 
 (deftest test-rename-table

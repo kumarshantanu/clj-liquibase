@@ -196,9 +196,11 @@
 
 (defn ^CreateTableChange create-table
   "Return a Change instance that creates a table (CreateTableChange).
+  NOTE! : User should call `clj-liquibase/create-table-changeset` instead.
   See also:
     http://www.liquibase.org/manual/create_table
-    http://www.liquibase.org/manual/column"
+    http://www.liquibase.org/manual/column
+    clj-liquibase/create-table-changeset"
   [table-name ^List columns
    & {:keys [schema-name schema ; String/Keyword - subject to db-iden
              table-space tspace ; String/Keyword - subject to db-iden
@@ -223,14 +225,21 @@
 
 (defn ^CreateTableChange create-table-withid
   "Same as `create-table`, but includes an additional auto-generated primary
-  key column. The primary key column is named <table-name>_id - e.g. if the
+  key column. The primary key column is named <table-name>_id unless overriden
+  with optional argument `:idcol` and ID column-name as the value. E.g. if the
   table name is :sample or \"sample\", then primary key will be \"sample_id\".
+  NOTE! : User should call `clj-liquibase/create-table-withid-changeset` instead.
   See also:
-    create-table"
+    create-table
+    clj-liquibase/create-table-withid-changeset"
   [table-name columns & args]
-  (let [idcol [(str (sp/db-iden table-name) "_id") :BIGINT :null false :pk true
-                                                           :autoinc true]]
-    (apply create-table table-name (cons idcol columns) args)))
+  (let [{:keys [idcol] :as opt} args
+        idcol-name (if idcol
+                     (sp/db-iden idcol)
+                     (str (sp/db-iden table-name) "_id"))
+        idcol-spec [idcol-name :BIGINT :null false :pk true :autoinc true]
+        ct-varargs (reduce into [] (dissoc opt :idcol))]
+    (apply create-table table-name (cons idcol-spec columns) ct-varargs)))
 
 
 ;; Rename Table
