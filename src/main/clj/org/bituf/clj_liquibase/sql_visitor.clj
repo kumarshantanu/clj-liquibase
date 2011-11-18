@@ -98,3 +98,9 @@
                   (mu/illegal-argval
                     'k ":include/:append/:prepend/:replace" k)))]
     (into [] (reduce concat (map (fn [[k v]] (makev k v)) pairs)))))
+
+
+;; ===== Some common visitors =====
+
+(def ^{:doc "SQL visitor to enforce InnoDB storage engine on MySQL"}
+      mysql-innodb (for-dbms! :mysql (make-append-visitor " engine=InnoDB")))
