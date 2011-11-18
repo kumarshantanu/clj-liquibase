@@ -19,12 +19,7 @@
 * Use Clj-DBSpec 0.3
 * Liquibase Functionality (commands)
   # Diff (Regular database diff - output to STDOUT)
-* Idiomatic convenience `make-changeset` variants:
-  # New: `create-table-changeset` to wrap `change/create-table`
-  # New: `create-table-withid-changeset` wrap `change/create-table-withid`
-  # Documented as "Not for external use":
-    * change/create-table
-    * change/create-table-withid
+* `make-changeset` now accepts SQL-visitors as optional argument
 * 'Change' implementations
   # Create table: `create-table-withid` (updated)
     * Allow user to specify ID column name via an optional argument :idcol

@@ -194,54 +194,6 @@
     c-set))
 
 
-(defn create-table-changeset-internal
-  "Common internal implementation for `create-table-changeset` and
-  `create-table-withid-changeset`."
-  [f ct-vkeys ^String id ^String author table-name ^List columns
-   & {:keys [dummy] :as opt}]
-  (let [map2vec  (partial reduce into [])
-        ct-vargs (map2vec (select-keys opt ct-vkeys))
-        ;; mc = make-changeset
-        mc-visit (vis/make-visitors
-                   :include (map (partial vis/for-dbms! :mysql)
-                                 (vis/make-visitors :append "engine=InnoDB")))
-        mc-vargs (map2vec (apply dissoc (merge {:visitors mc-visit} opt)
-                                 ct-vkeys))]
-    (apply make-changeset id author
-           [(apply f table-name columns ct-vargs)]
-           mc-vargs)))
-
-
-(defn create-table-changeset
-  "Convenience function to build a changeset for `create-table` change with
-  sensible defaults, e.g. create a table on MySQL with InnoDB storage engine.
-  Optional arguments are a union of those in `make-changeset` and
-  `change/create-table`.
-  See also:
-    make-changeset
-    change/create-table"
-  [^String id ^String author table-name ^List columns & args]
-  (apply create-table-changeset-internal
-         ch/create-table
-         [:schema-name :schema :table-space :tspace :remarks]
-         id author table-name columns args))
-
-
-(defn create-table-withid-changeset
-  "Convenience function to build a changeset for `create-table-withid` with
-  sensible defaults, e.g. create a table on MySQL with InnoDB storage engine.
-  Optional arguments are a union of those in `make-changeset` and
-  `change/create-table-withid`.
-  See also:
-    make-changeset
-    change/create-table-withid"
-  [^String id ^String author table-name ^List columns & args]
-  (apply create-table-changeset-internal
-         ch/create-table-withid
-         [:schema-name :schema :table-space :tspace :remarks :idcol]
-         id author table-name columns args))
-
-
 ;; ===== DatabaseChangeLog helpers =====
 
 
@@ -352,8 +304,8 @@
     make-changelog"
   [var-name change-sets & var-args]
   `(def ~var-name
-     (partial make-changelog (or (and *logical-filepath* (mu/java-filepath
-                                                           *logical-filepath*))
+     (partial make-changelog (if *logical-filepath*
+                               (mu/java-filepath *logical-filepath*)
                                (mu/pick-filename *file*))
        ~change-sets ~@var-args)))
 

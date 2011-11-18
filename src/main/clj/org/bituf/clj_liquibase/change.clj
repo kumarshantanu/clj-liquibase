@@ -196,11 +196,9 @@
 
 (defn ^CreateTableChange create-table
   "Return a Change instance that creates a table (CreateTableChange).
-  NOTE! : User should call `clj-liquibase/create-table-changeset` instead.
   See also:
     http://www.liquibase.org/manual/create_table
-    http://www.liquibase.org/manual/column
-    clj-liquibase/create-table-changeset"
+    http://www.liquibase.org/manual/column"
   [table-name ^List columns
    & {:keys [schema-name schema ; String/Keyword - subject to db-iden
              table-space tspace ; String/Keyword - subject to db-iden
@@ -228,10 +226,8 @@
   key column. The primary key column is named <table-name>_id unless overriden
   with optional argument `:idcol` and ID column-name as the value. E.g. if the
   table name is :sample or \"sample\", then primary key will be \"sample_id\".
-  NOTE! : User should call `clj-liquibase/create-table-withid-changeset` instead.
   See also:
-    create-table
-    clj-liquibase/create-table-withid-changeset"
+    create-table"
   [table-name columns & args]
   (let [{:keys [idcol] :as opt} args
         idcol-name (if idcol
