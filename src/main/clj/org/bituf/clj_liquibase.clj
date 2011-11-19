@@ -12,6 +12,7 @@
     (liquibase.changelog               ChangeLogIterator ChangeSet ChangeLogParameters
                                        DatabaseChangeLog)
     (liquibase.change                  Change)
+    (liquibase.change.core             CreateTableChange)
     (liquibase.changelog.filter        AfterTagChangeSetFilter      AlreadyRanChangeSetFilter
                                        ChangeSetFilter              ContextChangeSetFilter
                                        CountChangeSetFilter         DbmsChangeSetFilter
@@ -90,7 +91,8 @@
 
 
 (defn ^ChangeSet make-changeset
-  "Return a ChangeSet instance.
+  "Return a ChangeSet instance. Use MySQL InnoDB for `create-table` changes by
+  default (unless overridden by :visitors argument.)
   Arguments:
     id      (String)     Author-assigned ID, which can be sequential
     author  (String)     Author name (must be kept same across changesets)
@@ -155,6 +157,10 @@
         v-pre-cond (or pre-conditions     pre-cond)
         v-rollback (or rollback-changes   rollback)
         s-val-csum (or valid-checksum     valid-csum)
+        v-visitors (or visitors (if (every? #(instance? CreateTableChange %)
+                                            visitors)
+                                  [vis/mysql-innodb]
+                                  []))
         _ (do
             (mu/verify-arg (string?       id))
             (mu/verify-arg (string?       author))
@@ -189,7 +195,7 @@
                        (.addRollbackChange c-set ^Change each))))
     (if s-val-csum (doseq [each (mu/as-vector s-val-csum)]
                      (.addValidCheckSum c-set each)))
-    (doseq [each visitors]
+    (doseq [each v-visitors]
       (.addSqlVisitor c-set ^SqlVisitor each))
     c-set))
 

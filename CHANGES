@@ -19,13 +19,13 @@
 * Use Clj-DBSpec 0.3
 * Liquibase Functionality (commands)
   # Diff (Regular database diff - output to STDOUT)
-* `make-changeset` now accepts SQL-visitors as optional argument
+* `make-changeset` now accepts SQL-visitors as :visitors optional argument
+  # defaults `create-table` changes to InnoDB for MySQL unless overridden
 * 'Change' implementations
   # Create table: `create-table-withid` (updated)
     * Allow user to specify ID column name via an optional argument :idcol
   # Custom Refactorings (new implementation)
     * Modifying Generated SQL (Append, Prepend, Replace SQL visitors)
-* Cleanup implementations
 
 
 ## 0.2 / 2011-Apr-01
