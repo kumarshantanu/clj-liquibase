@@ -4,13 +4,37 @@
   <groupId>org.bituf</groupId>
   <artifactId>clj-liquibase</artifactId>
   <packaging>jar</packaging>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   <name>Clj-Liquibase</name>
   <description>
     Clj-Liquibase is a simple Clojure wrapper around the Liquibase library
     for carrying out relational database migrations.
   </description>
   <url>http://code.google.com/p/bitumenframework/</url>
+  
+  <developers>
+    <developer>
+      <name>Shantanu Kumar</name>
+      <email>kumar.shantanu@gmail.com</email>
+      <timezone>+5:30</timezone>
+    </developer>
+  </developers>
+  
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <mailingLists>
+    <mailingList>
+      <name>Bitumen Framework discussion group</name>
+      <archive>http://groups.google.com/group/bitumenframework</archive>
+    </mailingList>
+  </mailingLists>
+  
   <repositories>
     <repository>
       <id>build.clojure.org</id>
@@ -31,14 +55,6 @@
       <version>1.3.0</version>
       <optional>true</optional>
     </dependency>
-    <!--
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure-contrib</artifactId>
-      <version>1.2.0</version>
-      <optional>true</optional>
-    </dependency>
-    -->
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
@@ -52,7 +68,7 @@
     <dependency>
       <groupId>org.bituf</groupId>
       <artifactId>clj-dbspec</artifactId>
-      <version>0.3-SNAPSHOT</version>
+      <version>0.3</version>
     </dependency>
     <!-- Test Dependencies -->
     <dependency><!-- All Open Source JDBC Drivers available via Maven -->

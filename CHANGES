@@ -14,7 +14,7 @@
     * Execute Shell Command
 
 
-## 0.3 / 2011-Nov-??
+## 0.3 / 2011-Nov-20
 
 * Use Clj-DBSpec 0.3
 * Liquibase Functionality (commands)

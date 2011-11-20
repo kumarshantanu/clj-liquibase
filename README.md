@@ -1,6 +1,6 @@
 -*- markdown -*-
 
-# Clj-Liquibase v0.2
+# Clj-Liquibase v0.3
 
 Clj-Liquibase is a simple Clojure wrapper around the Liquibase library for
 carrying out relational database change management and migrations.
@@ -12,6 +12,7 @@ Supported actions:
 * rollback
 * generate SQL for actions
 * generate DB doc
+* database diff
 
 
 ## Usage
@@ -62,8 +63,8 @@ Create a new project and include the following dependencies:
 
 
     [org.bituf/clj-dbcp "0.5"]
-    [org.bituf/oss-jdbc "0.4"]
-    [org.bituf/clj-liquibase "0.2"]
+    [org.bituf/oss-jdbc "0.5"]
+    [org.bituf/clj-liquibase "0.3"]
 
 
 To use Clj-Liquibase you need to include the required namespace in your application and define a
@@ -77,9 +78,9 @@ changelog.
         [org.bituf.clj-liquibase.change :as ch]))
     
     (def ct-change1 (ch/create-table :sample-table1
-                      [[:id :int :null false :pk true :autoinc true]
-                       [:name [:varchar 40] :null false]
-                       [:gender [:char 1] :null false]]))
+                      [[:id     :int          :null false :pk true :autoinc true]
+                       [:name   [:varchar 40] :null false]
+                       [:gender [:char 1]     :null false]]))
     
     (def changeset-1 ["id=1" "author=shantanu" [ct-change1]])
     
@@ -91,9 +92,10 @@ After defining the changelog, you need to apply the changes (see below).
 
     ;; filename: fooapp/src/fooapp/dbmigrate.clj
     (ns fooapp.dbmigrate
-      (:require [fooapp.dbchange :as dbch]
-        [org.bituf.clj-dbcp :as dbcp]
-        [org.bituf.clj-dbspec :as spec]
+      (:require
+        [fooapp.dbchange         :as dbch]
+        [org.bituf.clj-dbcp      :as dbcp]
+        [org.bituf.clj-dbspec    :as spec]
         [org.bituf.clj-liquibase :as lb]))
     
     ;; define datasource for supported database using Clj-DBCP
