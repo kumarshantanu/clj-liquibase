@@ -158,7 +158,7 @@
         v-rollback (or rollback-changes   rollback)
         s-val-csum (or valid-checksum     valid-csum)
         v-visitors (or visitors (if (every? #(instance? CreateTableChange %)
-                                            visitors)
+                                            changes)
                                   [vis/mysql-innodb]
                                   []))
         _ (do
