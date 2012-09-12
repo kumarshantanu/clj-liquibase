@@ -1,4 +1,4 @@
-(ns org.bituf.clj-liquibase
+(ns clj-liquibase.core
   "Expose functions from the Liquibase library.
   See also:
     http://www.liquibase.org/manual/home"
@@ -8,7 +8,7 @@
     (java.text                         DateFormat)
     (java.util                         Date List)
     (javax.sql                         DataSource)
-    (org.bituf.clj_liquibase           CustomDBDocVisitor)
+    (clj_liquibase                     CustomDBDocVisitor)
     (liquibase.changelog               ChangeLogIterator ChangeSet ChangeLogParameters
                                        DatabaseChangeLog)
     (liquibase.change                  Change)
@@ -36,10 +36,10 @@
     [clojure.string         :as sr]
     [org.bituf.clj-dbspec   :as sp]
     [org.bituf.clj-miscutil :as mu]
-    [org.bituf.clj-liquibase.internal     :as in]
-    [org.bituf.clj-liquibase.change       :as ch]
-    [org.bituf.clj-liquibase.precondition :as pc]
-    [org.bituf.clj-liquibase.sql-visitor  :as vis]))
+    [clj-liquibase.internal     :as in]
+    [clj-liquibase.change       :as ch]
+    [clj-liquibase.precondition :as pc]
+    [clj-liquibase.sql-visitor  :as vis]))
 
 
 (def ^{:doc "Clj-Liquibase version (only major and minor)"}

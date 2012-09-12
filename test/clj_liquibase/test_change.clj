@@ -1,4 +1,4 @@
-(ns org.bituf.clj-liquibase.test-change
+(ns clj-liquibase.test-change
   (:import
     (java.util Date)
     (liquibase.change.core
@@ -24,8 +24,8 @@
     (liquibase.statement DatabaseFunction)
     (liquibase.util      ISODateFormat))
   (:require
-    [org.bituf.clj-liquibase.change :as change])
-  (:use org.bituf.test-util)
+    [clj-liquibase.change :as change])
+  (:use test-util)
   (:use clojure.test))
 
 

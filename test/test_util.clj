@@ -1,4 +1,4 @@
-(ns org.bituf.test-util
+(ns test-util
   (:import
     (java.util List)
     (java.sql Connection Statement))

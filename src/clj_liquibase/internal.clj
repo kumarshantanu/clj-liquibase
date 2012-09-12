@@ -1,4 +1,4 @@
-(ns org.bituf.clj-liquibase.internal
+(ns clj-liquibase.internal
   (:import
     (liquibase.database.structure Column)
     (liquibase.change      ColumnConfig ConstraintsConfig)

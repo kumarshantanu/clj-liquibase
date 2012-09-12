@@ -1,4 +1,4 @@
-(ns org.bituf.clj-liquibase.precondition
+(ns clj-liquibase.precondition
   "Clojure wrappers for liquibase.change.Change implementations.
   See also:
     http://www.liquibase.org/manual/home (Available Database Refactorings)"
@@ -24,7 +24,7 @@
   (:require
     [org.bituf.clj-dbspec   :as sp]
     [org.bituf.clj-miscutil :as mu]
-    [org.bituf.clj-liquibase.internal :as in]))
+    [clj-liquibase.internal :as in]))
 
 
 (defn pre-cond?

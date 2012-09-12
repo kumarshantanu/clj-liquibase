@@ -1,10 +1,10 @@
-(ns org.bituf.clj-liquibase.test-sql-visitor
+(ns clj-liquibase.test-sql-visitor
   (:import
     (liquibase.sql.visitor SqlVisitor
                            AppendSqlVisitor PrependSqlVisitor
                            RegExpReplaceSqlVisitor ReplaceSqlVisitor))
-  (:require [org.bituf.clj-liquibase.sql-visitor :as vis])
-  (:use org.bituf.test-util)
+  (:require [clj-liquibase.sql-visitor :as vis])
+  (:use test-util)
   (:use clojure.test))
 
 

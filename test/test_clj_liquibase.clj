@@ -1,4 +1,4 @@
-(ns org.bituf.test-clj-liquibase
+(ns test-clj-liquibase
   (:import
     (java.io              File)
     (java.sql             Connection SQLException)
@@ -6,14 +6,14 @@
     (org.bituf.clj_dbspec IRow)
     (org.bituf.clj_dbspec Row))
   (:require
-    [clojure.string                 :as sr]
-    [clojure.pprint                 :as pp]
-    [org.bituf.clj-miscutil         :as mu]
-    [org.bituf.clj-liquibase        :as lb]
-    [org.bituf.clj-liquibase.change :as ch]
-    [org.bituf.clj-dbcp             :as dbcp]
-    [org.bituf.clj-dbspec           :as spec])
-  (:use org.bituf.test-util)
+    [clojure.string         :as sr]
+    [clojure.pprint         :as pp]
+    [org.bituf.clj-miscutil :as mu]
+    [clj-liquibase.core     :as lb]
+    [clj-liquibase.change   :as ch]
+    [org.bituf.clj-dbcp     :as dbcp]
+    [org.bituf.clj-dbspec   :as spec])
+  (:use test-util)
   (:use clojure.test))
 
 

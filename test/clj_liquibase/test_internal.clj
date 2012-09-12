@@ -1,4 +1,4 @@
-(ns org.bituf.clj-liquibase.test-internal
+(ns clj-liquibase.test-internal
   (:import
     (liquibase.database.structure Column)
     (liquibase.change      ColumnConfig ConstraintsConfig)
@@ -7,8 +7,8 @@
     (liquibase.util        ISODateFormat)
     (java.util Date))
   (:require
-    [org.bituf.clj-liquibase.internal :as in]
-    [org.bituf.clj-liquibase.change   :as ch])
+    [clj-liquibase.internal :as in]
+    [clj-liquibase.change   :as ch])
   (:use clojure.test))
 
 

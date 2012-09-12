@@ -1,11 +1,11 @@
-(ns org.bituf.test
+(ns test
   (:require
-    [clojure.pprint                 :as pp]
-    [org.bituf.clj-miscutil         :as mu]
-    [org.bituf.clj-liquibase        :as lb]
-    [org.bituf.clj-liquibase.change :as ch]
-    [org.bituf.clj-dbcp             :as dbcp]
-    [org.bituf.clj-dbspec           :as spec]))
+    [clojure.pprint         :as pp]
+    [org.bituf.clj-miscutil :as mu]
+    [clj-liquibase.core     :as lb]
+    [clj-liquibase.change   :as ch]
+    [org.bituf.clj-dbcp     :as dbcp]
+    [org.bituf.clj-dbspec   :as spec]))
 
 
 (def ds (dbcp/h2-memory-datasource))

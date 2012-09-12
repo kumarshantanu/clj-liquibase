@@ -1,4 +1,4 @@
-(ns org.bituf.clj-liquibase.sql-visitor
+(ns clj-liquibase.sql-visitor
   (:import
     (java.util.regex       Pattern)
     (liquibase.sql.visitor SqlVisitor

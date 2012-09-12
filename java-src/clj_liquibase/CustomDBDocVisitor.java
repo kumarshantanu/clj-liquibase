@@ -1,4 +1,4 @@
-package org.bituf.clj_liquibase;
+package clj_liquibase;
 
 import java.io.File;
 import java.io.FileOutputStream;
