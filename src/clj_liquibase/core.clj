@@ -304,16 +304,13 @@
 
 (defmacro defchangelog
   "Define a function that when executed with no arguments, returns a database
-  changelog (DatabaseChangeLog instance). Do so in the context where
-  *logical-filepath* is bound to *file* i.e. name of the current file.
+  changelog (DatabaseChangeLog instance) while binding *logical-filepath* to
+  `logical-schema`.
   See also:
     make-changelog"
-  [var-name change-sets & var-args]
+  [var-name logical-schema change-sets & var-args] {:pre [(symbol? var-name)]}
   `(def ~var-name
-     (partial make-changelog (if *logical-filepath*
-                               (mu/java-filepath *logical-filepath*)
-                               (mu/pick-filename *file*))
-       ~change-sets ~@var-args)))
+     (partial make-changelog ~logical-schema ~change-sets ~@var-args)))
 
 
 ;; ===== Actions helpers =====

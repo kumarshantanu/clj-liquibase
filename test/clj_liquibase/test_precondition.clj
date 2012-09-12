@@ -40,10 +40,10 @@
 (def changeset-2 ["id=2" "author=shantanu" [tl/ct-change3]])
 
 
-;(lb/defchangelog clog-1 [changeset-1])
+;(lb/defchangelog clog-1 "precond" [changeset-1])
 
 
-;(lb/defchangelog clog-2 [changeset-1 changeset-2])
+;(lb/defchangelog clog-2 "precond" [changeset-1 changeset-2])
 
 
 (deftest test-changeset-executed
@@ -51,14 +51,14 @@
     (lb/with-lb
       (let [cs-0 (into changeset-1
                    [:pre-cond [(pc/changeset-executed
-                                 "runtests.clj" "id=0" "author=shantanu")]])
+                                 "precond" "id=0" "author=shantanu")]])
             cs-1 changeset-1
             cs-2 (into changeset-2
                    [:pre-cond [(pc/changeset-executed
-                                 "runtests.clj" "id=1" "author=shantanu")]])]
-        (lb/defchangelog clog-0 [cs-0])
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-1 cs-2])
+                                 "precond" "id=1" "author=shantanu")]])]
+        (lb/defchangelog clog-0 "precond" [cs-0])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-1 cs-2])
         (tl/clb-setup)
         (let [[r e] (mu/maybe (lb/update clog-0))]
           (is (instance? MigrationFailedException e))
@@ -74,8 +74,8 @@
             cs-2 (into changeset-2
                    [:pre-cond [(pc/column-exists
                                  "" :sample-table-1 :id)]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-1 cs-2])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-1 cs-2])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -87,8 +87,8 @@
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
                    [:pre-cond [(pc/dbms :h2)]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-1 cs-2])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-1 cs-2])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -99,10 +99,11 @@
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 changeset-2]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-1 (into cs-2
-                                        [:pre-cond [(pc/foreign-key-exists
-                                                      "" :sample-table-2 :f-cons)]])])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond"
+                         [cs-1 (into cs-2
+                                 [:pre-cond [(pc/foreign-key-exists
+                                               "" :sample-table-2 :f-cons)]])])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -113,11 +114,12 @@
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 changeset-2]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-1 (into cs-2
-                                        [:pre-cond [(pc/index-exists
-                                                      "" :sample-table-1 [:name]
-                                                      :sample-1-index-1)]])])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond"
+                         [cs-1 (into cs-2
+                                 [:pre-cond [(pc/index-exists
+                                               "" :sample-table-1 [:name]
+                                               :sample-1-index-1)]])])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -128,11 +130,12 @@
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 changeset-2]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-1 (into cs-2
-                                        [:pre-cond [(pc/primary-key-exists
-                                                      "" :sample-table-1
-                                                      :pk-sample-table-1)]])])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond"
+                         [cs-1 (into cs-2
+                                 [:pre-cond [(pc/primary-key-exists
+                                               "" :sample-table-1
+                                               :pk-sample-table-1)]])])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -143,7 +146,7 @@
     (lb/with-lb
       (let [cs-1 (into changeset-1
                    [:pre-cond [(pc/running-as "sa")]])]
-        (lb/defchangelog clog-1 [cs-1])
+        (lb/defchangelog clog-1 "precond" [cs-1])
         (tl/clb-setup)
         (lb/update clog-1)))))
 
@@ -154,8 +157,8 @@
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
                    [:pre-cond [(pc/sequence-exists "" :foo)]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-2])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -167,8 +170,8 @@
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
                    [:pre-cond [(pc/sql 1 "SELECT COUNT(*) FROM sample_table_1")]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-2])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -180,8 +183,8 @@
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
                    [:pre-cond [(pc/table-exists "" :sample-table-1)]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-2])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -193,8 +196,8 @@
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
                    [:pre-cond [(pc/view-exists "" :sample-view-1)]])]
-        (lb/defchangelog clog-1 [cs-1])
-        (lb/defchangelog clog-2 [cs-2])
+        (lb/defchangelog clog-1 "precond" [cs-1])
+        (lb/defchangelog clog-2 "precond" [cs-2])
         (tl/clb-setup)
         (lb/update clog-1)
         (lb/update clog-2)))))
@@ -210,8 +213,8 @@
                                    (pc/table-exists "" :sample-table-1)
                                    (pc/view-exists  "" :sample-view-1))
                                  ]])]
-          (lb/defchangelog clog-1 [cs-1])
-          (lb/defchangelog clog-2 [cs-2])
+          (lb/defchangelog clog-1 "precond" [cs-1])
+          (lb/defchangelog clog-2 "precond" [cs-2])
           (tl/clb-setup)
           (lb/update clog-1)
           (lb/update clog-2))))))
@@ -227,8 +230,8 @@
                                    (pc/table-exists "" :sample-table-11)
                                    (pc/view-exists  "" :sample-view-11))
                                  ]])]
-          (lb/defchangelog clog-1 [cs-1])
-          (lb/defchangelog clog-2 [cs-2])
+          (lb/defchangelog clog-1 "precond" [cs-1])
+          (lb/defchangelog clog-2 "precond" [cs-2])
           (tl/clb-setup)
           (lb/update clog-1)
           (lb/update clog-2))))))
@@ -244,8 +247,8 @@
                                    (pc/table-exists "" :sample-table-11)
                                    (pc/view-exists  "" :sample-view-1))
                                  ]])]
-          (lb/defchangelog clog-1 [cs-1])
-          (lb/defchangelog clog-2 [cs-2])
+          (lb/defchangelog clog-1 "precond" [cs-1])
+          (lb/defchangelog clog-2 "precond" [cs-2])
           (tl/clb-setup)
           (lb/update clog-1)
           (lb/update clog-2))))))
@@ -263,7 +266,7 @@
       (doseq [each pcs]
         (sp/with-dbspec (tl/dbspec)
           (lb/with-lb
-            (lb/defchangelog cl [(into changeset-1 [:pre-cond each])])
+            (lb/defchangelog cl "precond" [(into changeset-1 [:pre-cond each])])
             (lb/update cl)))))))
 
 

@@ -3,7 +3,8 @@
 - Move to Github (from Bitbucket)
 - Move to Leiningen builds (from Maven)
 - Move to Liquibase 2.0.5 (from 2.0.2)
-- [TODO] Force user to specify _logical file-name_ (logical schema name)
+- Introduce required argument _logical-schema_ in `defchangelog`
+- [TODO] Drop usage of `clj-dbspec` (remove dependency, simplify)
 - [TODO] Expose Liquibase 2.0.5 features
 - [TODO] Improve documentation
 - [TODO] Liquibase Functionality (commands)

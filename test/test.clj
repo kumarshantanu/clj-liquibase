@@ -32,9 +32,9 @@
 (def changeset-2 ["id=2" "author=shantanu" [ct-change2]])
 
 
-(lb/defchangelog changelog-1 [changeset-1])
+(lb/defchangelog changelog-1 "test" [changeset-1])
 
-(lb/defchangelog changelog-2 [changeset-1 changeset-2])
+(lb/defchangelog changelog-2 "test" [changeset-1 changeset-2])
 
 
 ;; ----- execute

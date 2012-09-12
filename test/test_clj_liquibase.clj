@@ -94,10 +94,10 @@
 (def changeset-2 ["id=2" "author=shantanu" [ct-change3]])
 
 
-(lb/defchangelog clog-1 [changeset-1])
+(lb/defchangelog clog-1 "core" [changeset-1])
 
 
-(lb/defchangelog clog-2 [changeset-1 changeset-2])
+(lb/defchangelog clog-2 "core" [changeset-1 changeset-2])
 
 
 ;; ===== ChangeSet =====
