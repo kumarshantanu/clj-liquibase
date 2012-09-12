@@ -1,7 +1,9 @@
--*- markdown -*-
-
 # Changes and TODO
 
+- Move to Github (from Bitbucket)
+- [TODO] Move to Leiningen builds (from Maven)
+- [TODO] Move to Liquibase 2.0.5 (from 2.0.2)
+- [TODO] Expose Liquibase 2.0.5 features
 - [TODO] Improve documentation
 - [TODO] Liquibase Functionality (commands)
   # Diff Changelog
