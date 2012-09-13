@@ -15,7 +15,6 @@
     (org.bituf.clj_dbspec Row))
   (:use clj-liquibase.test-util)
   (:use clojure.test))
-    ;;[org.bituf.clj-dbcp     :as dbcp]
 
 
 (defn clb-setup
