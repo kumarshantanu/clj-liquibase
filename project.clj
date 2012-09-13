@@ -15,12 +15,11 @@
                  [org.bituf/clj-miscutil "0.3"]
                  [org.bituf/clj-dbspec   "0.3"]]
   :profiles {:dev {:dependencies [[oss-jdbc "0.8.0"]
-                                  ;;[org.bituf/clj-dbcp "0.5"]
                                   [clj-dbcp "0.8.0"]]}
              :1.2 {:dependencies [[org.clojure/clojure "1.2.1"]]}
              :1.3 {:dependencies [[org.clojure/clojure "1.3.0"]]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
-             :1.5 {:dependencies [[org.clojure/clojure "1.5.0-alpha5"]]}}
+             :1.5 {:dependencies [[org.clojure/clojure "1.5.0-alpha4"]]}}
   :aliases {"dev" ["with-profile" "dev,1.4"]
             "all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev,1.5"]}
   :warn-on-reflection true
