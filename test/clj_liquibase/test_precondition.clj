@@ -8,8 +8,8 @@
     [clj-liquibase.core         :as lb]
     [clj-liquibase.change       :as ch]
     [clj-liquibase.precondition :as pc]
-    [test-clj-liquibase         :as tl])
-  (:use test-util)
+    [clj-liquibase.test-core    :as tl])
+  (:use clj-liquibase.test-util)
   (:use clojure.test))
 
 

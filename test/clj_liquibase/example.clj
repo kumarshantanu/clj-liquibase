@@ -1,4 +1,4 @@
-(ns test
+(ns clj-liquibase.example
   (:require
     [clojure.pprint         :as pp]
     [org.bituf.clj-miscutil :as mu]

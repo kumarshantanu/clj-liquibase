@@ -1,4 +1,4 @@
-(ns test-clj-liquibase
+(ns clj-liquibase.test-core
   (:import
     (java.io              File)
     (java.sql             Connection SQLException)
@@ -13,7 +13,7 @@
     [clj-liquibase.change   :as ch]
     [org.bituf.clj-dbcp     :as dbcp]
     [org.bituf.clj-dbspec   :as spec])
-  (:use test-util)
+  (:use clj-liquibase.test-util)
   (:use clojure.test))
 
 

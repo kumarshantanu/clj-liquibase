@@ -25,7 +25,7 @@
     (liquibase.util      ISODateFormat))
   (:require
     [clj-liquibase.change :as change])
-  (:use test-util)
+  (:use clj-liquibase.test-util)
   (:use clojure.test))
 
 

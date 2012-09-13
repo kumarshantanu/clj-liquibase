@@ -1,4 +1,4 @@
-(ns test-util
+(ns clj-liquibase.test-util
   (:import
     (java.util List)
     (java.sql Connection Statement))

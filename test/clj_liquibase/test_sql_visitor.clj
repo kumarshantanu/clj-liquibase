@@ -4,7 +4,7 @@
                            AppendSqlVisitor PrependSqlVisitor
                            RegExpReplaceSqlVisitor ReplaceSqlVisitor))
   (:require [clj-liquibase.sql-visitor :as vis])
-  (:use test-util)
+  (:use clj-liquibase.test-util)
   (:use clojure.test))
 
 
