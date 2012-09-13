@@ -1,21 +1,24 @@
 # Changes and TODO
 
-- Move to Github (from Bitbucket)
-- Move to Leiningen builds (from Maven)
-- Move to Liquibase 2.0.5 (from 2.0.2)
-- Introduce required argument _logical-schema_ in `defchangelog`
-- [TODO] Drop usage of `clj-dbspec` (remove dependency, simplify)
-- [TODO] Expose Liquibase 2.0.5 features
-- [TODO] Improve documentation
-- [TODO] Liquibase Functionality (commands)
-  # Diff Changelog
-  # Generate Changelog
-- [TODO] Column type vars/inference functions
-  # Database-independent columns: http://www.liquibase.org/manual/column
-  # Infer from java.sql.Types instance (use liquibase.database.structure.Column)
-  # By example: (example "Joe Backer") or (eg 269.8)
-- [TODO] 'Change' implementations:
-  # Custom Refactorings
+* Move to Github (from Bitbucket)
+* Move to Leiningen builds (from Maven)
+* Move to Liquibase 2.0.5 (from 2.0.2)
+* Introduce required argument _logical-schema_ in `defchangelog`
+* [TODO] Drop usage of `clj-dbspec` (remove dependency, simplify)
+* [TODO] Expose Liquibase 2.0.5 features
+* Upgrade test dependencies
+  * OSS-JDBC from 0.5 to 0.8.0
+  * clj-dbcp from 0.5 to 0.8.0
+* [TODO] Improve documentation
+* [TODO] Liquibase Functionality (commands)
+  * Diff Changelog
+  * Generate Changelog
+* [TODO] Column type vars/inference functions
+  * Database-independent columns: http://www.liquibase.org/manual/column
+  * Infer from java.sql.Types instance (use liquibase.database.structure.Column)
+  * By example: (example "Joe Backer") or (eg 269.8)
+* [TODO] 'Change' implementations:
+  * Custom Refactorings
     * Custom SQL
     * Custom SQL File
     * Custom Refactoring Class

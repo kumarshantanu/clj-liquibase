@@ -4,11 +4,13 @@
     [org.bituf.clj-miscutil :as mu]
     [clj-liquibase.core     :as lb]
     [clj-liquibase.change   :as ch]
-    [org.bituf.clj-dbcp     :as dbcp]
+    ;;[org.bituf.clj-dbcp     :as dbcp]
+    [clj-dbcp.core          :as dbcp]
     [org.bituf.clj-dbspec   :as spec]))
 
 
-(def ds (dbcp/h2-memory-datasource))
+(def ds ;(dbcp/h2-memory-datasource)
+        (dbcp/make-datasource :h2 {:target :memory :database :default}))
 
 ;(def ds (dbcp/mysql-datasource "localhost" "bituf" "root" "root"))
 
@@ -32,9 +34,9 @@
 (def changeset-2 ["id=2" "author=shantanu" [ct-change2]])
 
 
-(lb/defchangelog changelog-1 "test" [changeset-1])
+(lb/defchangelog changelog-1 "example" [changeset-1])
 
-(lb/defchangelog changelog-2 "test" [changeset-1 changeset-2])
+(lb/defchangelog changelog-2 "example" [changeset-1 changeset-2])
 
 
 ;; ----- execute

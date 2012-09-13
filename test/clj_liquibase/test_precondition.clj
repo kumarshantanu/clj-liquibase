@@ -13,10 +13,6 @@
   (:use clojure.test))
 
 
-(deftest test-changelog-prop-defined
-  (fail))
-
-
 (def changeset-1 ["id=1" "author=shantanu" [tl/ct-change1 tl/ct-change2
                                             (ch/insert-data
                                               :sample-table-1 {:name   "Henry"
@@ -271,7 +267,6 @@
 
 
 (defn test-ns-hook []
-  ;(test-changelog-prop-defined)
   (test-changeset-executed)
   (test-column-exists)
   (test-dbms)

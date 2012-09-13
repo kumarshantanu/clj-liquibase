@@ -30,3 +30,9 @@
   [^String sql]
   (let [res (query sql)]
     ((first res))))
+
+
+(defn as-vector
+  [v]
+  (if (coll? v) (vec v)
+    [v]))

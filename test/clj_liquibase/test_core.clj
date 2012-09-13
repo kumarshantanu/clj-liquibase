@@ -1,20 +1,21 @@
 (ns clj-liquibase.test-core
-  (:import
-    (java.io              File)
-    (java.sql             Connection SQLException)
-    (javax.sql            DataSource)
-    (org.bituf.clj_dbspec IRow)
-    (org.bituf.clj_dbspec Row))
   (:require
     [clojure.string         :as sr]
     [clojure.pprint         :as pp]
     [org.bituf.clj-miscutil :as mu]
     [clj-liquibase.core     :as lb]
     [clj-liquibase.change   :as ch]
-    [org.bituf.clj-dbcp     :as dbcp]
+    [clj-dbcp.core          :as dbcp]
     [org.bituf.clj-dbspec   :as spec])
+  (:import
+    (java.io              File)
+    (java.sql             Connection SQLException)
+    (javax.sql            DataSource)
+    (org.bituf.clj_dbspec IRow)
+    (org.bituf.clj_dbspec Row))
   (:use clj-liquibase.test-util)
   (:use clojure.test))
+    ;;[org.bituf.clj-dbcp     :as dbcp]
 
 
 (defn clb-setup
@@ -24,19 +25,26 @@
     (let [conn (:connection spec/*dbspec*)]
       (assert (or (println "Testing connection") conn (println "= NULL")))
       (with-open [stmt (.createStatement ^Connection conn)]
-        (doseq [each [:sample-table-1 :sample-table-2 "sampletable3"
+        (doseq [each [[:sample-view-1 "VIEW"]
+                      [:foo "SEQUENCE"]
+                      :sample-table-1 :sample-table-2 "sampletable3"
                       :databasechangelog :databasechangeloglock]]
           (try
-            (.executeUpdate stmt (format "DROP TABLE %s"
-                                   (spec/db-iden each)))
-            (println "Deleted table " (spec/db-iden each))
+            (let [[n t] (as-vector each)
+                  t     (or t "TABLE")]
+              (.executeUpdate stmt (format "DROP %s %s"
+                                     t (spec/db-iden n)))
+                        (println "Deleted " t (spec/db-iden n)))
             (catch SQLException e
               (println "Ignoring exception: " e))))))))
 
 
-(def db {:h2-mem {:dbcp #(dbcp/h2-memory-datasource)
+(def db {:h2-mem {:dbcp ; #(dbcp/h2-memory-datasource)
+                        #(dbcp/make-datasource :h2 {:target :memory :database "default"})
                   :int  "INTEGER"}
-         :mysql  {:dbcp #(dbcp/mysql-datasource "localhost" "bituf" "root" "root")
+         :mysql  {:dbcp ; #(dbcp/mysql-datasource "localhost" "bituf" "root" "root")
+                        #(dbcp/make-datasource :mysql {:host "localhost" :database "bituf"
+                                                       :user "root"      :password "root"})
                   :int  "INT"}})
 
 
