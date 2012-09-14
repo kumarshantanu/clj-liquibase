@@ -4,6 +4,7 @@
 * Move to Leiningen builds (from Maven)
 * Move to Liquibase 2.0.5 (from 2.0.2)
 * Introduce required argument _logical-schema_ in `defchangelog`
+* Support for CLI integration (pulled from Lein-LB) [TODO] integration tests
 * [TODO] Drop usage of `clj-dbspec` (remove dependency, simplify)
 * [TODO] Expose Liquibase 2.0.5 features
 * Upgrade test dependencies
