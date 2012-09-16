@@ -1,4 +1,6 @@
 (ns clj-liquibase.test-change
+  (:require
+    [clj-liquibase.change :as change])
   (:import
     (java.util Date)
     (liquibase.change.core
@@ -23,8 +25,6 @@
       CreateIndexChange DropIndexChange)
     (liquibase.statement DatabaseFunction)
     (liquibase.util      ISODateFormat))
-  (:require
-    [clj-liquibase.change :as change])
   (:use clj-liquibase.test-util)
   (:use clojure.test))
 

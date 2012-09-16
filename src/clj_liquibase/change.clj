@@ -2,6 +2,10 @@
   "Clojure wrappers for liquibase.change.Change implementations.
   See also:
     http://www.liquibase.org/manual/home (Available Database Refactorings)"
+  (:require
+    [org.bituf.clj-dbspec   :as sp]
+    [org.bituf.clj-miscutil :as mu]
+    [clj-liquibase.internal :as in])
   (:import
     (java.math BigInteger)
     (java.util List)
@@ -26,11 +30,7 @@
       ;; Architectural Refactorings
       CreateIndexChange DropIndexChange)
     (liquibase.statement DatabaseFunction)
-    (liquibase.util      ISODateFormat))
-  (:require
-    [org.bituf.clj-dbspec   :as sp]
-    [org.bituf.clj-miscutil :as mu]
-    [clj-liquibase.internal :as in]))
+    (liquibase.util      ISODateFormat)))
 
 
 ;; ===== schema =====

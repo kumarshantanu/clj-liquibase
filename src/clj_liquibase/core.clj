@@ -2,6 +2,14 @@
   "Expose functions from the Liquibase library.
   See also:
     http://www.liquibase.org/manual/home"
+  (:require
+    [clojure.string         :as sr]
+    [org.bituf.clj-dbspec   :as sp]
+    [org.bituf.clj-miscutil :as mu]
+    [clj-liquibase.internal     :as in]
+    [clj-liquibase.change       :as ch]
+    [clj-liquibase.precondition :as pc]
+    [clj-liquibase.sql-visitor  :as vis])
   (:import
     (java.io                           File IOException Writer)
     (java.sql                          Connection)
@@ -31,15 +39,7 @@
     (liquibase.sql.visitor             SqlVisitor)
     (liquibase.sqlgenerator            SqlGeneratorFactory)
     (liquibase.statement               SqlStatement)
-    (liquibase.util                    LiquibaseUtil))
-  (:require
-    [clojure.string         :as sr]
-    [org.bituf.clj-dbspec   :as sp]
-    [org.bituf.clj-miscutil :as mu]
-    [clj-liquibase.internal     :as in]
-    [clj-liquibase.change       :as ch]
-    [clj-liquibase.precondition :as pc]
-    [clj-liquibase.sql-visitor  :as vis]))
+    (liquibase.util                    LiquibaseUtil)))
 
 
 (def ^{:doc "Clj-Liquibase version (only major and minor)"}

@@ -1,15 +1,15 @@
 (ns clj-liquibase.internal
+  (:require
+    [clojure.string         :as sr]
+    [org.bituf.clj-miscutil :as mu]
+    [org.bituf.clj-dbspec   :as sp])
   (:import
     (liquibase.database.structure Column)
     (liquibase.change      ColumnConfig ConstraintsConfig)
     (liquibase.change.core LoadDataColumnConfig)
     (liquibase.statement   DatabaseFunction)
     (liquibase.util        ISODateFormat)
-    (java.util Date))
-  (:require
-    [clojure.string         :as sr]
-    [org.bituf.clj-miscutil :as mu]
-    [org.bituf.clj-dbspec   :as sp]))
+    (java.util Date)))
 
 
 (defn ^Boolean dbfn?

@@ -1,9 +1,9 @@
 (ns clj-liquibase.test-sql-visitor
+  (:require [clj-liquibase.sql-visitor :as vis])
   (:import
     (liquibase.sql.visitor SqlVisitor
                            AppendSqlVisitor PrependSqlVisitor
                            RegExpReplaceSqlVisitor ReplaceSqlVisitor))
-  (:require [clj-liquibase.sql-visitor :as vis])
   (:use clj-liquibase.test-util)
   (:use clojure.test))
 

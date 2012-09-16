@@ -1,7 +1,4 @@
 (ns clj-liquibase.test-precondition
-  (:import
-    (java.util Date)
-    (liquibase.exception MigrationFailedException PreconditionFailedException))
   (:require
     [org.bituf.clj-miscutil     :as mu]
     [org.bituf.clj-dbspec       :as sp]
@@ -9,6 +6,9 @@
     [clj-liquibase.change       :as ch]
     [clj-liquibase.precondition :as pc]
     [clj-liquibase.test-core    :as tl])
+  (:import
+    (java.util Date)
+    (liquibase.exception MigrationFailedException PreconditionFailedException))
   (:use clj-liquibase.test-util)
   (:use clojure.test))
 

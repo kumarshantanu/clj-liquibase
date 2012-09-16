@@ -1,10 +1,10 @@
 (ns clj-liquibase.test-util
-  (:import
-    (java.util List)
-    (java.sql Connection Statement))
   (:require
     [org.bituf.clj-miscutil :as mu]
     [org.bituf.clj-dbspec   :as sp])
+  (:import
+    (java.util List)
+    (java.sql Connection Statement))
   (:use clojure.test))
 
 

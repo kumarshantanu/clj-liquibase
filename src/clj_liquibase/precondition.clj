@@ -2,6 +2,10 @@
   "Clojure wrappers for liquibase.change.Change implementations.
   See also:
     http://www.liquibase.org/manual/home (Available Database Refactorings)"
+  (:require
+    [org.bituf.clj-dbspec   :as sp]
+    [org.bituf.clj-miscutil :as mu]
+    [clj-liquibase.internal :as in])
   (:import
     (liquibase.precondition      Precondition PreconditionLogic)
     (liquibase.precondition.core ChangeLogPropertyDefinedPrecondition
@@ -20,11 +24,7 @@
                                  AndPrecondition
                                  NotPrecondition
                                  OrPrecondition
-                                 PreconditionContainer))
-  (:require
-    [org.bituf.clj-dbspec   :as sp]
-    [org.bituf.clj-miscutil :as mu]
-    [clj-liquibase.internal :as in]))
+                                 PreconditionContainer)))
 
 
 (defn pre-cond?

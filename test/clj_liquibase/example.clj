@@ -4,15 +4,13 @@
     [org.bituf.clj-miscutil :as mu]
     [clj-liquibase.core     :as lb]
     [clj-liquibase.change   :as ch]
-    ;;[org.bituf.clj-dbcp     :as dbcp]
     [clj-dbcp.core          :as dbcp]
     [org.bituf.clj-dbspec   :as spec]))
 
 
-(def ds ;(dbcp/h2-memory-datasource)
-        (dbcp/make-datasource :h2 {:target :memory :database :default}))
+(def ds (dbcp/make-datasource :h2 {:target :memory :database :default}))
 
-;(def ds (dbcp/mysql-datasource "localhost" "bituf" "root" "root"))
+;;(def ds (dbcp/make-datasource :mysql {:host "localhost" :database "bituf" :user "root" :password "root"}))
 
 
 (def dbspec (spec/make-dbspec ds))

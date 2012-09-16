@@ -1,10 +1,10 @@
 (ns clj-liquibase.sql-visitor
+  (:require [org.bituf.clj-miscutil :as mu])
   (:import
     (java.util.regex       Pattern)
     (liquibase.sql.visitor SqlVisitor
                            AppendSqlVisitor PrependSqlVisitor
-                           RegExpReplaceSqlVisitor ReplaceSqlVisitor))
-  (:require [org.bituf.clj-miscutil :as mu]))
+                           RegExpReplaceSqlVisitor ReplaceSqlVisitor)))
 
 
 (defn visitor?
