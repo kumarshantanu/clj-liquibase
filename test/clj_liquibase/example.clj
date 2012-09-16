@@ -1,11 +1,11 @@
 (ns clj-liquibase.example
   (:require
-    [clojure.pprint         :as pp]
-    [org.bituf.clj-miscutil :as mu]
-    [clj-liquibase.core     :as lb]
-    [clj-liquibase.change   :as ch]
-    [clj-dbcp.core          :as dbcp]
-    [org.bituf.clj-dbspec   :as spec]))
+    [clojure.pprint       :as pp]
+    [clj-miscutil.core    :as mu]
+    [clj-liquibase.core   :as lb]
+    [clj-liquibase.change :as ch]
+    [clj-dbcp.core        :as dbcp]
+    [org.bituf.clj-dbspec :as spec]))
 
 
 (def ds (dbcp/make-datasource :h2 {:target :memory :database :default}))

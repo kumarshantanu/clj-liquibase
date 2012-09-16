@@ -1,12 +1,12 @@
 (ns clj-liquibase.test-core
   (:require
-    [clojure.string         :as sr]
-    [clojure.pprint         :as pp]
-    [org.bituf.clj-miscutil :as mu]
-    [clj-liquibase.core     :as lb]
-    [clj-liquibase.change   :as ch]
-    [clj-dbcp.core          :as dbcp]
-    [org.bituf.clj-dbspec   :as spec])
+    [clojure.string       :as sr]
+    [clojure.pprint       :as pp]
+    [clj-miscutil.core    :as mu]
+    [clj-liquibase.core   :as lb]
+    [clj-liquibase.change :as ch]
+    [clj-dbcp.core        :as dbcp]
+    [org.bituf.clj-dbspec :as spec])
   (:import
     (java.io              File)
     (java.sql             Connection SQLException)

@@ -1,8 +1,8 @@
 (ns clj-liquibase.internal
   (:require
-    [clojure.string         :as sr]
-    [org.bituf.clj-miscutil :as mu]
-    [org.bituf.clj-dbspec   :as sp])
+    [clojure.string       :as sr]
+    [clj-miscutil.core    :as mu]
+    [org.bituf.clj-dbspec :as sp])
   (:import
     (liquibase.database.structure Column)
     (liquibase.change      ColumnConfig ConstraintsConfig)

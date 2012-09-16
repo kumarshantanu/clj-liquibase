@@ -12,8 +12,8 @@
                   :source  "1.5"
                   :target  "1.5"}
   :dependencies [[org.liquibase/liquibase-core "2.0.5"]
-                 [org.bituf/clj-miscutil "0.3"]
-                 [org.bituf/clj-dbspec   "0.3"]]
+                 [org.bituf/clj-dbspec "0.3"]
+                 [clj-miscutil         "0.4"]]
   :profiles {:dev {:dependencies [[oss-jdbc "0.8.0"]
                                   [clj-dbcp "0.8.0"]]}
              :1.2 {:dependencies [[org.clojure/clojure "1.2.1"]]}

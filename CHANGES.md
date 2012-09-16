@@ -5,8 +5,10 @@
 * Move to Liquibase 2.0.5 (from 2.0.2)
 * Introduce required argument _logical-schema_ in `defchangelog`
 * Support for CLI integration (pulled from Lein-LB) [TODO] integration tests
-* [TODO] Drop usage of `clj-dbspec` (remove dependency, simplify)
 * [TODO] Expose Liquibase 2.0.5 features
+* Upgrade dependencies
+  * clj-miscutil from 0.3 to 0.4
+  * [TODO] clj-dbspec
 * Upgrade test dependencies
   * OSS-JDBC from 0.5 to 0.8.0
   * clj-dbcp from 0.5 to 0.8.0

@@ -1,6 +1,6 @@
 (ns clj-liquibase.test-precondition
   (:require
-    [org.bituf.clj-miscutil     :as mu]
+    [clj-miscutil.core          :as mu]
     [org.bituf.clj-dbspec       :as sp]
     [clj-liquibase.core         :as lb]
     [clj-liquibase.change       :as ch]

@@ -3,8 +3,8 @@
     [clojure.java.io :as io]
     [clojure.string  :as sr]
     [clojure.pprint  :as pp]
-    [org.bituf.clj-miscutil  :as mu]
-    [org.bituf.clj-dbspec    :as sp]
+    [clj-miscutil.core    :as mu]
+    [org.bituf.clj-dbspec :as sp]
     [clj-liquibase.core   :as lb]
     [clj-liquibase.change :as ch])
   (:import

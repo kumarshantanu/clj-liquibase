@@ -1,5 +1,5 @@
 (ns clj-liquibase.sql-visitor
-  (:require [org.bituf.clj-miscutil :as mu])
+  (:require [clj-miscutil.core :as mu])
   (:import
     (java.util.regex       Pattern)
     (liquibase.sql.visitor SqlVisitor

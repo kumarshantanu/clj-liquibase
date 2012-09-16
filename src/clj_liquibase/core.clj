@@ -5,7 +5,7 @@
   (:require
     [clojure.string         :as sr]
     [org.bituf.clj-dbspec   :as sp]
-    [org.bituf.clj-miscutil :as mu]
+    [clj-miscutil.core      :as mu]
     [clj-liquibase.internal     :as in]
     [clj-liquibase.change       :as ch]
     [clj-liquibase.precondition :as pc]
