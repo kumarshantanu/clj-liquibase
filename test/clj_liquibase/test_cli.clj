@@ -150,6 +150,9 @@
       (is (= a (ll/parse-diff-args p "-dfoo/bar"            "-rbar/baz")) "-d")
       (is (= a (ll/parse-diff-args p "-dfoo/bar" "--ref-datasource=bar/baz")) "--ref-datasource")
       (is (= a (ll/parse-diff-args p "-dfoo/bar" "-rbar/baz"))                "-r"))
+    (let [p {:datasource :foo}
+          a {:datasource "bar" :ref-datasource "baz"}]
+      (is (= a (ll/parse-diff-args p "-dbar" "-rbaz")) "override defaults via CLI arg"))
     (is (= {:help nil} (ll/parse-diff-args {} "--help")))))
 
 
