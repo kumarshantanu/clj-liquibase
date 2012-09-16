@@ -12,9 +12,6 @@
     (javax.sql       DataSource)))
 
 
-(def ^:dynamic *datasource* nil)
-
-
 (defn help
   []
   (println "The following commands are available
@@ -63,10 +60,10 @@ For help on individual command, append with `--help`, e.g.:
   (re-pattern (opt-string elem "(.*)")))
 
 
-(defn opt-value
+(defn opt-match-value
   "Return option value
   Example:
-    (opt-value (opt-pattern \"foo\") \"--foo=bar\")
+    (opt-match-value (opt-pattern \"foo\") \"--foo=bar\")
     => returns \"bar\"
   See also: opt-pattern"
   [^Pattern re ^String arg]
@@ -75,10 +72,9 @@ For help on individual command, append with `--help`, e.g.:
 
 (defn noarg-pattern
   [^String elem] {:pre [(string? elem)]}
-  (re-pattern (format (if (> (count elem) 1)
-                        "--%s"
-                        "-%s")
-                elem)))
+  (-> (if (> (count elem) 1) "--%s" "-%s")
+    (format elem)
+    re-pattern))
 
 
 (def arg-types #{:with-arg :opt-arg :no-arg})
@@ -118,15 +114,16 @@ For help on individual command, append with `--help`, e.g.:
 
 (defn parse-opts
   "Spec can be:
-    [[docstring :opt-arg :profile  :p]
-     [docstring :no-arg  :sql-only :s]
+    [[docstring :opt-arg :datasource :d]
+     [docstring :no-arg  :sql-only   :s]
      [docstring :with-arg :a]]
   `args` is a collection of argument bodies:
     \"--foo=bar\" \"-fbar\" \"--simulate\" \"-s\"
   Note: Evaluated every time"
-  [cmd-prefix args & spec]
+  [opts cmd-prefix args & spec]
   {:post [(map? %)]
-   :pre  [(assert-spec spec)]}
+   :pre  [(map? opts)
+          (assert-spec spec)]}
   (let [spec-opts  (map #(map as-string (drop 2 %)) spec)
         rev-opts   (->> spec-opts
                      (map (fn [opt-row]
@@ -146,7 +143,7 @@ For help on individual command, append with `--help`, e.g.:
                      (some (fn [row]
                              (some #(let [v (-> (as-string %)
                                               opt-pattern
-                                              (opt-value arg))]
+                                              (opt-match-value arg))]
                                       (and v
                                         (into acc
                                           {(get rev-opts (as-string %)) v})))
@@ -173,14 +170,15 @@ For help on individual command, append with `--help`, e.g.:
                               (str "Illegal option: " arg)))))]
     (let [opt-map   (reduce get-opts {} args)
           with-arg? (fn []
-                      (every? (fn [row]
-                                (some (fn [opt]
-                                        (some #(re-matches
-                                                 (opt-pattern (as-string opt))
-                                                 (as-string %))
-                                          args))
-                                  row))
-                        with-arg))]
+                      (-> (fn [row]
+                            (or (contains? opts (first row))
+                                (-> (fn [opt]
+                                      (-> #(re-matches
+                                             (opt-pattern (as-string opt))
+                                             (as-string %))
+                                        (some args)))
+                                  (some row))))
+                        (every? with-arg)))]
       (cond
         ;; ignore validations if help was sought
         (contains?
@@ -194,10 +192,9 @@ For help on individual command, append with `--help`, e.g.:
                             (throw (IllegalArgumentException.
                                      (str "Must supply the following:\n"
                                        (apply str (map optsr with-arg))))))
-        :else             opt-map))))
+        :else             (merge opts opt-map)))))
 
 
-;; TODO Is this function really required?
 (defn resolve-var
   "Given a qualified/un-qualified var name (string), resolve and return value.
   Throw NullPointerException if var cannot be resolved."
@@ -208,6 +205,23 @@ For help on individual command, append with `--help`, e.g.:
              (not (find-ns (symbol var-ns))))
        (require (symbol var-ns)))
      (resolve (symbol var-name))))
+
+
+(defn opt-value
+  [k opt & opts] {:pre [(map? opt)
+                        (every? #(or (map? %) (nil? %)) opts)]}
+  (-> #(when (contains? % k)
+         [(get % k)])
+    (some (concat [opt] opts))
+    first))
+
+
+(defn opt-datasource
+  [opt & opts]
+  (when-let [ds (apply opt-value :datasource opt opts)]
+    (cond (string? ds) (resolve-var ds)
+          (symbol? ds) (resolve-var (name ds))
+          :otherwise   ds)))
 
 
 (defn ctx-list
@@ -221,24 +235,26 @@ For help on individual command, append with `--help`, e.g.:
 
 
 (defn parse-update-args
-  [& args]
-  (parse-opts "update"
+  [opts & args]
+  (parse-opts opts "update"
     args
-    ["Changelog var name to apply update on"  :with-arg :changelog :c]
-    ["How many Changesets to apply update on" :opt-arg  :chs-count :n]
-    ["Contexts (comma separated)"             :opt-arg  :contexts  :t]
-    ["Only generate SQL, do not commit"       :no-arg   :sql-only  :s]))
+    ["JDBC Datasource"                        :with-arg :datasource :d]
+    ["Changelog var name to apply update on"  :with-arg :changelog  :c]
+    ["How many Changesets to apply update on" :opt-arg  :chs-count  :n]
+    ["Contexts (comma separated)"             :opt-arg  :contexts   :t]
+    ["Only generate SQL, do not commit"       :no-arg   :sql-only   :s]))
 
 
 (defn update
-  [& args]
-  (let [opt (apply parse-update-args args)]
+  [opts & args] {:pre [(map? opts)]}
+  (let [opt (apply parse-update-args opts args)]
     (when-not (contains? opt :help)
       (let [changelog  (resolve-var (:changelog opt))
             chs-count  (:chs-count opt)
             contexts   (:contexts  opt)
-            sql-only   (contains? opt :sql-only)]
-        (sp/with-dbspec {:datasource *datasource*}
+            sql-only   (contains? opt :sql-only)
+            datasource (opt-datasource opts opt)]
+        (sp/with-dbspec {:datasource datasource}
           (lb/with-lb
             (if chs-count
               (let [chs-num (Integer/parseInt chs-count)]
@@ -251,20 +267,21 @@ For help on individual command, append with `--help`, e.g.:
 
 
 (defn parse-rollback-args
-  [& args]
-  (parse-opts "rollback"
+  [opts  & args]
+  (parse-opts opts "rollback"
     args
-    ["Changelog var name to apply rollback on"   :with-arg :changelog :c]
-    ["How many Changesets to rollback"           :opt-arg  :chs-count :n]
-    ["Which tag to rollback to"                  :opt-arg  :tag       :g]
-    ["Rollback ISO-date (yyyy-MM-dd'T'HH:mm:ss)" :opt-arg  :date      :d]
-    ["Contexts (comma separated)"                :opt-arg  :contexts  :t]
-    ["Only generate SQL, do not commit"          :no-arg   :sql-only  :s]))
+    ["JDBC Datasource"                           :with-arg :datasource :d]
+    ["Changelog var name to apply rollback on"   :with-arg :changelog  :c]
+    ["How many Changesets to rollback"           :opt-arg  :chs-count  :n]
+    ["Which tag to rollback to"                  :opt-arg  :tag        :g]
+    ["Rollback ISO-date (yyyy-MM-dd'T'HH:mm:ss)" :opt-arg  :date       :d]
+    ["Contexts (comma separated)"                :opt-arg  :contexts   :t]
+    ["Only generate SQL, do not commit"          :no-arg   :sql-only   :s]))
 
 
 (defn rollback
-  [& args]
-  (let [opt (apply parse-rollback-args args)]
+  [opts & args]
+  (let [opt (apply parse-rollback-args opts args)]
     (when-not (contains? opt :help)
       (let [changelog  (resolve-var (:changelog opt))
             chs-count  (:chs-count opt)
@@ -272,7 +289,8 @@ For help on individual command, append with `--help`, e.g.:
             date       (:date      opt)
             c-t-d      [chs-count tag date] ; either of 3 is required
             contexts   (:contexts  opt)
-            sql-only   (contains? opt :sql-only)]
+            sql-only   (contains? opt :sql-only)
+            datasource (opt-datasource opts opt)]
         (when (not (= 1 (count (filter identity c-t-d))))
           (throw
             (IllegalArgumentException.
@@ -280,7 +298,7 @@ For help on individual command, append with `--help`, e.g.:
                 "Expected only either of --chs-count/-n, --tag/-g and --date/-d
 arguments, but found %s"
                 (with-out-str (pp/pprint args))))))
-        (sp/with-dbspec {:datasource *datasource*}
+        (sp/with-dbspec {:datasource datasource}
           (lb/with-lb
             (cond
               chs-count (let [chs-num (Integer/parseInt chs-count)]
@@ -302,87 +320,94 @@ roll back to: %s"
 
 
 (defn parse-tag-args
-  [& args]
-  (parse-opts "tag"
+  [opts  & args]
+  (parse-opts opts  "tag"
     args
-    ["Clj-DBCP profile name (or default)" :opt-arg  :profile   :p]
-    ["Tag name to apply"                  :with-arg :tag       :g]))
+    ["JDBC Datasource"   :with-arg :datasource     :d]
+    ["Tag name to apply" :with-arg :tag        :g]))
 
 
 (defn tag
   "Tag the database manually (recommended: create a Change object of type tag)"
-  [& args]
-  (let [opt (apply parse-tag-args args)]
+  [opts  & args]
+  (let [opt (apply parse-tag-args opts args)]
     (when-not (contains? opt :help)
-      (let [tag (:tag opt)]
-        (sp/with-dbspec {:datasource *datasource*}
+      (let [tag        (:tag opt)
+            datasource (opt-datasource opts opt)]
+        (sp/with-dbspec {:datasource datasource}
           (lb/with-lb
             (lb/tag tag)))))))
 
 
 (defn parse-dbdoc-args
   "Parse arguments for `dbdoc` command."
-  [& args]
-  (parse-opts "dbdoc"
+  [opts & args]
+  (parse-opts opts "dbdoc"
     args
-    ["Changelog var name to apply tag on"             :with-arg :changelog  :c]
-    ["Clj-DBCP profile name (default if unspecified)" :opt-arg  :profile    :p]
-    ["Output directory to generate doc files into"    :with-arg :output-dir :o]
-    ["Contexts (comma separated)"                     :opt-arg  :contexts   :t]))
+    ["JDBC Datasource"                             :with-arg :datasource :d]
+    ["Changelog var name to apply tag on"          :with-arg :changelog  :c]
+    ["Output directory to generate doc files into" :with-arg :output-dir :o]
+    ["Contexts (comma separated)"                  :opt-arg  :contexts   :t]))
 
 
 (defn dbdoc
   "Generate database/changelog documentation"
-  [& args]
-  (let [opt (apply parse-dbdoc-args args)]
+  [opts & args]
+  (let [opt (apply parse-dbdoc-args opts args)]
     (when-not (contains? opt :help)
-      (let [changelog (resolve-var (:changelog opt))
-            out-dir   (:output-dir opt)
-            contexts  (:contexts   opt)]
-        (sp/with-dbspec {:datasource *datasource*}
+      (let [changelog  (resolve-var (:changelog opt))
+            out-dir    (:output-dir opt)
+            contexts   (:contexts   opt)
+            datasource (opt-datasource opts opt)]
+        (sp/with-dbspec {:datasource datasource}
           (lb/with-lb
             (lb/generate-doc changelog out-dir (ctx-list contexts))))))))
 
 
 (defn parse-diff-args
   "Parse arguments for `diff` command."
-  [& args]
-  (parse-opts "diff"
-    args))
+  [opts & args]
+  (parse-opts opts "diff"
+    args
+    ["JDBC Datasource"           :with-arg :datasource     :d]
+    ["Reference JDBC Datasource" :with-arg :ref-datasource :r]))
 
 
-(defn diff  ; TODO use :ref-datasource or :ref-connection key
+(defn opt-ref-datasource
+  [opt & opts]
+  (when-let [ds (apply opt-value :ref-datasource opt opts)]
+    (cond (string? ds) (resolve-var ds)
+          (symbol? ds) (resolve-var (name ds))
+          :otherwise   ds)))
+
+
+(defn diff
   "Report differences between two database instances"
-  [& args]
-  (let [opt (apply parse-diff-args args)]
+  [opts & args]
+  (let [opt (apply parse-diff-args opts args)]
     (when-not (contains? opt :help)
-      (let []
+      (let [ref-datasource (opt-ref-datasource opts opt)]
         ;; begin with reference DB profile
         (sp/with-dbspec
-          {:datasource *datasource*}
+          {:datasource ref-datasource}
           (sp/with-connection
             sp/*dbspec*
-            (let [ref-db (lb/make-db-instance (:connection sp/*dbspec*))]
+            (let [ref-db     (lb/make-db-instance (:connection sp/*dbspec*))
+                  datasource (opt-datasource opts opt)]
               ;; go on to target DB profile
-              (sp/with-dbspec {:datasource *datasource*}
+              (sp/with-dbspec {:datasource datasource}
                               (lb/with-lb
                                 (lb/diff ref-db))))))))))
 
 
-(defn prepare-args
-  ""
-  [opts ks sub-args]
-  (into (vec (map (fn [[k v]]
-                        (opt-string (as-string k) v))
-                   (select-keys opts ks)))
-        sub-args))
-
-
 (defn call*
   "Invoke f after parsing/normalizing args"
-  [opts args f ks]
-  (mu/! (->> (prepare-args opts ks args)
-             (apply f))))
+  [opts args f ks] {:pre [(map? opts)]}
+  (let []
+    (mu/! (apply f opts (-> (fn [[k v]]
+                              (opt-string (as-string k) v))
+                          (map (select-keys opts ks))
+                          (into args))))))
 
 
 (defn entry
