@@ -1,7 +1,7 @@
 (ns clj-liquibase.test-precondition
   (:require
+    [clj-jdbcutil.core          :as sp]
     [clj-miscutil.core          :as mu]
-    [org.bituf.clj-dbspec       :as sp]
     [clj-liquibase.core         :as lb]
     [clj-liquibase.change       :as ch]
     [clj-liquibase.precondition :as pc]
@@ -43,7 +43,7 @@
 
 
 (deftest test-changeset-executed
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-0 (into changeset-1
                    [:pre-cond [(pc/changeset-executed
@@ -64,7 +64,7 @@
 
 
 (deftest test-column-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
@@ -78,7 +78,7 @@
 
 
 (deftest test-dbms
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
@@ -91,7 +91,7 @@
 
 
 (deftest test-foreign-key-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 changeset-2]
@@ -106,7 +106,7 @@
 
 
 (deftest test-index-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 changeset-2]
@@ -122,7 +122,7 @@
 
 
 (deftest test-primary-key-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 changeset-2]
@@ -138,7 +138,7 @@
 
 
 (deftest test-running-as
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 (into changeset-1
                    [:pre-cond [(pc/running-as "sa")]])]
@@ -148,7 +148,7 @@
 
 
 (deftest test-sequence-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
@@ -161,7 +161,7 @@
 
 
 (deftest test-sql
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
@@ -174,7 +174,7 @@
 
 
 (deftest test-table-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
@@ -187,7 +187,7 @@
 
 
 (deftest test-view-exists
-  (sp/with-dbspec (tl/dbspec)
+  (sp/with-connection (tl/dbspec)
     (lb/with-lb
       (let [cs-1 changeset-1
             cs-2 (into changeset-2
@@ -201,7 +201,7 @@
 
 (deftest test-pc-and
   (testing "pc-and"
-    (sp/with-dbspec (tl/dbspec)
+    (sp/with-connection (tl/dbspec)
       (lb/with-lb
         (let [cs-1 changeset-1
               cs-2 (into changeset-2
@@ -218,7 +218,7 @@
 
 (deftest test-pc-not
   (testing "pc-not"
-    (sp/with-dbspec (tl/dbspec)
+    (sp/with-connection (tl/dbspec)
       (lb/with-lb
         (let [cs-1 changeset-1
               cs-2 (into changeset-2
@@ -235,7 +235,7 @@
 
 (deftest test-pc-or
   (testing "pc-or"
-    (sp/with-dbspec (tl/dbspec)
+    (sp/with-connection (tl/dbspec)
       (lb/with-lb
         (let [cs-1 changeset-1
               cs-2 (into changeset-2
@@ -260,7 +260,7 @@
                (pc/pre-cond [(pc/dbms :h2)] :on-update-sql :test)
                (pc/pre-cond [(pc/dbms :h2)] :on-update-sql :fail)]]
       (doseq [each pcs]
-        (sp/with-dbspec (tl/dbspec)
+        (sp/with-connection (tl/dbspec)
           (lb/with-lb
             (lb/defchangelog cl "precond" [(into changeset-1 [:pre-cond each])])
             (lb/update cl)))))))

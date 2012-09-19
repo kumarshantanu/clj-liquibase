@@ -6,13 +6,13 @@
     [clj-liquibase.core   :as lb]
     [clj-liquibase.change :as ch]
     [clj-dbcp.core        :as dbcp]
-    [org.bituf.clj-dbspec :as spec])
+    [clj-jdbcutil.core    :as spec])
   (:import
-    (java.io              File)
-    (java.sql             Connection SQLException)
-    (javax.sql            DataSource)
-    (org.bituf.clj_dbspec IRow)
-    (org.bituf.clj_dbspec Row))
+    (java.io           File)
+    (java.sql          Connection SQLException)
+    (javax.sql         DataSource)
+    (clj_jdbcutil.core IRow)
+    (clj_jdbcutil.core Row))
   (:use clj-liquibase.test-util)
   (:use clojure.test))
 
@@ -38,11 +38,9 @@
               (println "Ignoring exception: " e))))))))
 
 
-(def db {:h2-mem {:dbcp ; #(dbcp/h2-memory-datasource)
-                        #(dbcp/make-datasource :h2 {:target :memory :database "default"})
+(def db {:h2-mem {:dbcp #(dbcp/make-datasource :h2 {:target :memory :database "default"})
                   :int  "INTEGER"}
-         :mysql  {:dbcp ; #(dbcp/mysql-datasource "localhost" "bituf" "root" "root")
-                        #(dbcp/make-datasource :mysql {:host "localhost" :database "bituf"
+         :mysql  {:dbcp #(dbcp/make-datasource :mysql {:host "localhost" :database "bituf"
                                                        :user "root"      :password "root"})
                   :int  "INT"}})
 
@@ -67,7 +65,7 @@
   "Run Liquibase action"
   [f] {:post [(mu/not-fn? %)]
        :pre  [(fn? f)]}
-  (spec/with-dbspec (dbspec)
+  (spec/with-connection (dbspec)
     (lb/with-lb
       (mu/! (f)))))
 
@@ -385,7 +383,7 @@
 
 (defmacro with-readonly
   [& body]
-  `(spec/with-dbspec (spec/assoc-readonly spec/*dbspec*)
+  `(spec/with-connection (spec/assoc-readonly spec/*dbspec*)
      ~@body))
 
 

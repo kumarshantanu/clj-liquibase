@@ -4,7 +4,7 @@
     [clojure.string  :as sr]
     [clojure.pprint  :as pp]
     [clj-miscutil.core    :as mu]
-    [org.bituf.clj-dbspec :as sp]
+    [clj-jdbcutil.core    :as sp]
     [clj-liquibase.core   :as lb]
     [clj-liquibase.change :as ch])
   (:import
@@ -254,7 +254,7 @@ For help on individual command, append with `--help`, e.g.:
             contexts   (:contexts  opt)
             sql-only   (contains? opt :sql-only)
             datasource (opt-datasource opts opt)]
-        (sp/with-dbspec {:datasource datasource}
+        (sp/with-connection {:datasource datasource}
           (lb/with-lb
             (if chs-count
               (let [chs-num (Integer/parseInt chs-count)]
@@ -298,7 +298,7 @@ For help on individual command, append with `--help`, e.g.:
                 "Expected only either of --chs-count/-n, --tag/-g and --date/-d
 arguments, but found %s"
                 (with-out-str (pp/pprint args))))))
-        (sp/with-dbspec {:datasource datasource}
+        (sp/with-connection {:datasource datasource}
           (lb/with-lb
             (cond
               chs-count (let [chs-num (Integer/parseInt chs-count)]
@@ -334,7 +334,7 @@ roll back to: %s"
     (when-not (contains? opt :help)
       (let [tag        (:tag opt)
             datasource (opt-datasource opts opt)]
-        (sp/with-dbspec {:datasource datasource}
+        (sp/with-connection {:datasource datasource}
           (lb/with-lb
             (lb/tag tag)))))))
 
@@ -359,7 +359,7 @@ roll back to: %s"
             out-dir    (:output-dir opt)
             contexts   (:contexts   opt)
             datasource (opt-datasource opts opt)]
-        (sp/with-dbspec {:datasource datasource}
+        (sp/with-connection {:datasource datasource}
           (lb/with-lb
             (lb/generate-doc changelog out-dir (ctx-list contexts))))))))
 
@@ -388,16 +388,15 @@ roll back to: %s"
     (when-not (contains? opt :help)
       (let [ref-datasource (opt-ref-datasource opts opt)]
         ;; begin with reference DB profile
-        (sp/with-dbspec
-          {:datasource ref-datasource}
-          (sp/with-connection
-            sp/*dbspec*
+        (sp/with-connection
+            (merge sp/*dbspec* {:datasource ref-datasource :connection nil})
             (let [ref-db     (lb/make-db-instance (:connection sp/*dbspec*))
                   datasource (opt-datasource opts opt)]
               ;; go on to target DB profile
-              (sp/with-dbspec {:datasource datasource}
-                              (lb/with-lb
-                                (lb/diff ref-db))))))))))
+              (sp/with-connection
+                {:datasource datasource :connection nil}
+                (lb/with-lb
+                  (lb/diff ref-db)))))))))
 
 
 (defn call*
@@ -417,8 +416,6 @@ roll back to: %s"
         call (partial call* opts args)]
     ;; check for commands
     (case cmd
-      nil          (help)
-      ""           (help)
       "help"       (help)
       "version"    (println (format "clj-liquibase version %s"
                               (apply str (interpose "." lb/version))))

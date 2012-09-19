@@ -3,9 +3,9 @@
   See also:
     http://www.liquibase.org/manual/home"
   (:require
-    [clojure.string         :as sr]
-    [org.bituf.clj-dbspec   :as sp]
-    [clj-miscutil.core      :as mu]
+    [clojure.string    :as sr]
+    [clj-jdbcutil.core :as sp]
+    [clj-miscutil.core :as mu]
     [clj-liquibase.internal     :as in]
     [clj-liquibase.change       :as ch]
     [clj-liquibase.precondition :as pc]
@@ -225,26 +225,14 @@
 ;; ===== Integration =====
 
 
-(defn wrap-lb-init
-  "Initialize global settings and wrap f with that context."
-  [f] {:post [(fn? %)]
-       :pre  [(fn? f)]}
-  (fn [& args]
-    (if (mu/not-nil? *db-instance*) (apply f args)
-      (let [g (sp/wrap-connection
-                #(binding [*db-instance* (make-db-instance
-                                           (:connection sp/*dbspec*))
-                           *changelog-params* (make-changelog-params
-                                                *db-instance*)]
-                   (apply f args)))]
-        (g)))))
-
-
 (defmacro with-lb
-  "Execute of code in the context of initialized Liquibase settings."
+  "Execute body of code in the context of initialized Liquibase settings."
   [& body]
-  `(let [g# (wrap-lb-init (fn [] ~@body))]
-     (g#)))
+  `(do (assert (:connection sp/*dbspec*))
+     (if (mu/not-nil? *db-instance*) (do ~@body)
+       (binding [*db-instance* (make-db-instance (:connection sp/*dbspec*))
+                 *changelog-params* (make-changelog-params *db-instance*)]
+         ~@body))))
 
 
 ;; ===== DatabaseChangeLog =====
@@ -423,7 +411,7 @@
 (defmacro with-writable
   "Set spec with :read-only as false and execute body of code in that context."
   [& body]
-  `(sp/with-dbspec (sp/assoc-readonly sp/*dbspec* false)
+  `(sp/with-connection (sp/assoc-readonly sp/*dbspec* false)
      ~@body))
 
 

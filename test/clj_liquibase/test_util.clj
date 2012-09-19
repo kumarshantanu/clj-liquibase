@@ -1,7 +1,7 @@
 (ns clj-liquibase.test-util
   (:require
-    [clj-miscutil.core    :as mu]
-    [org.bituf.clj-dbspec :as sp])
+    [clj-jdbcutil.core :as sp]
+    [clj-miscutil.core :as mu])
   (:import
     (java.util List)
     (java.sql Connection Statement))

@@ -1,8 +1,8 @@
 (ns clj-liquibase.internal
   (:require
-    [clojure.string       :as sr]
-    [clj-miscutil.core    :as mu]
-    [org.bituf.clj-dbspec :as sp])
+    [clojure.string    :as sr]
+    [clj-jdbcutil.core :as sp]
+    [clj-miscutil.core :as mu])
   (:import
     (liquibase.database.structure Column)
     (liquibase.change      ColumnConfig ConstraintsConfig)
@@ -246,8 +246,7 @@
         c-dcascade (or delete-cascade         dcascade)
         c-fkname   (or foreign-key-name       fkname  )
         c-idefer   (or initially-deferred     idefer  )
-        c-defer    (or deferrable             defer   )
-        ]
+        c-defer    (or deferrable             defer   )]
     ;; set base column properties
     (doto col
       (.setName (sp/db-iden colname))

@@ -3,7 +3,7 @@
   See also:
     http://www.liquibase.org/manual/home (Available Database Refactorings)"
   (:require
-    [org.bituf.clj-dbspec   :as sp]
+    [clj-jdbcutil.core      :as sp]
     [clj-miscutil.core      :as mu]
     [clj-liquibase.internal :as in])
   (:import

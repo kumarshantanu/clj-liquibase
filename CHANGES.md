@@ -7,8 +7,8 @@
 * Support for CLI integration (pulled from Lein-LB) [TODO] integration tests
 * [TODO] Expose Liquibase 2.0.5 features
 * Upgrade dependencies
-  * clj-miscutil from 0.3 to 0.4
-  * [TODO] clj-dbspec
+  * clj-miscutil from 0.3 to 0.4.1
+  * Drop clj-dbspec, use clj-jdbcutil 0.1.0
 * Upgrade test dependencies
   * OSS-JDBC from 0.5 to 0.8.0
   * clj-dbcp from 0.5 to 0.8.0

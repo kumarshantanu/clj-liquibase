@@ -5,7 +5,7 @@
     [clj-liquibase.core   :as lb]
     [clj-liquibase.change :as ch]
     [clj-dbcp.core        :as dbcp]
-    [org.bituf.clj-dbspec :as spec]))
+    [clj-jdbcutil.core    :as spec]))
 
 
 (def ds (dbcp/make-datasource :h2 {:target :memory :database :default}))
@@ -42,23 +42,26 @@
 
 (defn update-1
   []
-  ((spec/wrap-dbspec dbspec
-     (lb/wrap-lb-init (fn []
-                        (lb/update changelog-1)
-                        (lb/tag "tag1"))))))
+  (spec/with-connection
+    dbspec
+    (lb/with-lb
+      (lb/update changelog-1)
+      (lb/tag "tag1"))))
 
 (defn update-2
   []
-  ((spec/wrap-dbspec dbspec
-     (lb/wrap-lb-init (fn []
-                        (lb/update changelog-2)
-                        (lb/tag "tag2"))))))
+  (spec/with-connection
+    dbspec
+    (lb/with-lb
+      (lb/update changelog-2)
+      (lb/tag "tag2"))))
 
 (defn rollback-to-1
   []
-  ((spec/wrap-dbspec dbspec
-     (lb/wrap-lb-init (fn []
-                        (lb/rollback-to-tag changelog-2 "tag1" []))))))
+  (spec/with-connection
+    dbspec
+    (lb/with-lb
+      (lb/rollback-to-tag changelog-2 "tag1" []))))
 
 
 ;(mu/! (update-1))
