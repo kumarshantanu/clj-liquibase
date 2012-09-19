@@ -409,7 +409,7 @@
 
 
 (defmacro with-writable
-  "Set spec with :read-only as false and execute body of code in that context."
+  "Set spec with :read-only? as false and execute body of code in that context."
   [& body]
   `(sp/with-connection (sp/assoc-readonly sp/*dbspec* false)
      ~@body))
@@ -515,8 +515,7 @@
                               (ContextChangeSetFilter.
                                 (into-array String
                                   [(mu/comma-sep-str contexts)]))
-                              (DbmsChangeSetFilter. *db-instance*)
-                              ])]
+                              (DbmsChangeSetFilter. *db-instance*)])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^String tag ^List contexts ^Writer output]
     {:pre [(mu/verify-arg (instance? Writer output))]}
@@ -551,8 +550,7 @@
                               (ContextChangeSetFilter.
                                 (into-array String
                                   [(mu/comma-sep-str contexts)]))
-                              (DbmsChangeSetFilter. *db-instance*)
-                              ])]
+                              (DbmsChangeSetFilter. *db-instance*)])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^Date date contexts ^Writer output]
     {:pre [(mu/verify-arg (instance? Writer output))]}
@@ -587,8 +585,7 @@
                                 (into-array String
                                   [(mu/comma-sep-str contexts)]))
                               (DbmsChangeSetFilter. *db-instance*)
-                              (CountChangeSetFilter. howmany-changesets)
-                              ])]
+                              (CountChangeSetFilter. howmany-changesets)])]
           (.run changelog-it (RollbackVisitor. *db-instance*) *db-instance*)))))
   ([changelog-fn ^Integer howmany-changesets ^List contexts ^Writer output]
     {:pre [(mu/verify-arg (instance? Writer output))]}
