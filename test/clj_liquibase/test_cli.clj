@@ -1,6 +1,7 @@
 (ns clj-liquibase.test-cli
   (:require
-    [clj-liquibase.cli :as ll])
+    [clj-liquibase.cli :as  ll]
+    [clj-liquibase.test-core :as tl])
   (:use [clojure.test]))
 
 
@@ -44,6 +45,32 @@
                  "-s"))              "all combined (short version)")
       (is (thrown? IllegalArgumentException (ll/parse-update-args p "--bad")))
       (is (= {:help nil} (ll/parse-update-args p "--help"))))))
+
+
+(deftest test-update
+  (testing "all defaults"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (ll/update {:datasource (tl/make-ds) :changelog tl/clog-1})))
+  (testing "datasource default and changelog arg"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (ll/update {:datasource (tl/make-ds)}
+                 "-cclj-liquibase.test-core/clog-1")))
+  (testing "entrypoint with defaults"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (ll/entry "update" {:datasource (tl/make-ds) :changelog tl/clog-1})))
+  (testing "entrypoint with args"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (ll/entry "update" {:datasource (tl/make-ds)}
+                "--changelog=clj-liquibase.test-core/clog-1")))
+  (testing "entrypoint with args"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (ll/entry "update" {:datasource (tl/make-ds)}
+                "-cclj-liquibase.test-core/clog-1"))))
 
 
 (deftest test-rollback-args
@@ -159,6 +186,7 @@
 (defn test-ns-hook
   []
   (test-update-args)
+  (test-update)
   (test-rollback-args)
   (test-tag-args)
   (test-dbdoc-args)

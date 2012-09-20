@@ -142,7 +142,7 @@ For help on individual command, append with `--help`, e.g.:
                      ;; with-arg and opt-arg
                      (some (fn [row]
                              (some #(let [v (-> (as-string %)
-                                              opt-pattern
+                                              opt-pattern      ;; FIXME with-arg opt-pattern should accompany '=(.*)'?
                                               (opt-match-value arg))]
                                       (and v
                                         (into acc
@@ -249,7 +249,8 @@ For help on individual command, append with `--help`, e.g.:
   [opts & args] {:pre [(map? opts)]}
   (let [opt (apply parse-update-args opts args)]
     (when-not (contains? opt :help)
-      (let [changelog  (resolve-var (:changelog opt))
+      (let [changelog  (let [clog (:changelog opt)]
+                         (if (string? clog) (resolve-var clog) clog))
             chs-count  (:chs-count opt)
             contexts   (:contexts  opt)
             sql-only   (contains? opt :sql-only)
@@ -399,31 +400,21 @@ roll back to: %s"
                   (lb/diff ref-db)))))))))
 
 
-(defn call*
-  "Invoke f after parsing/normalizing args"
-  [opts args f ks] {:pre [(map? opts)]}
-  (let []
-    (mu/! (apply f opts (-> (fn [[k v]]
-                              (opt-string (as-string k) v))
-                          (map (select-keys opts ks))
-                          (into args))))))
-
-
 (defn entry
   "Entry point for clj-liquibase CLI"
-  [opts & [cmd & args]]
+  [cmd opts & args]
   (let [argc (count args)
-        call (partial call* opts args)]
+        call #(apply % opts args)]
     ;; check for commands
     (case cmd
       "help"       (help)
       "version"    (println (format "clj-liquibase version %s"
                               (apply str (interpose "." lb/version))))
-      "update"     (call update   [:datasource :changelog :chs-count :contexts :sql-only])
-      "rollback"   (call rollback [:datasource :changelog :chs-count :tag :date :contexts :sql-only])
-      "tag"        (call tag      [:datasource :tag])
-      "dbdoc"      (call dbdoc    [:datasource :changelog :output-dir :contexts])
-      "diff"       (call diff     [:datasource :ref-datasource])
+      "update"     (call update)   ; :datasource :changelog :chs-count :contexts :sql-only
+      "rollback"   (call rollback) ; :datasource :changelog :chs-count :tag :date :contexts :sql-only
+      "tag"        (call tag)      ; :datasource :tag
+      "dbdoc"      (call dbdoc)    ; :datasource :changelog :output-dir :contexts
+      "diff"       (call diff)     ; :datasource :ref-datasource
       (do
         (println (format "Invalid command: %s" cmd))
         (help)))))
