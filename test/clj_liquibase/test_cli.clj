@@ -1,7 +1,11 @@
 (ns clj-liquibase.test-cli
   (:require
-    [clj-liquibase.cli :as  ll]
+    [clj-liquibase.cli  :as ll]
+    [clj-liquibase.core :as lb]
     [clj-liquibase.test-core :as tl])
+  (:import
+    (java.sql SQLException))
+  (:use clj-liquibase.test-util)
   (:use [clojure.test]))
 
 
@@ -49,28 +53,23 @@
 
 (deftest test-update
   (testing "all defaults"
-    (tl/with-lb-action
-      (tl/clb-setup)
-      (ll/update {:datasource (tl/make-ds) :changelog tl/clog-1})))
+    (tl/with-lb-action (tl/clb-setup))
+    (ll/update {:datasource (tl/make-ds) :changelog tl/clog-1}))
   (testing "datasource default and changelog arg"
-    (tl/with-lb-action
-      (tl/clb-setup)
-      (ll/update {:datasource (tl/make-ds)}
-                 "-cclj-liquibase.test-core/clog-1")))
+    (tl/with-lb-action (tl/clb-setup))
+    (ll/update {:datasource (tl/make-ds)}
+               "-cclj-liquibase.test-core/clog-1"))
   (testing "entrypoint with defaults"
-    (tl/with-lb-action
-      (tl/clb-setup)
-      (ll/entry "update" {:datasource (tl/make-ds) :changelog tl/clog-1})))
-  (testing "entrypoint with args"
-    (tl/with-lb-action
-      (tl/clb-setup)
-      (ll/entry "update" {:datasource (tl/make-ds)}
-                "--changelog=clj-liquibase.test-core/clog-1")))
-  (testing "entrypoint with args"
-    (tl/with-lb-action
-      (tl/clb-setup)
-      (ll/entry "update" {:datasource (tl/make-ds)}
-                "-cclj-liquibase.test-core/clog-1"))))
+    (tl/with-lb-action (tl/clb-setup))
+    (ll/entry "update" {:datasource (tl/make-ds) :changelog tl/clog-1}))
+  (testing "entrypoint with long args"
+    (tl/with-lb-action (tl/clb-setup))
+    (ll/entry "update" {:datasource (tl/make-ds)}
+              "--changelog=clj-liquibase.test-core/clog-1"))
+  (testing "entrypoint with short args"
+    (tl/with-lb-action (tl/clb-setup))
+    (ll/entry "update" {:datasource (tl/make-ds)}
+                "-cclj-liquibase.test-core/clog-1")))
 
 
 (deftest test-rollback-args
@@ -117,6 +116,67 @@
                  "-s"))              "all combined (short version)")
       (is (thrown? IllegalArgumentException (ll/parse-rollback-args p "--bad")))
       (is (= {:help nil} (ll/parse-rollback-args p "--help"))))))
+
+
+(deftest test-rollback
+  (testing "all defaults"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag")
+      (lb/update tl/clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3")))))
+    (ll/rollback {:datasource (tl/make-ds) :changelog tl/clog-2 :tag "mytag"})
+    (tl/with-lb-action
+      (is (thrown? SQLException
+        (query "SELECT * FROM sampletable3")) "Table should not exist")))
+  (testing "datasource default, changelog arg, tag arg"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag")
+      (lb/update tl/clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3")))))
+    (ll/rollback {:datasource (tl/make-ds)}
+                 "-cclj-liquibase.test-core/clog-2" "-gmytag")
+    (tl/with-lb-action
+      (is (thrown? SQLException
+        (query "SELECT * FROM sampletable3")) "Table should not exist")))
+  (testing "entrypoint with defaults"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag")
+      (lb/update tl/clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3")))))
+    (ll/entry "rollback" {:datasource (tl/make-ds) :changelog tl/clog-2 :tag "mytag"})
+    (tl/with-lb-action
+      (is (thrown? SQLException
+        (query "SELECT * FROM sampletable3")) "Table should not exist")))
+  (testing "entrypoint with long args"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag")
+      (lb/update tl/clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3")))))
+    (ll/entry "rollback" {:datasource (tl/make-ds)}
+              "--changelog=clj-liquibase.test-core/clog-2" "--tag=mytag")
+    (tl/with-lb-action
+      (is (thrown? SQLException
+        (query "SELECT * FROM sampletable3")) "Table should not exist")))
+  (testing "entrypoint with short args"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag")
+      (lb/update tl/clog-2)
+      (is (zero? (count (query "SELECT * FROM sampletable3")))))
+    (ll/entry "rollback" {:datasource (tl/make-ds)}
+              "-cclj-liquibase.test-core/clog-2" "-gmytag")
+    (tl/with-lb-action
+      (is (thrown? SQLException
+        (query "SELECT * FROM sampletable3")) "Table should not exist"))))
 
 
 (deftest test-tag-args
@@ -188,6 +248,7 @@
   (test-update-args)
   (test-update)
   (test-rollback-args)
+  (test-rollback)
   (test-tag-args)
   (test-dbdoc-args)
   (test-diff-args))

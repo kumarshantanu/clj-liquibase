@@ -224,6 +224,13 @@ For help on individual command, append with `--help`, e.g.:
           :otherwise   ds)))
 
 
+(defn opt-changelog
+  [clog]
+  (if (string? clog)
+    (resolve-var clog)
+    clog))
+
+
 (defn ctx-list
   "Generate context list from a given comma-separated context list (string)"
   [contexts] {:post [(vector? %)]
@@ -249,8 +256,7 @@ For help on individual command, append with `--help`, e.g.:
   [opts & args] {:pre [(map? opts)]}
   (let [opt (apply parse-update-args opts args)]
     (when-not (contains? opt :help)
-      (let [changelog  (let [clog (:changelog opt)]
-                         (if (string? clog) (resolve-var clog) clog))
+      (let [changelog  (opt-changelog (:changelog opt))
             chs-count  (:chs-count opt)
             contexts   (:contexts  opt)
             sql-only   (contains? opt :sql-only)
@@ -284,7 +290,7 @@ For help on individual command, append with `--help`, e.g.:
   [opts & args]
   (let [opt (apply parse-rollback-args opts args)]
     (when-not (contains? opt :help)
-      (let [changelog  (resolve-var (:changelog opt))
+      (let [changelog  (opt-changelog (:changelog opt))
             chs-count  (:chs-count opt)
             tag        (:tag       opt)
             date       (:date      opt)
@@ -356,7 +362,7 @@ roll back to: %s"
   [opts & args]
   (let [opt (apply parse-dbdoc-args opts args)]
     (when-not (contains? opt :help)
-      (let [changelog  (resolve-var (:changelog opt))
+      (let [changelog  (opt-changelog (:changelog opt))
             out-dir    (:output-dir opt)
             contexts   (:contexts   opt)
             datasource (opt-datasource opts opt)]
