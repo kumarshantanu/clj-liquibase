@@ -200,6 +200,10 @@
       (is (= {:help nil} (ll/parse-tag-args p "--help"))))))
 
 
+(deftest test-tag
+  (is false "Not yet written"))
+
+
 (deftest test-dbdoc-args
   (testing "dbdoc args"
     (let [p {}
@@ -228,6 +232,10 @@
       (is (= {:help nil} (ll/parse-dbdoc-args p "--help"))))))
 
 
+(deftest test-dbdoc
+  (is false "Not yet written"))
+
+
 (deftest test-diff-args
   (testing "diff args"
     (let [p {}
@@ -243,6 +251,10 @@
     (is (= {:help nil} (ll/parse-diff-args {} "--help")))))
 
 
+(deftest test-diff
+  (is false "Not yet written"))
+
+
 (defn test-ns-hook
   []
   (test-update-args)
@@ -250,5 +262,8 @@
   (test-rollback-args)
   (test-rollback)
   (test-tag-args)
+  (test-tag)
   (test-dbdoc-args)
-  (test-diff-args))
+  (test-dbdoc)
+  (test-diff-args)
+  (test-diff))
