@@ -350,8 +350,26 @@
     (is (= {:help nil} (ll/parse-diff-args {} "--help")))))
 
 
+(def ref-ds (tl/make-ds))
+
+
 (deftest test-diff
-  (is false "Not yet written"))
+  (tl/with-lb-action
+    (tl/clb-setup)
+    (lb/update tl/clog-1))
+  (testing "all defaults"
+    (ll/diff {:datasource (tl/make-ds) :ref-datasource (tl/make-ds)}))
+  (testing "datasource default, ref-datasource arg"
+    (ll/diff {:datasource (tl/make-ds)}
+             "-rclj-liquibase.test-cli/ref-ds"))
+  (testing "entrypoint with all defaults"
+    (ll/entry "diff" {:datasource (tl/make-ds) :ref-datasource (tl/make-ds)}))
+  (testing "entrypoint with datasource default, ref-datasource long arg"
+    (ll/entry "diff" {:datasource (tl/make-ds)}
+              "--ref-datasource=clj-liquibase.test-cli/ref-ds"))
+  (testing "entrypoint with datasource default, ref-datasource short arg"
+    (ll/entry "diff" {:datasource (tl/make-ds)}
+              "-rclj-liquibase.test-cli/ref-ds")))
 
 
 (defn test-ns-hook
