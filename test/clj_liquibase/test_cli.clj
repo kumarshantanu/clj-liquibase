@@ -4,6 +4,7 @@
     [clj-liquibase.core :as lb]
     [clj-liquibase.test-core :as tl])
   (:import
+    (java.io  File)
     (java.sql SQLException))
   (:use clj-liquibase.test-util)
   (:use [clojure.test]))
@@ -201,7 +202,54 @@
 
 
 (deftest test-tag
-  (is false "Not yet written"))
+  (testing "all defaults"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag"))
+    (ll/tag {:datasource (tl/make-ds) :tag "mytag"})
+    (tl/with-lb-action
+      (is (= "mytag" (query-value "SELECT tag FROM databasechangelog"))
+          "Tag name should match")))
+  (testing "datasource default, changelog arg, tag arg"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag"))
+    (ll/tag {:datasource (tl/make-ds)}
+            "-gmytag")
+    (tl/with-lb-action
+      (is (= "mytag" (query-value "SELECT tag FROM databasechangelog"))
+          "Tag name should match")))
+  (testing "entrypoint with defaults"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag"))
+    (ll/entry "tag" {:datasource (tl/make-ds) :tag "mytag"})
+    (tl/with-lb-action
+      (is (= "mytag" (query-value "SELECT tag FROM databasechangelog"))
+          "Tag name should match")))
+  (testing "entrypoint with long args"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag"))
+    (ll/entry "tag" {:datasource (tl/make-ds)}
+              "--tag=mytag")
+    (tl/with-lb-action
+      (is (= "mytag" (query-value "SELECT tag FROM databasechangelog"))
+          "Tag name should match")))
+  (testing "entrypoint with short args"
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1)
+      (lb/tag    "mytag"))
+    (ll/entry "tag" {:datasource (tl/make-ds)}
+              "-gmytag")
+    (tl/with-lb-action
+      (is (= "mytag" (query-value "SELECT tag FROM databasechangelog"))
+          "Tag name should match"))))
 
 
 (deftest test-dbdoc-args
@@ -232,8 +280,59 @@
       (is (= {:help nil} (ll/parse-dbdoc-args p "--help"))))))
 
 
+(defn rm-rf
+  [^File file]
+  (let [file (if (instance? File file) file (File. (str file)))]
+    (cond
+      ;; directory
+      (.isDirectory file)
+      (doseq [^File each (.listFiles file)]
+        (rm-rf each))
+      ;; file
+      (.isFile file)
+      (if (not (.delete file))
+        (throw (RuntimeException. (str "Cannot delete file: " file)))))))
+
+
 (deftest test-dbdoc
-  (is false "Not yet written"))
+  (testing "all defaults"
+    (rm-rf "target/dbdoc")
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1))
+    (ll/dbdoc {:datasource (tl/make-ds) :changelog tl/clog-2 :output-dir "target/dbdoc"})
+    (is (.exists (File. "target/dbdoc/index.html"))))
+  (testing "datasource default, changelog arg, tag arg"
+    (rm-rf "target/dbdoc")
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1))
+    (ll/dbdoc {:datasource (tl/make-ds)}
+              "--changelog=clj-liquibase.test-core/clog-2"  "--output-dir=target/dbdoc")
+    (is (.exists (File. "target/dbdoc/index.html"))))
+  (testing "entrypoint with defaults"
+    (rm-rf "target/dbdoc")
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1))
+    (ll/entry "dbdoc" {:datasource (tl/make-ds) :changelog tl/clog-2 :output-dir "target/dbdoc"})
+    (is (.exists (File. "target/dbdoc/index.html"))))
+  (testing "entrypoint with long args"
+    (rm-rf "target/dbdoc")
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1))
+    (ll/entry "dbdoc" {:datasource (tl/make-ds)}
+              "--changelog=clj-liquibase.test-core/clog-2"  "--output-dir=target/dbdoc")
+    (is (.exists (File. "target/dbdoc/index.html"))))
+  (testing "entrypoint with short args"
+    (rm-rf "target/dbdoc")
+    (tl/with-lb-action
+      (tl/clb-setup)
+      (lb/update tl/clog-1))
+    (ll/entry "dbdoc" {:datasource (tl/make-ds)}
+              "-cclj-liquibase.test-core/clog-2"  "-otarget/dbdoc")
+    (is (.exists (File. "target/dbdoc/index.html")))))
 
 
 (deftest test-diff-args

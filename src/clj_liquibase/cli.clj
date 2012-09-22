@@ -330,7 +330,7 @@ roll back to: %s"
   [opts  & args]
   (parse-opts opts  "tag"
     args
-    ["JDBC Datasource"   :with-arg :datasource     :d]
+    ["JDBC Datasource"   :with-arg :datasource :d]
     ["Tag name to apply" :with-arg :tag        :g]))
 
 
