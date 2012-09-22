@@ -27,18 +27,25 @@
                          [:some-text   "some-text" :new-text  "new-text"]
                          [#"some-text" "some-text" :new-text  "new-text"]]]
     (let [v (vis/make-replace-visitor rk wk)]
-      (is (= rr (.getReplace v)))
-      (is (= wr (.getWith v))))))
+      (cond
+        (= ReplaceSqlVisitor
+           (class v)) (do (is (= rr (.getReplace ^ReplaceSqlVisitor v)))
+                        (is (= wr (.getWith ^ReplaceSqlVisitor v))))
+        (= RegExpReplaceSqlVisitor
+           (class v)) (do (is (= rr (.getReplace ^RegExpReplaceSqlVisitor v)))
+                        (is (= wr (.getWith ^RegExpReplaceSqlVisitor v))))
+        :or (throw (RuntimeException.
+                     "v must be of type ReplaceSqlVisitor/RegExpReplaceSqlVisitor"))))))
 
 
 (deftest test-misc-visitor-constraints
   (let [v (vis/make-append-visitor "text")
-        f (vis/for-dbms!          :mysql    v)
-        r (vis/apply-to-rollback! true      v)
-        c (vis/for-contexts!      :some-ctx v)]
-    (is (= #{"mysql"}    (.getApplicableDbms f)) "for-dbms!")
-    (is (= true          (.isApplyToRollback r)) "apply-to-rollback!")
-    (is (= #{"some-ctx"} (.getContexts c)) "for-contexts!")))
+        f (vis/for-dbms!           :mysql    v)
+        r (vis/apply-to-rollback!  true      v)
+        c (vis/for-contexts!       :some-ctx v)]
+    (is (= #{"mysql"}    (.getApplicableDbms ^SqlVisitor f)) "for-dbms!")
+    (is (= true          (.isApplyToRollback ^SqlVisitor r)) "apply-to-rollback!")
+    (is (= #{"some-ctx"} (.getContexts       ^SqlVisitor c)) "for-contexts!")))
 
 
 (deftest test-make-visitors
