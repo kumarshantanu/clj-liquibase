@@ -324,11 +324,47 @@ TODO
 
 ### Defining Changelog
 
-TODO
+A _changelog_ can be defined using the `defchangelog` macro, which essentially
+defines a partially applied function such that when executed with no args it
+returns a `liquibase.changelog.DatabaseChangeLog` object.
+
+```clojure
+(clj-liquibase.core/defchangelog changelog-name
+  "logical-schema-name" [changeset-1 changeset-2 changeset-3])
+```
+
+Alternatively, you can also create a changelog using the factory function
+`clj-liquibase.core/make-changelog`. The macro `defchangelog` returns a higher
+order function that calls `make-changelog`.
+
+The function `make-changelog` and (hence) the `defchangelog` macro accept an
+optional keyword argument `:pre-conditions` (short name `:pre-cond`) to specify
+the pre-condition checks for the changelog.
+
+A changelog definition cannot be modified once applied to the database; however,
+you can incrementally add changesets to a changelog as time goes.
 
 ## Command Line Interface (CLI) integration
 
-TODO
+The _Command-Line Interface_ is the easiest integration option for applications
+that want to use Clj-Liquibase. The `clj-liquibase.cli` namespace has a built-in
+command-line argument parser that knows about the CLI commands and their various
+switches respectively.
+
+An application simply needs to collect user-provided command line arguments and
+invoke the `clj-liquibase.cli/entry` function with the following arguments:
+
+| Argument | Description |
+|----------|-------------|
+| `cmd`    | any of "help" "version" "update" "rollback" "tag" "dbdoc" "diff" |
+| `opts`   | default options         |
+| `args`   | user provided arguments |
+
+The various switches for their respective commands are listed below:
+
+TODO: table with command switches
+
+TODO: example with `lein run -m foo.bar`
 
 ## Core functions
 
