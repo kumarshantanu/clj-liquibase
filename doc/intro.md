@@ -74,11 +74,11 @@ Note that you can use the following short names for corresponding keyword args:
 | `:encoding`                     | `:enc`             | string                | "UTF-8" |
 | `:base-table-schema-name`       | `:base-schema`     | string                ||
 | `:referenced-table-schema-name` | `:ref-schema`      | string                ||
-| `:deferrable`                   | `:defer`           | boolean               ||
-| `:initially-deferred`           | `:idefer`          | boolean               ||
 | `:on-delete`                    | `:ondel`           | string                ||
 | `:on-update`                    | `:onupd`           | string                ||
 | `:where-clause`                 | `:where`           | string                ||
+| `:index-name`                   | `:index`           | string                ||
+| `:unique`                       | `:uniq`            | logical boolean       ||
 
 #### Structural Refactorings
 
@@ -198,7 +198,14 @@ Note that you can use the following short names for corresponding keyword args:
 
 #### Architectural Refactorings
 
-TODO
+| Function name                 | Required args           | Type       | Optional kwargs                 | Description |
+|-------------------------------|-------------------------|------------|---------------------------------|-------------|
+| `create-index`                | `table-name`            | stringable | `:schema-name`                  | [Create index with specified column names](http://www.liquibase.org/manual/create_index) |
+|                               | `column-names`          | collection | `:index-name`                   ||
+|                               |                         |            | `:unique`                       ||
+|                               |                         |            | `:table-space`                  ||
+| `drop-index`                  | `index-name`            | stringable | `:schema-name`                  | [Drop an existing index](http://www.liquibase.org/manual/drop_index) |
+|                               | `table-name`            | stringable |||
 
 ### Constructing Changeset objects
 
