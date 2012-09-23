@@ -72,6 +72,13 @@ Note that you can use the following short names for corresponding keyword args:
 | `:increment-by`               | `:incby`           | coerced as BigInteger |
 | `:cycle`                      | `:cyc`             | logical boolean       |
 
+base-table-schema-name       base-schema ; String
+             referenced-table-schema-name ref-schema  ; String
+             deferrable                   defer  ; Boolean
+             initially-deferred           idefer ; Boolean
+             on-delete                    ondel  ; String
+             on-update                    onupd  ; String
+
 #### Structural Refactorings
 
 | Function name             | Required args       | Optional kwargs        | Description |
@@ -152,7 +159,21 @@ Note that you can use the following short names for corresponding keyword args:
 
 #### Referential Integrity Refactorings
 
-TODO
+| Function name                 | Required args             | Optional kwargs                 | Description |
+|-------------------------------|---------------------------|---------------------------------|-------------|
+| `add-foreign-key-constraint`  | `constraint-name`         | `:base-table-schema-name`       | [Add foreign key constraint to an existing column](http://www.liquibase.org/manual/add_foreign_key_constraint) |
+|                               | `base-table-name`         | `:referenced-table-schema-name` ||
+|                               | `base-column-names`       | `:deferrable`                   ||
+|                               | `referenced-table-name`   | `:initially-deferred`           ||
+|                               | `referenced-column-names` | `:on-delete`                    ||
+|                               |                           | `:on-update`                    ||
+| `drop-foreign-key-constraint` | `constraint-name`         | `:schema-name`                  | [Drop a foreign key constraint](http://www.liquibase.org/manual/drop_foreign_key_constraint) |
+|                               | `base-table-name`         |||
+| `add-primary-key`             | `table-name`              | `:schema-name`                  | [Add primary key from one or more columns](http://www.liquibase.org/manual/add_primary_key_constraint) |
+|                               | `column-names`            | `:table-space`                  ||
+|                               | `constraint-name`         |||
+| `drop-primary-key`            | `table-name`              | `:schema-name`                  | [Drop an existing primary key](http://www.liquibase.org/manual/drop_primary_key_constraint) |
+|                               |                           | `:constraint-name`              ||
 
 #### Non-Refactoring Transformations
 
