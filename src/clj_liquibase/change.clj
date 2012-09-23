@@ -597,7 +597,9 @@
 ;; Drop Sequence
 
 (defn ^DropSequenceChange drop-sequence
-  "Return a Change instance that drops a sequence (DropSequenceChange)."
+  "Return a Change instance that drops a sequence (DropSequenceChange).
+  See also:
+    http://www.liquibase.org/manual/drop_sequence"
   [sequence-name
    & {:keys [schema-name schema  ; String/Keyword - subject to db-iden
              ] :as opt}] {:post [(instance? DropSequenceChange %)]
