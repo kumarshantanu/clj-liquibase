@@ -50,35 +50,6 @@ Important points to note:
 The _change_ objects can be constructed by using the factory functions in the
 `clj-liquibase.change` namespace, which are described in the sub-sections below:
 
-Note that you can use the following short names for corresponding keyword args:
-
-| Keyword arg (long name)         | Short name         | Value type            | Default |
-|---------------------------------|--------------------|-----------------------|---------|
-| `:schema-name`                  | `:schema`          | string/keyword        ||
-| `:existing-table-schema-name`   | `:existing-schema` | string/keyword        ||
-| `:new-table-schema-name`        | `:new-schema`      | string/keyword        ||
-| `:column-data-type`             | `:data-type`       | string/keyword/vector ||
-| `:new-column-data-type`         | `:new-data-type`   | string/keyword/vector ||
-| `:max-value`                    | `:max`             | number or string      ||
-| `:min-value`                    | `:min`             | number or string      ||
-| `:ordered`                      | `:ord`             | true or false         ||
-| `:table-space`                  | `:tspace`          | string/keyword        ||
-| `:cascade-constraints`          | `:cascade`         | logical boolean       ||
-| `:replace-if-exists`            | `:replace`         | logical boolean       ||
-| `:default-null-value`           | `:default`         | string                ||
-| `:deferrable`                   | `:defer`           | logical boolean       ||
-| `:initially-deferred`           | `:idefer`          | logical boolean       ||
-| `:start-value`                  | `:start`           | coerced as BigInteger ||
-| `:increment-by`                 | `:incby`           | coerced as BigInteger ||
-| `:cycle`                        | `:cyc`             | logical boolean       ||
-| `:encoding`                     | `:enc`             | string                | "UTF-8" |
-| `:base-table-schema-name`       | `:base-schema`     | string                ||
-| `:referenced-table-schema-name` | `:ref-schema`      | string                ||
-| `:on-delete`                    | `:ondel`           | string                ||
-| `:on-update`                    | `:onupd`           | string                ||
-| `:where-clause`                 | `:where`           | string                ||
-| `:index-name`                   | `:index`           | string                ||
-| `:unique`                       | `:uniq`            | logical boolean       ||
 
 #### Structural Refactorings
 
@@ -120,6 +91,47 @@ Note that you can use the following short names for corresponding keyword args:
 |                           | `final-column-type` |||
 | `create-stored-procedure` | `procedure-body`    | `:comments`            | [Create database stored procedure](http://www.liquibase.org/manual/create_stored_procedure) |
 
+
+##### Column config
+
+The functions `add-columns`, `create-table` and `create-table-withid` accept a
+`columns` argument, which is a collection of
+[_column-config_](http://www.liquibase.org/manual/column) elements. Each
+column-config is a vector of 2 required args followed by optional keyword args.
+
+Required args: `column-name`, `column-type`
+Optional kwargs:
+
+| Long name                 | Short name  |Allowed types           |
+|---------------------------|-------------|------------------------|
+| `:default-value`          | `:default`  | String/Number/java.util.Date/Boolean/DatabaseFunction |
+| `:auto-increment`         | `:autoinc   | Boolean        |
+| `:remarks`                |             | String         |
+| `:nullable`               | `:null`     | Boolean        |
+| `:primary-key`            | `:pk`       | Boolean        |
+| `:primary-key-name`       | `:pkname`   | String/Keyword |
+| `:primary-key-tablespace` | `:pktspace` | String/Keyword |
+| `:references`             | `:refs`     | String (Foreign key definition) |
+| `:unique`                 | `:uniq`     | Boolean        |
+| `:unique-constraint-name` | `:ucname`   | String/Keyword |
+| `:check`                  |             | String         |
+| `:delete-cascade`         | `:dcascade` | Boolean        |
+| `:foreign-key-name`       | `:fkname`   | String/Keyword |
+| `:initially-deferred`     | `:idefer`   | Boolean        |
+| `:deferrable`             | `:defer`    | Boolean        |
+
+##### Example
+
+Example of creating a _change_ object:
+
+```clojure
+(clj-liquibase.change/create-table "sampletable1"
+                                   [[:id     :int          :null false :pk true :autoinc true]
+                                    [:name   [:varchar 40] :null false]
+                                    [:gender [:char 1]     :null false]])
+```
+
+
 #### Data Quality Refactorings
 
 | Function name              | Required args          | Optional kwargs               | Description |
@@ -158,6 +170,7 @@ Note that you can use the following short names for corresponding keyword args:
 | `drop-default-value`       | `table-name`           | `:schema-name`                | [Drop default value for specified column](http://www.liquibase.org/manual/drop_default_value) |
 |                            | `column-name`          | `:column-data-type`           ||
 
+
 #### Referential Integrity Refactorings
 
 | Function name                 | Required args             | Optional kwargs                 | Description |
@@ -175,6 +188,7 @@ Note that you can use the following short names for corresponding keyword args:
 |                               | `constraint-name`         |||
 | `drop-primary-key`            | `table-name`              | `:schema-name`                  | [Drop an existing primary key](http://www.liquibase.org/manual/drop_primary_key_constraint) |
 |                               |                           | `:constraint-name`              ||
+
 
 #### Non-Refactoring Transformations
 
@@ -196,6 +210,7 @@ Note that you can use the following short names for corresponding keyword args:
 | `tag-database`                | `tag`                   |          |                                 | [Tag the database with specified tag](http://www.liquibase.org/manual/tag_database) |
 | `stop`                        |                         |          |                                 | [Stop Liquibase execution immediately, useful for debugging](http://www.liquibase.org/manual/stop) |
 
+
 #### Architectural Refactorings
 
 | Function name                 | Required args           | Type       | Optional kwargs                 | Description |
@@ -207,7 +222,79 @@ Note that you can use the following short names for corresponding keyword args:
 | `drop-index`                  | `index-name`            | stringable | `:schema-name`                  | [Drop an existing index](http://www.liquibase.org/manual/drop_index) |
 |                               | `table-name`            | stringable |||
 
+
+#### Short names for keyword args
+
+Note that you can use the following short names for corresponding keyword args:
+
+| Keyword arg (long name)         | Short name         | Value type            | Default |
+|---------------------------------|--------------------|-----------------------|---------|
+| `:schema-name`                  | `:schema`          | string/keyword        ||
+| `:existing-table-schema-name`   | `:existing-schema` | string/keyword        ||
+| `:new-table-schema-name`        | `:new-schema`      | string/keyword        ||
+| `:column-data-type`             | `:data-type`       | string/keyword/vector ||
+| `:new-column-data-type`         | `:new-data-type`   | string/keyword/vector ||
+| `:max-value`                    | `:max`             | number or string      ||
+| `:min-value`                    | `:min`             | number or string      ||
+| `:ordered`                      | `:ord`             | true or false         ||
+| `:table-space`                  | `:tspace`          | string/keyword        ||
+| `:cascade-constraints`          | `:cascade`         | logical boolean       ||
+| `:replace-if-exists`            | `:replace`         | logical boolean       ||
+| `:default-null-value`           | `:default`         | string                ||
+| `:deferrable`                   | `:defer`           | logical boolean       ||
+| `:initially-deferred`           | `:idefer`          | logical boolean       ||
+| `:start-value`                  | `:start`           | coerced as BigInteger ||
+| `:increment-by`                 | `:incby`           | coerced as BigInteger ||
+| `:cycle`                        | `:cyc`             | logical boolean       ||
+| `:encoding`                     | `:enc`             | string                | "UTF-8" |
+| `:base-table-schema-name`       | `:base-schema`     | string                ||
+| `:referenced-table-schema-name` | `:ref-schema`      | string                ||
+| `:on-delete`                    | `:ondel`           | string                ||
+| `:on-update`                    | `:onupd`           | string                ||
+| `:where-clause`                 | `:where`           | string                ||
+| `:index-name`                   | `:index`           | string                ||
+| `:unique`                       | `:uniq`            | logical boolean       ||
+
+
 ### Constructing Changeset objects
+
+A [_changeset_](http://www.liquibase.org/manual/changeset) can be constructed
+using the function `clj-liquibase.core/make-changeset`.
+Required args: `id` (string),  `author` (string), `changes` (collection of _change_ objects)
+Optional kwargs:
+
+| Long name             | Short name    | Type         |
+|-----------------------|---------------|--------------|
+| `:dbms`               |               | String/Keyword/vector-of-multiple |
+| `:run-always`         | `:always`     | Boolean                           |
+| `:run-on-change`      | `:on-change`  | Boolean                           |
+| `:context`            | `:ctx`        | String                            |
+| `:run-in-transaction` | `:in-txn`     | Boolean (true by default)         |
+| `:fail-on-error`      | `:fail-err`   | Boolean                           |
+| `:comment`            |               | String                            |
+| `:pre-conditions`     | `:pre-cond`   | list of Precondition objects, or PreconditionContainer object |
+| `:valid-checksum`     | `:valid-csum` | String                            |
+| `:visitors`           |               | collection of SqlVisitor objects  |
+
+An example changeset-construction look like this:
+
+```clojure
+;; assume `ch1` is a change object
+(make-changeset "id=1" "author=shantanu" [ch1])
+```
+
+The recommended way to create a changeset is to wrap only one _change_ object,
+the main reason being pre-conditions and SQL-visitors can be applied only at the
+changeset level. Since changesets cannot be modified after being applied to the
+database, it would be impossible to go back and refactor the changesets.
+However, one can add conditional SQL-visitor to a changeset later to modify the
+generated SQL statement a little to suit a different database type.
+
+#### Precondition
+
+TODO
+
+#### SQL Visitor
 
 TODO
 
