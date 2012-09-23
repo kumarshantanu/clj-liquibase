@@ -2,13 +2,15 @@
 
 TODO: write [great documentation](http://jacobian.org/writing/great-documentation/what-to-write/)
 
-[Liquibase](http://liquibase.org/) is a database change management library. This
-library provides a way to write Liquibase changesets and changelogs in Clojure,
-while inheriting other attributes of Liquibase.
+[Liquibase](http://liquibase.org/) is an Open Source (Apache 2 license) database
+change management library. Clj-Liquibase provides a way to write Liquibase
+changesets and changelogs in Clojure, while inheriting other attributes of
+Liquibase.
 
-Clj-Liquibase works with _change_, _changeset_ and _changelog_ objects, which
-constitute the changes that can be tracked and applied to JDBC databases via
-various _commands_. These terms are described in the sections below.
+In order to work with Clj-Liquibase, you need to know the Liquibase abstractions
+_change_, _changeset_ and _changelog_ objects, which constitute the changes that
+can be tracked and applied to JDBC databases via various _commands_. These terms
+are described in the sections below.
 
 Supported commands:
 
@@ -65,43 +67,41 @@ Note that you can use the following short names for corresponding keyword args:
 
 | Function name             | Required args       | Optional kwargs        | Description |
 |---------------------------|---------------------|------------------------|-------------|
-| `add-columns`             | `table-name`        | `:schema-name`         | Add columns to an existing table           |
-|                           | `columns`           |                        | http://www.liquibase.org/manual/add_column |
-|                           |                     |                        | http://www.liquibase.org/manual/column |
-| `rename-column`           | `table-name`        | `:schema-name`         | Rename column in an existing table |
-|                           | `old-column-name`   | `:column-data-type`    | http://www.liquibase.org/manual/rename_column |
+| `add-columns`             | `table-name`        | `:schema-name`         | [Add columns to an existing table](http://www.liquibase.org/manual/add_column) |
+|                           | `columns`           |                        | [Column definition](http://www.liquibase.org/manual/column) |
+| `rename-column`           | `table-name`        | `:schema-name`         | [Rename column in an existing table](http://www.liquibase.org/manual/rename_column) |
+|                           | `old-column-name`   | `:column-data-type`    ||
 |                           | `new-column-name`   |||
-| `modify-column`           | `table-name`        | `:schema-name`         | Modify data type of a column in an existing table |
-|                           | `column-name`       |                        | http://www.liquibase.org/manual/modify_column |
+| `modify-column`           | `table-name`        | `:schema-name`         | [Modify data type of a column in an existing table](http://www.liquibase.org/manual/modify_column) |
+|                           | `column-name`       |                        ||
 |                           | `new-data-type`     |||
-| `drop-column`             | `table-name`        | `:schema-name`         | Drop specified column from an existing table |
-|                           | `column-name`       |                        | http://www.liquibase.org/manual/drop_column |
-| `alter-sequence`          | `seq-name`          | `:schema-name`         | Modifies a database sequence |
-|                           | `increment-by`      | `:max-value`           | http://www.liquibase.org/manual/alter_sequence |
+| `drop-column`             | `table-name`        | `:schema-name`         | [Drop specified column from an existing table](http://www.liquibase.org/manual/drop_column) |
+|                           | `column-name`       |                        ||
+| `alter-sequence`          | `seq-name`          | `:schema-name`         | [Modifies a database sequence](http://www.liquibase.org/manual/alter_sequence) |
+|                           | `increment-by`      | `:max-value`           ||
 |                           |                     | `:min-value`           ||
 |                           |                     | `:ordered`             ||
-| `create-table`            | `table-name`        | `:schema-name`         | Create a new table |
-|                           | `columns`           | `:table-space`         | http://www.liquibase.org/manual/create_table |
-|                           |                     | `:remarks`             | http://www.liquibase.org/manual/column       |
-| `create-table-withid`     | same as above       | as above, `:idcol`     | Same as above, except it creates auto-incremented ID column |
-| `rename-table`            | `old-table-name`    | `:schema-name`         | Rename an existing table |
-|                           | `new-table-name`    |                        | http://www.liquibase.org/manual/rename_table |
-| `drop-table`              | `table-name`        | `:schema-name`         | Drop an existing table |
-|                           |                     | `:cascade-constraints` | http://www.liquibase.org/manual/drop_table |
-| `create-view`             | `view-name`         | `:schema-name`         | Create a database view |
-|                           | `select-query`      | `:replace-if-exists`   | http://www.liquibase.org/manual/create_view |
-| `rename-view`             | `old-view-name`     | `:schema-name`         | Rename an existing database view |
-|                           | `new-view-name`     |                        | http://www.liquibase.org/manual/rename_view |
-| `drop-view`               | `view-name`         | `:schema-name`         | Drop an existing database view |
-|                           |                     |                        | http://www.liquibase.org/manual/drop_view |
-| `merge-columns`           | `table-name`        | `:schema-name`         | Merge two columns of the same table into one |
-|                           | `column1-name`      |                        | http://www.liquibase.org/manual/merge_columns |
+| `create-table`            | `table-name`        | `:schema-name`         | [Create a new table](http://www.liquibase.org/manual/create_table) |
+|                           | `columns`           | `:table-space`         | [Column definition](http://www.liquibase.org/manual/column) |
+|                           |                     | `:remarks`             ||
+| `create-table-withid`     | same as above       | same as above          | Same as above, except it creates auto-incremented ID column |
+|                           |                     | `:idcol`               ||
+| `rename-table`            | `old-table-name`    | `:schema-name`         | [Rename an existing table](http://www.liquibase.org/manual/rename_table) |
+|                           | `new-table-name`    |                        ||
+| `drop-table`              | `table-name`        | `:schema-name`         | [Drop an existing table](http://www.liquibase.org/manual/drop_table) |
+|                           |                     | `:cascade-constraints` ||
+| `create-view`             | `view-name`         | `:schema-name`         | [Create a database view](http://www.liquibase.org/manual/create_view) |
+|                           | `select-query`      | `:replace-if-exists`   ||
+| `rename-view`             | `old-view-name`     | `:schema-name`         | [Rename an existing database view](http://www.liquibase.org/manual/rename_view) |
+|                           | `new-view-name`     |                        ||
+| `drop-view`               | `view-name`         | `:schema-name`         | [Drop an existing database view](http://www.liquibase.org/manual/drop_view) |
+| `merge-columns`           | `table-name`        | `:schema-name`         | [Merge two columns of the same table into one](http://www.liquibase.org/manual/merge_columns) |
+|                           | `column1-name`      |                        ||
 |                           | `join-string`       |||
 |                           | `column2-name`      |||
 |                           | `final-column-name` |||
 |                           | `final-column-type` |||
-| `create-stored-procedure` | `procedure-body`    | `:comments`            | Create database stored procedure |
-|                           |                     |                        | http://www.liquibase.org/manual/create_stored_procedure |
+| `create-stored-procedure` | `procedure-body`    | `:comments`            | [Create database stored procedure](http://www.liquibase.org/manual/create_stored_procedure) |
 
 #### Data Quality Refactorings
 
