@@ -262,7 +262,7 @@
 ;; Drop Table
 
 (defn ^DropTableChange drop-table
-  "Return a Change instance that drops a table ().
+  "Return a Change instance that drops a table (DropTableChange).
   See also:
     http://www.liquibase.org/manual/drop_table"
   [table-name
