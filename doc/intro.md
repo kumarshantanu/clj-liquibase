@@ -39,8 +39,8 @@ to the database in the intended way.
 
 Important points to note:
 
-* The _change_ and _changeset_ definitions (in code) cannot be modified in any
-  way once they are applied to the database.
+* The _change_ and _changeset_ definition (in code) cannot be modified in any
+  way once applied to the database.
 * A _changelog_ definition (in code) cannot be modified after being applied to
   the database. However, you can add more _changeset_ objects to it later.
 
@@ -52,16 +52,25 @@ The _change_ objects can be constructed by using the factory functions in the
 
 Note that you can use the following short names for corresponding keyword args:
 
-| Keyword arg            | Short name   | Value type       |
-|------------------------|--------------|------------------|
-| `:schema-name`         | `:schema`    | string/keyword   |
-| `:column-data-type`    | `:data-type` | string/keyword   |
-| `:max-value`           | `:max`       | number or string |
-| `:min-value`           | `:min`       | number or string |
-| `:ordered`             | `:ord`       | true or false    |
-| `:table-space`         | `:tspace`    | string/keyword   |
-| `:cascade-constraints` | `:cascade`   | logical boolean  |
-| `:replace-if-exists`   | `:replace`   | logical boolean  |
+| Keyword arg                   | Short name         | Value type            |
+|-------------------------------|--------------------|-----------------------|
+| `:schema-name`                | `:schema`          | string/keyword        |
+| `:existing-table-schema-name` | `:existing-schema` | string/keyword        |
+| `:new-table-schema-name`      | `:new-schema`      | string/keyword        |
+| `:column-data-type`           | `:data-type`       | string/keyword/vector |
+| `:new-column-data-type`       | `:new-data-type`   | string/keyword/vector |
+| `:max-value`                  | `:max`             | number or string      |
+| `:min-value`                  | `:min`             | number or string      |
+| `:ordered`                    | `:ord`             | true or false         |
+| `:table-space`                | `:tspace`          | string/keyword        |
+| `:cascade-constraints`        | `:cascade`         | logical boolean       |
+| `:replace-if-exists`          | `:replace`         | logical boolean       |
+| `:default-null-value`         | `:default`         | string                |
+| `:deferrable`                 | `:defer`           | logical boolean       |
+| `:initially-deferred`         | `:idefer`          | logical boolean       |
+| `:start-value`                | `:start`           | coerced as BigInteger |
+| `:increment-by`               | `:incby`           | coerced as BigInteger |
+| `:cycle`                      | `:cyc`             | logical boolean       |
 
 #### Structural Refactorings
 
@@ -105,7 +114,41 @@ Note that you can use the following short names for corresponding keyword args:
 
 #### Data Quality Refactorings
 
-TODO
+| Function name              | Required args          | Optional kwargs               | Description |
+|----------------------------|------------------------|-------------------------------|-------------|
+| `add-lookup-table`         | `existing-table-name`  | `:existing-table-schema-name` | [Add a lookup table](http://www.liquibase.org/manual/add_lookup_table) |
+|                            | `existing-column-name` | `:new-table-schema-name`      ||
+|                            | `new-table-name`       | `:new-column-data-type`       ||
+|                            | `new-column-name`      |||
+|                            | `constraint-name`      |||
+| `add-not-null-constraint`  | `table-name`           | `:schema-name`                | [Add NOT NULL constraint on specified column in a table](http://www.liquibase.org/manual/add_not-null_constraint) |
+|                            | `column-name`          | `:default-null-value`         ||
+|                            | `column-data-type`     |||
+| `drop-not-null-constraint` | `table-name`           | `:schema-name`                | [Drop NOT NULL constraint for specified column](http://www.liquibase.org/manual/remove_not-null_constraint) |
+|                            | `column-name`          | `:column-data-type`           ||
+| `add-unique-constraint`    | `table-name`           | `:schema-name`                | [Add UNIQUE constraint for specified columns](http://www.liquibase.org/manual/add_unique_constraint) |
+|                            | `column-names`         | `:table-space`                ||
+|                            | `constraint-name`      | `:deferrable`                 ||
+|                            |                        | `:initially-deferred`         ||
+|                            |                        | `:disabled`                   ||
+| `drop-unique-constraint`   | `table-name`           | `:schema-name`                | [Drop specified UNIQUE constraint](http://www.liquibase.org/manual/drop_unique_constraint) |
+|                            | `constraint-name`      |||
+| `create-sequence`          | `sequence-name`        | `:schema-name`                | [Create a database sequence](http://www.liquibase.org/manual/create_sequence) |
+|                            |                        | `:start-value`                ||
+|                            |                        | `:increment-by`               ||
+|                            |                        | `:max-value`                  ||
+|                            |                        | `:min-value`                  ||
+|                            |                        | `:ordered`                    ||
+|                            |                        | `:cycle`                      ||
+| `drop-sequence`            | `sequence-name`        | `:schema-name`                | [Drop specified database sequence](http://www.liquibase.org/manual/drop_sequence) |
+| `add-auto-increment`       | `table-name`           | `:schema-name`                | [Convert an existing column to auto-increment type](http://www.liquibase.org/manual/add_auto-increment) |
+|                            | `column-name`          |||
+|                            | `column-data-type`     |||
+| `add-default-value`        | `table-name`           | `:schema-name`                | [Add default value for specified column](http://www.liquibase.org/manual/add_default_value) |
+|                            | `column-name`          | `:column-data-type`           ||
+|                            | `default-value`        |||
+| `drop-default-value`       | `table-name`           | `:schema-name`                | [Drop default value for specified column](http://www.liquibase.org/manual/drop_default_value) |
+|                            | `column-name`          | `:column-data-type`           ||
 
 #### Referential Integrity Refactorings
 
