@@ -52,32 +52,33 @@ The _change_ objects can be constructed by using the factory functions in the
 
 Note that you can use the following short names for corresponding keyword args:
 
-| Keyword arg                   | Short name         | Value type            |
-|-------------------------------|--------------------|-----------------------|
-| `:schema-name`                | `:schema`          | string/keyword        |
-| `:existing-table-schema-name` | `:existing-schema` | string/keyword        |
-| `:new-table-schema-name`      | `:new-schema`      | string/keyword        |
-| `:column-data-type`           | `:data-type`       | string/keyword/vector |
-| `:new-column-data-type`       | `:new-data-type`   | string/keyword/vector |
-| `:max-value`                  | `:max`             | number or string      |
-| `:min-value`                  | `:min`             | number or string      |
-| `:ordered`                    | `:ord`             | true or false         |
-| `:table-space`                | `:tspace`          | string/keyword        |
-| `:cascade-constraints`        | `:cascade`         | logical boolean       |
-| `:replace-if-exists`          | `:replace`         | logical boolean       |
-| `:default-null-value`         | `:default`         | string                |
-| `:deferrable`                 | `:defer`           | logical boolean       |
-| `:initially-deferred`         | `:idefer`          | logical boolean       |
-| `:start-value`                | `:start`           | coerced as BigInteger |
-| `:increment-by`               | `:incby`           | coerced as BigInteger |
-| `:cycle`                      | `:cyc`             | logical boolean       |
-
-base-table-schema-name       base-schema ; String
-             referenced-table-schema-name ref-schema  ; String
-             deferrable                   defer  ; Boolean
-             initially-deferred           idefer ; Boolean
-             on-delete                    ondel  ; String
-             on-update                    onupd  ; String
+| Keyword arg (long name)         | Short name         | Value type            | Default |
+|---------------------------------|--------------------|-----------------------|---------|
+| `:schema-name`                  | `:schema`          | string/keyword        ||
+| `:existing-table-schema-name`   | `:existing-schema` | string/keyword        ||
+| `:new-table-schema-name`        | `:new-schema`      | string/keyword        ||
+| `:column-data-type`             | `:data-type`       | string/keyword/vector ||
+| `:new-column-data-type`         | `:new-data-type`   | string/keyword/vector ||
+| `:max-value`                    | `:max`             | number or string      ||
+| `:min-value`                    | `:min`             | number or string      ||
+| `:ordered`                      | `:ord`             | true or false         ||
+| `:table-space`                  | `:tspace`          | string/keyword        ||
+| `:cascade-constraints`          | `:cascade`         | logical boolean       ||
+| `:replace-if-exists`            | `:replace`         | logical boolean       ||
+| `:default-null-value`           | `:default`         | string                ||
+| `:deferrable`                   | `:defer`           | logical boolean       ||
+| `:initially-deferred`           | `:idefer`          | logical boolean       ||
+| `:start-value`                  | `:start`           | coerced as BigInteger ||
+| `:increment-by`                 | `:incby`           | coerced as BigInteger ||
+| `:cycle`                        | `:cyc`             | logical boolean       ||
+| `:encoding`                     | `:enc`             | string                | "UTF-8" |
+| `:base-table-schema-name`       | `:base-schema`     | string                ||
+| `:referenced-table-schema-name` | `:ref-schema`      | string                ||
+| `:deferrable`                   | `:defer`           | boolean               ||
+| `:initially-deferred`           | `:idefer`          | boolean               ||
+| `:on-delete`                    | `:ondel`           | string                ||
+| `:on-update`                    | `:onupd`           | string                ||
+| `:where-clause`                 | `:where`           | string                ||
 
 #### Structural Refactorings
 
@@ -177,7 +178,23 @@ base-table-schema-name       base-schema ; String
 
 #### Non-Refactoring Transformations
 
-TODO
+| Function name                 | Required args           | Type     | Optional kwargs                 | Description |
+|-------------------------------|-------------------------|----------|---------------------------------|-------------|
+| `insert-data`                 | `table-name`            | str/kw   | `:schema-name`                  | [Insert data into specified table](http://www.liquibase.org/manual/insert_data) |
+|                               | `column-value-map`      | map      |||
+| `load-data`                   | `table-name`            | str/kw   | `:schema-name`                  | [Load data from CSV file into specified table](http://www.liquibase.org/manual/load_data) |
+|                               | `csv-filename`          | string   | `:encoding`                     ||
+|                               | `columns-spec`          | coll/map |||
+| `load-update-data`            | `table-name`            | str/kw   | `:schema-name`                  | [Load and save (insert/update) data from CSV file into specified table](http://www.liquibase.org/manual/load_update_data) |
+|                               | `csv-filename`          | string   | `:encoding`                     ||
+|                               | `primary-key-cols`      |          |                                 ||
+|                               | `columns-spec`          | coll/map |                                 ||
+| `update-data`                 | `table-name`            |          | `:schema-name`                  | [Update data in existing table](http://www.liquibase.org/manual/update_data) |
+|                               | `column-name-value-map` |          | `:where-clause`                 ||
+| `delete-data`                 | `table-name`            |          | `:schema-name`                  | [Delete data from specified table](http://www.liquibase.org/manual/delete_data) |
+|                               |                         |          | `:where-clause`                 ||
+| `tag-database`                | `tag`                   |          |                                 | [Tag the database with specified tag](http://www.liquibase.org/manual/tag_database) |
+| `stop`                        |                         |          |                                 | [Stop Liquibase execution immediately, useful for debugging](http://www.liquibase.org/manual/stop) |
 
 #### Architectural Refactorings
 
