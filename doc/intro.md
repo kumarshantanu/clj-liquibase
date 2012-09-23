@@ -26,9 +26,9 @@ Supported commands:
 ## Understanding change, changeset, changelog
 
 A _change_ (instance of class `liquibase.change.Change`) is the smallest unit of
-a database change. However a _change_ cannot be tracked as it is; hence it must
-be wrapped in a _changeset_ (instance of class `liquibase.changelog.ChangeSet`.)
-A _changeset_ can contain several _change_ objects in the desired order, and is
+a database change. A _change_ cannot be tracked as it is; hence it must be
+wrapped in a _changeset_ (instance of class `liquibase.changelog.ChangeSet`.) A
+_changeset_ can contain several _change_ objects in the desired order, and is
 marked with `id` and `author` attributes.
 
 A _changelog_ (instance of the class `liquibase.changelog.DatabaseChangeLog`)
@@ -39,15 +39,15 @@ to the database in the intended way.
 
 Important points to note:
 
-* The _change_ and _changeset_ definition (in code) cannot be modified in any
-  way once applied to the database.
+* The _change_ and _changeset_ definition (in code) cannot be modified once
+  applied to the database.
 * A _changelog_ definition (in code) cannot be modified after being applied to
   the database. However, you can add more _changeset_ objects to it later.
 
 
-### _Change_
+### Change
 
-The _change_ objects can be constructed by using the factory functions in the
+_Change_ objects can be constructed by using the factory functions in the
 `clj-liquibase.change` namespace, which are described in the sub-sections below:
 
 
@@ -210,6 +210,22 @@ Example of creating a _change_ object:
 | `tag-database`                | `tag`                   |          |                                 | [Tag the database with specified tag](http://www.liquibase.org/manual/tag_database) |
 | `stop`                        |                         |          |                                 | [Stop Liquibase execution immediately, useful for debugging](http://www.liquibase.org/manual/stop) |
 
+##### Columns config for loading data
+
+Loading data from CSV files into the database requires translation rules. The
+functions `load-data` and `load-update-data` accept an argument `columns-spec`
+that is a collection of column-config elements. Every column-config is a
+collection of 2 required arguments followed by optional keyword args:
+
+Required arguments:
+
+  * First element: `colname` (keyword/string)
+  * Second element: `coltype` (either of "STRING", "NUMERIC", "DATE", "BOOLEAN")
+
+Optional keyword args with corresponding values:
+
+  `:index` (number)
+  `:header` (Keyword/String)
 
 #### Architectural Refactorings
 
@@ -280,7 +296,15 @@ An example changeset-construction look like this:
 
 ```clojure
 ;; assume `ch1` is a change object
-(make-changeset "id=1" "author=shantanu" [ch1])
+(clj-liquibase.core/make-changeset "id=1" "author=shantanu" [ch1])
+```
+
+A shorter way to define a _changeset_ for use in a _changelog_ is to only store
+the arguments in a vector -- `defchangelog` automatically creates a _changeset_
+from the arguments in the vector:
+
+```clojure
+(def ch-set1 ["id=1" "author=shantanu" [ch1]])
 ```
 
 The recommended way to create a changeset is to wrap only one _change_ object,
