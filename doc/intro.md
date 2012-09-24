@@ -435,4 +435,6 @@ $ lein run -m foo.schema tag --tag=v0.1.0
 
 ## Core functions
 
-TODO
+The core functions that implement the commands are supposed to be invoked in
+a context where certain dynamic vars are bound to appropriate values. You are
+encouraged to inspect the source code in the namespace `clj-liquibase.core`.
