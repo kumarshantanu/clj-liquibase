@@ -352,7 +352,13 @@ command-line argument parser that knows about the CLI commands and their various
 switches respectively.
 
 An application simply needs to collect user-provided command line arguments and
-invoke the `clj-liquibase.cli/entry` function with the following arguments:
+invoke:
+
+```clojure
+(clj-liquibase.cli/entry cmd opts & args)
+```
+
+The `clj-liquibase.cli/entry` arguments are described below:
 
 | Argument | Description |
 |----------|-------------|
@@ -362,9 +368,70 @@ invoke the `clj-liquibase.cli/entry` function with the following arguments:
 
 The various switches for their respective commands are listed below:
 
-TODO: table with command switches
+| Command    | Required          | Optional     | Opt no-value | Description |
+|------------|-------------------|--------------|--------------|-------------|
+| `help`     |                   |              |              | Show help text |
+| `version`  |                   |              |              | Show Clj-Liquibase version |
+| `update`   | `:datasource`     | `:chs-count` | `:sql-only`  | Update database to specified changelog |
+|            | `:changelog`      | `:contexts`  |||
+| `rollback` | `:datasource`     | `:chs-count` | `:sql-only`  | Rollback database to specified changeset-count/tag/ISO-date |
+|            | `:changelog`      | `:tag`       |||
+|            |                   | `:date`      |||
+|            |                   | `:contexts`  |||
+| `tag`      | `:datasource`     |              |              | Tag database with specified tag |
+|            | `:tag`            ||||
+| `dbdoc`    | `:datasource`     | `:contexts`  |              | Generate database/changelog documentation |
+|            | `:changelog`      ||||
+|            | `:output-dir`     ||||
+| `diff`     | `:datasource`     |              |              | Report difference between 2 database instances |
+|            | `:ref-datasource` ||||
 
-TODO: example with `lein run -m foo.bar`
+The switches listed above may either be provided as part of the `opts` map, or
+as command-line arguments in `args` as follows:
+
+| Switch            | Long-name example           | Short-name example |
+|-------------------|-----------------------------|--------------------|
+| `:changelog`      | `"--changelog=a.schema/cl"` | `"-c=a.schema/cl"` |
+| `:chs-count`      | `"--chs-count=10"`          | `"-n10"`           |
+| `:contexts`       | `"--contexts=foo,bar"`      | `"-tfoo,bar"`      |
+| `:datasource`     | `"--datasource=foo.bar/ds"` | `"-dfoo.bar/ds"`   |
+| `:date`           | `"--date=2012-09-16"`       | `"-e2012-09-16"`   |
+| `:output-dir`     | `"--output-dir=target/doc"` | `"-otarget/doc"`   |
+| `:ref-datasource` | `"--ref-datasource=foo/ds"` | `"-rfoo/ds"`       |
+| `:sql-only`       | `"--sql-only"` (no value)   | `"-s"` (no value)  |
+| `:tag`            | `"--tag=v0.1.0"`            | `"-gv0.1.0"`       |
+
+Please note that `:datasource`, `:changelog` and `:ref-datasource` may point to
+var names that would be resolved at runtime to obtain the corresponding values.
+
+### Integrating in an app
+
+The following example shows how to integrate an app with the Clj-Liquibase CLI:
+
+```clojure
+(ns foo.schema
+  (:require
+    [foo.globals :as globals]
+    [clj-liquibase.change :as ch]
+    [clj-liquibase.core   :as lb]
+    [clj-liquibase.cli    :as cli]))
+
+;; assuming that globals/ds is bound to a DataSource
+
+(defchangelog ch-log "foo" [..change-sets..])
+
+(defn -main
+  [& [cmd & args]]
+  (apply cli/entry cmd {:datasource globals/ds :changelog ch-log} args))
+```
+
+
+You can run this example as follows:
+
+```bash
+$ lein run -m foo.schema update
+$ lein run -m foo.schema tag --tag=v0.1.0
+```
 
 ## Core functions
 
