@@ -372,18 +372,18 @@ The various switches for their respective commands are listed below:
 |------------|-------------------|--------------|--------------|-------------|
 | `help`     |                   |              |              | Show help text |
 | `version`  |                   |              |              | Show Clj-Liquibase version |
-| `update`   | `:datasource`     | `:chs-count` | `:sql-only`  | Update database to specified changelog |
+| `update`   | `:datasource`     | `:chs-count` | `:sql-only`  | [Update database to specified changelog](http://www.liquibase.org/manual/update) |
 |            | `:changelog`      | `:contexts`  |||
-| `rollback` | `:datasource`     | `:chs-count` | `:sql-only`  | Rollback database to specified changeset-count/tag/ISO-date |
+| `rollback` | `:datasource`     | `:chs-count` | `:sql-only`  | [Rollback database to specified changeset-count/tag/ISO-date](http://www.liquibase.org/manual/rollback) |
 |            | `:changelog`      | `:tag`       |||
 |            |                   | `:date`      |||
 |            |                   | `:contexts`  |||
-| `tag`      | `:datasource`     |              |              | Tag database with specified tag |
+| `tag`      | `:datasource`     |              |              | Tag the database on _ad hoc_ basis |
 |            | `:tag`            ||||
-| `dbdoc`    | `:datasource`     | `:contexts`  |              | Generate database/changelog documentation |
+| `dbdoc`    | `:datasource`     | `:contexts`  |              | [Generate database/changelog documentation](http://www.liquibase.org/manual/dbdoc) |
 |            | `:changelog`      ||||
 |            | `:output-dir`     ||||
-| `diff`     | `:datasource`     |              |              | Report difference between 2 database instances |
+| `diff`     | `:datasource`     |              |              | [Report difference between 2 database instances](http://www.liquibase.org/manual/diff) |
 |            | `:ref-datasource` ||||
 
 The switches listed above may either be provided as part of the `opts` map, or
