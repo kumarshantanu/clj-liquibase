@@ -1,11 +1,10 @@
 # Changes and TODO
 
 * Move to Github (from Bitbucket)
-* Move to Leiningen builds (from Maven)
+* Move to Leiningen build (from Maven)
 * Move to Liquibase 2.0.5 (from 2.0.2)
 * Introduce required argument _logical-schema_ in `defchangelog`
-* Support for CLI integration (pulled from Lein-LB) [TODO] integration tests
-* [TODO] Expose Liquibase 2.0.5 features
+* Support for CLI integration (pulled from Lein-LB)
 * Upgrade dependencies
   * clj-miscutil from 0.3 to 0.4.1
   * Drop clj-dbspec, use clj-jdbcutil 0.1.0
