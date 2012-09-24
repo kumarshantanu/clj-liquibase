@@ -90,7 +90,7 @@
     (let [p {:datasource :foo}
           a {:date "2011-02-26" :changelog "x" :datasource :foo}]
       (is (= a (ll/parse-rollback-args p "--date=2011-02-26" "-cx")) "--date")
-      (is (= a (ll/parse-rollback-args p "-d2011-02-26"      "-cx")) "-d"))
+      (is (= a (ll/parse-rollback-args p "-e2011-02-26"      "-cx")) "-e"))
     (let [p {:datasource :foo}
           a {:contexts "a,b" :changelog "x" :datasource :foo}]
       (is (= a (ll/parse-rollback-args p "--contexts=a,b"    "-cx")) "--contexts")

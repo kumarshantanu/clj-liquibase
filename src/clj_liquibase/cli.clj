@@ -281,7 +281,7 @@ For help on individual command, append with `--help`, e.g.:
     ["Changelog var name to apply rollback on"   :with-arg :changelog  :c]
     ["How many Changesets to rollback"           :opt-arg  :chs-count  :n]
     ["Which tag to rollback to"                  :opt-arg  :tag        :g]
-    ["Rollback ISO-date (yyyy-MM-dd'T'HH:mm:ss)" :opt-arg  :date       :d]
+    ["Rollback ISO-date (yyyy-MM-dd'T'HH:mm:ss)" :opt-arg  :date       :e]
     ["Contexts (comma separated)"                :opt-arg  :contexts   :t]
     ["Only generate SQL, do not commit"          :no-arg   :sql-only   :s]))
 
