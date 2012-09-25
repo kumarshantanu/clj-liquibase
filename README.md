@@ -1,7 +1,7 @@
 # clj-liquibase
 
-Clj-Liquibase is a Clojure wrapper for Liquibase for
-database change management and migrations.
+Clj-Liquibase is a Clojure wrapper for [Liquibase](http://www.liquibase.org/)
+for database change management and migration.
 
 Supported actions:
 
