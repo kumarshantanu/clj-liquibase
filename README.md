@@ -55,7 +55,7 @@ namespaces define the _change_, _changeset_ and _changelog_ objects:
 
 
 ; you can add more changesets later to the changelog
-(lb/defchangelog app-changelog "fooapp" [changeset-1])
+(defchangelog app-changelog "fooapp" [changeset-1])
 
 
 ;; keep the DataSource handy and invoke the CLI
