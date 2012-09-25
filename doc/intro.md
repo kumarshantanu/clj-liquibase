@@ -306,6 +306,8 @@ from the arguments in the vector:
 ```clojure
 (def ch-set1 ["id=1" "author=shantanu" [ch1]])
 ```
+_Note:_ Changeset ID should be unique per user across all changesets in a
+changelog, i.e. several users can have identical changeset ID.
 
 The recommended way to create a changeset is to wrap only one _change_ object,
 the main reason being pre-conditions and SQL-visitors can be applied only at the
