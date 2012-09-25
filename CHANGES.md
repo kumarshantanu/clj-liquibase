@@ -1,17 +1,5 @@
 # Changes and TODO
 
-* Move to Github (from Bitbucket)
-* Move to Leiningen build (from Maven)
-* Move to Liquibase 2.0.5 (from 2.0.2)
-* Introduce required argument _logical-schema_ in `defchangelog`
-* Support for CLI integration (pulled from Lein-LB)
-* Upgrade dependencies
-  * clj-miscutil from 0.3 to 0.4.1
-  * Drop clj-dbspec, use clj-jdbcutil 0.1.0
-* Upgrade test dependencies
-  * OSS-JDBC from 0.5 to 0.8.0
-  * clj-dbcp from 0.5 to 0.8.0
-* [TODO] Improve documentation
 * [TODO] Liquibase Functionality (commands)
   * Diff Changelog
   * Generate Changelog
@@ -25,6 +13,22 @@
     * Custom SQL File
     * Custom Refactoring Class
     * Execute Shell Command
+
+
+## 0.4.0 / 2012-Sep-25
+
+* Move to Github (from Bitbucket)
+* Move to Leiningen build (from Maven)
+* Move to Liquibase 2.0.5 (from 2.0.2)
+* Introduce required argument _logical-schema_ in `defchangelog`
+* Support for CLI integration (pulled from Lein-LB)
+* Upgrade dependencies
+  * clj-miscutil from 0.3 to 0.4.1
+  * Drop clj-dbspec, use clj-jdbcutil 0.1.0
+* Upgrade test dependencies
+  * OSS-JDBC from 0.5 to 0.8.0
+  * clj-dbcp from 0.5 to 0.8.0
+* Improve documentation
 
 
 ## 0.3 / 2011-Nov-20
