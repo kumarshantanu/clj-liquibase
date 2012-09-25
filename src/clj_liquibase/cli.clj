@@ -16,7 +16,7 @@
   []
   (println "The following commands are available
 help       - Shows this help screen
-version    - Shows version information
+version    - Shows clj-liquibase version
 update     - Updates the database
 rollback   - Rolls back database
 tag        - Tags the database
