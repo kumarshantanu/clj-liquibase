@@ -15,68 +15,71 @@ Supported actions:
 
 ## Usage
 
-On Clojars: [http://clojars.org/org.bituf/clj-liquibase](http://clojars.org/org.bituf/clj-liquibase)
+On Clojars: https://clojars.org/clj-liquibase
 
-Leiningen dependency: `[org.bituf/clj-quibase "0.3"]`
+Leiningen dependency: `[clj-liquibase "0.4.0"]`
+
 
 ### Quickstart
 
-Create a new project and include the following dependencies:
+Create a new project e.g. `fooapp` using [Leiningen](http://leiningen.org/) and
+include the following dependencies in `project.clj`:
 
 ```clojure
-[org.bituf/clj-dbcp "0.5"]
-[org.bituf/oss-jdbc "0.5"]
-[org.bituf/clj-liquibase "0.3"]
+[clj-dbcp      "0.8.0"]  ; to create connection-pooling DataSource
+[clj-liquibase "0.4.0"]  ; for this library
+[oss-jdbc      "0.8.0"]  ; for Open Source JDBC drivers
 ```
 
-Include the required namespace in your application and define a changelog:
+Create a Clojure source file for managing the DB schema. Include the required
+namespaces define the _change_, _changeset_ and _changelog_ objects:
 
 ```clojure
-;; filename: fooapp/src/fooapp/dbchange.clj
-(ns fooapp.dbchange
+(ns fooapp.dbschema
   (:require
-    [org.bituf.clj-liquibase :as lb]
-    [org.bituf.clj-liquibase.change :as ch]))
-    
+    [clj-dbcp.core        :as cp]
+    [clj-liquibase.change :as ch]
+    [clj-liquibase.cli    :as cli])
+  (:use
+    [clj-liquibase.core :only (defchangelog)]))
+
+;; define the changes, changesets and the changelog
+
 (def ct-change1 (ch/create-table :sample-table1
                   [[:id     :int          :null false :pk true :autoinc true]
                    [:name   [:varchar 40] :null false]
                    [:gender [:char 1]     :null false]]))
-    
+
+; recommended: one change per changeset
 (def changeset-1 ["id=1" "author=shantanu" [ct-change1]])
-    
-(lb/defchangelog changelog [changeset-1])
+
+
+; you can add more changesets later to the changelog
+(lb/defchangelog app-changelog "fooapp" [changeset-1])
+
+
+;; keep the DataSource handy and invoke the CLI
+
+(def ds (cp/make-datasource :mysql {:host "localhost" :database "people"
+                                    :user "dbuser"    :password "s3cr3t"}))
+
+(defn -main
+  [& [cmd & args]]
+  (apply cli/entry cmd {:datasource ds :changelog  app-changelog}
+         args))
+
 ```
 
 After defining the changelog, you need to apply the changes:
 
-```clojure
-;; filename: fooapp/src/fooapp/dbmigrate.clj
-(ns fooapp.dbmigrate
-  (:require
-    [fooapp.dbchange         :as dbch]
-    [org.bituf.clj-dbcp      :as dbcp]
-    [org.bituf.clj-dbspec    :as spec]
-    [org.bituf.clj-liquibase :as lb]))
-    
-;; define datasource for supported database using Clj-DBCP
-(def ds (dbcp/mysql-datasource "localhost" "dbname" "user" "pass"))
-    
-(defn do-lb-action "Wrap f using DBSpec middleware and execute it"
-  [f]
-  (let [g (spec/wrap-dbspec (spec/make-dbspec ds)
-            (lb/wrap-lb-init f))]
-            (g)))
-    
-(defn do-update "Invoke this function to update the database"
-  []
-  (do-lb-action #(lb/update dbch/changelog)))
+```bash
+lein run -m fooapp.dbschema help
+lein run -m fooapp.dbschema update
 ```
 
+### Documentation
 
-Once you are done with these, you can invoke `fooapp.dbmigrate/do-update` to
-carry out the changes.
-
+For more documentation please refer the file `doc/intro.md` in this repo.
 
 ## License
 
