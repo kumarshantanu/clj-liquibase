@@ -435,6 +435,15 @@ $ lein run -m foo.schema tag --tag=v0.1.0
 
 ## Core functions
 
+The CLI commands shown above are implemented via corresponding functions in the
+`clj-liquibase.core` namespace listed below:
+
+* `update` `update-by-count`
+* `tag`
+* `rollback-to-tag` `rollback-to-date` `rollback-by-count`
+* `generate-doc`
+* `diff`
+
 The core functions that implement the commands are supposed to be invoked in
-a context where certain dynamic vars are bound to appropriate values. You are
+a context where certain dynamic vars are bound to appropriate values. Feel
 encouraged to inspect the source code in the namespace `clj-liquibase.core`.
