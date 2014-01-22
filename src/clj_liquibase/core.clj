@@ -1,7 +1,7 @@
 (ns clj-liquibase.core
   "Expose functions from the Liquibase library.
   See also:
-    http://www.liquibase.org/manual/home"
+    http://www.liquibase.org/documentation/index.html"
   (:require
     [clojure.string    :as sr]
     [clj-jdbcutil.core :as sp]
@@ -31,7 +31,7 @@
     (liquibase.executor                Executor ExecutorService LoggingExecutor)
     (liquibase.exception               LiquibaseException LockException)
     (liquibase.integration.commandline CommandLineUtils)
-    (liquibase.lockservice             LockService)
+    (liquibase.lockservice             LockService LockServiceFactory)
     (liquibase.logging                 LogFactory Logger)
     (liquibase.precondition            Precondition)
     (liquibase.precondition.core       PreconditionContainer)
@@ -110,7 +110,7 @@
     :valid-checksum     :valid-csum ; String
     :visitors                       ; list of SqlVisitor objects
   See also:
-    http://www.liquibase.org/manual/changeset"
+    http://www.liquibase.org/documentation/changeset"
   [^String id ^String author ^List changes
    & {:keys [logical-filepath   filepath
              dbms
@@ -179,10 +179,11 @@
                                (every? #(instance? Precondition %) v-pre-cond)))))
         ;; String id, String author, boolean alwaysRun, boolean runOnChange,
         ;; String filePath, String contextList, String dbmsList, boolean runInTransaction
+        _ (do (println b-always "@" b-change "@" b-in-txn))
         c-set (ChangeSet.
                 ^String id ^String author   ^Boolean b-always ^Boolean b-change
                 ^String (mu/java-filepath s-filepath)
-                ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn)]
+                ^String s-contxt ^String  s-dbms   ^Boolean b-in-txn (DatabaseChangeLog. ""))]
     (doseq [each changes]
       (.addChange c-set each))
     (if b-fail-err (.setFailOnError   c-set b-fail-err))
@@ -253,7 +254,7 @@
   Optional args:
     :pre-conditions :pre-cond  ; PreconditionContainer object, or list of Precondition objects
   See also:
-    http://www.liquibase.org/manual/databasechangelog
+    http://www.liquibase.org/documentation/databasechangelog
     make-changelog-params"
   [^String filepath ^List change-sets
    & {:keys [pre-conditions     pre-cond   ; vector
@@ -320,7 +321,7 @@
         "'db-changelog' parameter is required if updating existing checksums")))
   (.checkDatabaseChangeLogTable db
     update-existing-null-checksums db-changelog (into-array String contexts))
-  (when (not (.hasChangeLogLock (LockService/getInstance db)))
+  (when (not (.hasChangeLogLock (.getLockService (LockServiceFactory/getInstance) db)))
     (.checkDatabaseChangeLogLockTable db)))
 
 
@@ -380,7 +381,7 @@
   "Acquire lock and execute body of code in that context. Make sure the lock is
   released (or log an error if it can't be) before exit."
   [& body]
-  `(let [ls# (LockService/getInstance *db-instance*)]
+  `(let [ls# (.getLockService (LockServiceFactory/getInstance) *db-instance*)]
      (.waitForLock ls#)
      (try ~@body
        (finally
@@ -420,7 +421,7 @@
   See also:
     liquibase.Liquibase/update
     make-db-instance
-    http://www.liquibase.org/manual/update"
+    http://www.liquibase.org/documentation/update"
   ([changelog-fn]
     (update changelog-fn []))
   ([changelog-fn ^List contexts] {:pre [(mu/verify-arg (fn? changelog-fn))
@@ -453,7 +454,7 @@
   See also:
     liquibase.Liquibase/update
     make-db-instance
-    http://www.liquibase.org/manual/update"
+    http://www.liquibase.org/documentation/update"
   ([changelog-fn ^Integer howmany-changesets]
     (update-by-count changelog-fn howmany-changesets []))
   ([changelog-fn ^Integer howmany-changesets ^List contexts]
@@ -496,7 +497,7 @@
   "Rollback schema to specified tag.
   See also:
     liquibase.Liquibase/rollback
-    http://www.liquibase.org/manual/rollback"
+    http://www.liquibase.org/documentation/rollback"
   ([changelog-fn ^String tag]
     (rollback-to-tag changelog-fn tag []))
   ([changelog-fn ^String tag ^List contexts]
@@ -530,7 +531,7 @@
   "Rollback schema to specified date.
   See also:
     liquibase.Liquibase/rollback
-    http://www.liquibase.org/manual/rollback"
+    http://www.liquibase.org/documentation/rollback"
   ([changelog-fn ^Date date]
     (rollback-to-date changelog-fn date []))
   ([changelog-fn ^Date date ^List contexts]
@@ -565,7 +566,7 @@
   "Rollback schema by specified count of changes.
   See also:
     liquibase.Liquibase/rollback
-    http://www.liquibase.org/manual/rollback"
+    http://www.liquibase.org/documentation/rollback"
   ([changelog-fn ^Integer howmany-changesets]
     (rollback-by-count changelog-fn ^Integer howmany-changesets []))
   ([changelog-fn ^Integer howmany-changesets ^List contexts]
@@ -599,7 +600,7 @@
 (defn generate-doc
   "Generate documentation for changelog.
   See also:
-    http://www.liquibase.org/manual/dbdoc
+    http://www.liquibase.org/documentation/dbdoc
     http://www.liquibase.org/dbdoc/index.html"
   ([changelog-fn ^String output-dir ^List contexts]
     {:pre [(mu/verify-arg (fn? changelog-fn))
@@ -624,6 +625,6 @@
 (defn diff
   "Report a description of the differences between two databases to standard out.
   See also:
-    http://www.liquibase.org/manual/diff"
+    http://www.liquibase.org/documentation/diff"
   [^Database ref-db-instance]
   (CommandLineUtils/doDiff ref-db-instance *db-instance*))

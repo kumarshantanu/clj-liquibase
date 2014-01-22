@@ -17,13 +17,15 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.structure.core.Column;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.dbdoc.AuthorListWriter;
 import liquibase.dbdoc.AuthorWriter;
 import liquibase.dbdoc.ChangeLogListWriter;
-import liquibase.dbdoc.ChangeLogWriter;
 import liquibase.dbdoc.ColumnWriter;
 import liquibase.dbdoc.HTMLWriter;
 import liquibase.dbdoc.PendingChangesWriter;
@@ -36,7 +38,7 @@ import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StreamUtil;
 
 public class CustomDBDocVisitor implements ChangeSetVisitor {
@@ -128,7 +130,7 @@ public class CustomDBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException, DatabaseHistoryException {
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException, DatabaseHistoryException, InvalidExampleException {
         //ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
@@ -142,21 +144,21 @@ public class CustomDBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
-        new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.getTables()));
+        new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.get(Table.class)));
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
             authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
         }
 
-        for (Table table : snapshot.getTables()) {
+        for (Table table : snapshot.get(Table.class)) {
             tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
-        for (Column column : snapshot.getColumns()) {
+        for (Column column : snapshot.get(Column.class)) {
             columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
         }
 

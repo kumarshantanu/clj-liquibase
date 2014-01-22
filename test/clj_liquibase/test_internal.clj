@@ -3,11 +3,11 @@
     [clj-liquibase.internal :as in]
     [clj-liquibase.change   :as ch])
   (:import
-    (liquibase.database.structure Column)
-    (liquibase.change      ColumnConfig ConstraintsConfig)
-    (liquibase.change.core LoadDataColumnConfig)
-    (liquibase.statement   DatabaseFunction)
-    (liquibase.util        ISODateFormat)
+    (liquibase.structure.core Column)
+    (liquibase.change         ColumnConfig ConstraintsConfig)
+    (liquibase.change.core    LoadDataColumnConfig)
+    (liquibase.statement      DatabaseFunction)
+    (liquibase.util           ISODateFormat)
     (java.util Date))
   (:use clojure.test))
 

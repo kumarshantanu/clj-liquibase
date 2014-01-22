@@ -22,7 +22,9 @@
       InsertDataChange LoadDataChange    LoadUpdateDataChange UpdateDataChange
       DeleteDataChange TagDatabaseChange StopChange
       ;; Architectural Refactorings
-      CreateIndexChange DropIndexChange)
+      CreateIndexChange DropIndexChange
+      ;; Custom Refactorings
+      RawSQLChange)
     (liquibase.statement DatabaseFunction)
     (liquibase.util      ISODateFormat))
   (:use clj-liquibase.test-util)
@@ -527,6 +529,15 @@
       with-schema-name
       with-schema)))
 
+(deftest test-sql
+  (testing "sql"
+    (test-change RawSQLChange
+                 (partial change/sql "SELECT * FROM DATABASECHAGELOG")
+                 ["With :comment value"          :comment         "This is a comment"]
+                 ["With :dbms value"             :dbms            "h2"]
+                 ["With :end-delimiter value"    :end-delimiter    ";"]
+                 ["With :split-statements value" :split-statements true]
+                 ["With :strip-comments value"   :strip-comments   true])))
 
 (defn test-ns-hook []
   ;; ----- Structural Refactorings -----

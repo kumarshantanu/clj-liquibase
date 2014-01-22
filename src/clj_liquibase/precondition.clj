@@ -1,7 +1,7 @@
 (ns clj-liquibase.precondition
   "Clojure wrappers for liquibase.change.Change implementations.
   See also:
-    http://www.liquibase.org/manual/home (Available Database Refactorings)"
+    http://www.liquibase.org/documentation/index (Available Database Refactorings)"
   (:require
     [clj-jdbcutil.core      :as sp]
     [clj-miscutil.core      :as mu]
@@ -252,7 +252,7 @@
     :on-update-sql What to do in updateSQL mode; either of
                      :run, :fail, :ignore
   See also:
-    http://www.liquibase.org/manual/preconditions"
+    http://www.liquibase.org/documentation/preconditions"
   [pre-cond-list
    & {:keys [on-fail       ; onFail         -- What to do when preconditions fail
              on-fail-msg   ; onFailMessage  -- Custom message to output when preconditions fail
