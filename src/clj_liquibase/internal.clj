@@ -4,7 +4,7 @@
     [clj-jdbcutil.core :as sp]
     [clj-miscutil.core :as mu])
   (:import
-    (liquibase.database.structure Column)
+    (liquibase.structure.core Column)
     (liquibase.change      ColumnConfig ConstraintsConfig)
     (liquibase.change.core LoadDataColumnConfig)
     (liquibase.statement   DatabaseFunction)
@@ -25,7 +25,7 @@
     (coltype :char 80)    => \"char(80)\"
     (coltype :float 17 5) => \"float(17, 5)\"
   Note: This function is called during constructing column-config.
-  See also: http://www.liquibase.org/manual/column"
+  See also: http://www.liquibase.org/documentation/column"
   [t & more]
   (str (sp/db-iden t)
     (if (mu/not-empty? more) (apply str "(" (mu/comma-sep-str more) ")"))))
@@ -73,7 +73,7 @@
     :index  (Number)
     :header (Keyword/String)
   See also:
-    http://www.liquibase.org/manual/load_data"
+    http://www.liquibase.org/documentation/changes/load_data"
   [colname coltype
    & {:keys [index  ; Integer
              header
@@ -209,7 +209,7 @@
     [:birth-date :date          :null false]
   See also:
     as-coltype
-    http://www.liquibase.org/manual/column"
+    http://www.liquibase.org/documentation/column"
   [colname coltype ; coltype (mixed) - keyword, string, vector (1st arg: db-iden)
    & {:keys [default-value          default  ; String/Number/Date/Boolean/DatabaseFunction
              auto-increment         autoinc  ; Boolean
@@ -266,7 +266,7 @@
     (if-nn c-uniq     (.setUnique               con ^Boolean   c-uniq     ))
     (if-nn c-ucname   (.setUniqueConstraintName con ^String  (sp/db-iden
                                                                c-ucname  )))
-    (if-nn c-check    (.setCheck                con ^String    c-check    ))
+    (if-nn c-check    (.setCheckConstraint      con ^String    c-check    ))
     (if-nn c-dcascade (.setDeleteCascade        con ^Boolean   c-dcascade ))
     (if-nn c-fkname   (.setForeignKeyName       con ^String  (sp/db-iden
                                                                c-fkname  )))
