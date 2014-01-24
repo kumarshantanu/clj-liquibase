@@ -27,7 +27,7 @@ include the following dependencies in `project.clj`:
 
 ```clojure
 [clj-dbcp      "0.8.1"]  ; to create connection-pooling DataSource
-[clj-liquibase "0.4.0"]  ; for this library
+[clj-liquibase "0.5.0"]  ; for this library
 [oss-jdbc      "0.8.0"]  ; for Open Source JDBC drivers
 ```
 
