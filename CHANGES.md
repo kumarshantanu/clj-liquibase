@@ -15,6 +15,15 @@
     * Execute Shell Command
 
 
+## 0.5.0 / 2014-Jan-24
+
+* Use Liquibase 3.0.8 (by Jonathan Rojas, @john-roj87)
+* Custom Refactorings
+  * Custom/Raw SQL (by Jonathan Rojas, @john-roj87)
+* Upgrade test dependencies
+  * clj-dbcp from 0.8.0 to 0.8.1
+
+
 ## 0.4.0 / 2012-Sep-25
 
 * Move to Github (from Bitbucket)
