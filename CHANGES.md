@@ -2,17 +2,21 @@
 
 * [TODO] Liquibase Functionality (commands)
   * Diff Changelog
-  * Generate Changelog
+  * Generate Changelog (i.e. reverse-engineer DB as a changelog)
 * [TODO] Column type vars/inference functions
   * Database-independent columns: http://www.liquibase.org/manual/column
   * Infer from java.sql.Types instance (use liquibase.database.structure.Column)
   * By example: (example "Joe Backer") or (eg 269.8)
 * [TODO] 'Change' implementations:
   * Custom Refactorings
-    * Custom SQL
-    * Custom SQL File
     * Custom Refactoring Class
     * Execute Shell Command
+
+
+## 0.5.1 / 2014-Jan-28
+
+* Custom Refactorings
+  * SQL File
 
 
 ## 0.5.0 / 2014-Jan-24
