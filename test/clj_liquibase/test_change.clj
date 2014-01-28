@@ -24,7 +24,7 @@
       ;; Architectural Refactorings
       CreateIndexChange DropIndexChange
       ;; Custom Refactorings
-      RawSQLChange)
+      RawSQLChange SQLFileChange)
     (liquibase.statement DatabaseFunction)
     (liquibase.util      ISODateFormat))
   (:use clj-liquibase.test-util)
@@ -529,15 +529,34 @@
       with-schema-name
       with-schema)))
 
+
+;; ----- Custom Refactorings -----
+
+
 (deftest test-sql
   (testing "sql"
     (test-change RawSQLChange
-                 (partial change/sql "SELECT * FROM DATABASECHAGELOG")
-                 ["With :comment value"          :comment         "This is a comment"]
-                 ["With :dbms value"             :dbms            "h2"]
-                 ["With :end-delimiter value"    :end-delimiter    ";"]
-                 ["With :split-statements value" :split-statements true]
-                 ["With :strip-comments value"   :strip-comments   true])))
+      (partial change/sql "SELECT * FROM DATABASECHAGELOG")
+      ["With :comment value"          :comment         "This is a comment"]
+      ["With :dbms value"             :dbms            "h2"]
+      ["With :end-delimiter value"    :end-delimiter    ";"]
+      ["With :split-statements value" :split-statements true]
+      ["With :strip-comments value"   :strip-comments   true])))
+
+
+(deftest test-sql-file
+  (testing "sql-file"
+    (test-change SQLFileChange
+      (partial change/sql-file "test-sql-file.sql")
+      ["With :dbms value"             :dbms             "h2"]
+      ["With :encoding value"         :encoding         "utf-8"]
+      ["With :end-delimiter value"    :end-delimiter    ";"]
+      ["With :split-statements value" :split-statements true]
+      ["With :strip-comments value"   :strip-comments   true])))
+
+
+;; ***** Run the tests *****
+
 
 (defn test-ns-hook []
   ;; ----- Structural Refactorings -----
@@ -581,7 +600,6 @@
   ;; ----- Architectural Refactorings -----
   (test-create-index)
   (test-drop-index)
-  (test-drop-default-value)
-  (test-drop-default-value)
-  (test-drop-default-value)
-  (test-drop-default-value))
+  ;; ----- Custom Refactorings -----
+  (test-sql)
+  (test-sql-file))

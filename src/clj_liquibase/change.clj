@@ -30,7 +30,7 @@
       ;; Architectural Refactorings
       CreateIndexChange DropIndexChange
       ;; Custom Refactorings
-      RawSQLChange)
+      RawSQLChange SQLFileChange)
     (liquibase.statement DatabaseFunction)
     (liquibase.util      ISODateFormat)))
 
@@ -1189,10 +1189,12 @@
 ;; Modifying Generated SQL
 ;; TODO
 
-;; Custom SQL
+
+;; Custom SQL - RawSQLChange
+
 (defn ^RawSQLChange sql
-  "Allows execution of arbitrary SQL. This change can be used when existing
-   changes are either don't exist, are not flexible enough, or buggy. (RawSQLChange).
+  "Return a Change instance that executes arbitrary SQL (RawSQLChange). May be
+  useful when desired change types don't exist, or are buggy/inflexible.
   See also:
     http://www.liquibase.org/documentation/changes/sql"
   [sql
@@ -1212,14 +1214,47 @@
     (doto change
       (.setSql sql))
     (if comment          (.setComment         change comment))
-    (if dbms             (.setDbms            change dbms))
+    (if dbms             (.setDbms            change (if (or (coll? dbms) (seq? dbms))
+                                                       (mu/comma-sep-str dbms)
+                                                       dbms)))
     (if end-delimiter    (.setEndDelimiter    change end-delimiter))
     (if split-statements (.setSplitStatements change split-statements))
     (if strip-comments   (.setStripComments   change strip-comments))
     change))
 
-;; Custom SQL File .SQLFileChange
-;; TODO
+
+;; Custom SQL File - SQLFileChange
+
+(defn ^SQLFileChange sql-file
+  "Return a Change instance that executes SQL after reading it from a file
+  (SQLFileChange). Useful to integrate with legacy projects having SQL files for
+  DDL, or to decouple DDL from the project in general.
+  See also:
+    http://www.liquibase.org/documentation/changes/sql_file"
+  [sql-filepath
+   & {:keys [dbms
+             encoding
+             end-delimiter
+             split-statements
+             strip-comments
+             ] :as opt}] {:post (instance? SQLFileChange %)
+                          :pre [(mu/verify-opt #{:dbms
+                                                 :encoding
+                                                 :end-delimiter
+                                                 :split-statements
+                                                 :strip-comments} opt)]}
+  (let [change (SQLFileChange.)]
+    (doto change
+      (.setPath sql-filepath))
+    (if dbms             (.setDbms         change (if (or (coll? dbms) (seq? dbms))
+                                                    (mu/comma-sep-str dbms)
+                                                    dbms)))
+    (if encoding         (.setEncoding     change encoding))
+    (if end-delimiter    (.setEndDelimiter change end-delimiter))
+    (if split-statements (.setSplitStatements change split-statements))
+    (if strip-comments   (.setStripComments   change strip-comments))
+    change))
+
 
 ;; Custom Refactoring Class
 ;; TODO
