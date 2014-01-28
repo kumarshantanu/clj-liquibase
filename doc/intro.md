@@ -239,6 +239,23 @@ Optional keyword args with corresponding values:
 |                               | `table-name`            | stringable |||
 
 
+#### Custom Refactorings
+
+| Function name | Required args | Type       | Optional kwargs     | Description |
+|---------------|---------------|------------|---------------------|-------------|
+| `sql`         | `sql`         | string     | `:comment`          | [Execute given SQL](http://www.liquibase.org/documentation/changes/sql) |
+|               |               |            | `:dbms`             ||
+|               |               |            | `:encoding`         ||
+|               |               |            | `:end-delimiter`    ||
+|               |               |            | `:split-statements` ||
+|               |               |            | `:strip-comments`   ||
+| `sql-file`    | `file-path`   | string     | `:dbms`             | [Execute SQL from file](http://www.liquibase.org/documentation/changes/sql_file) |
+|               |               |            | `:encoding`         ||
+|               |               |            | `:end-delimiter`    ||
+|               |               |            | `:split-statements` ||
+|               |               |            | `:strip-comments`   ||
+
+
 #### Short names for keyword args
 
 Note that you can use the following short names for corresponding keyword args:
