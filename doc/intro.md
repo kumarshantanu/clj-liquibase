@@ -55,48 +55,48 @@ _Change_ objects can be constructed by using the factory functions in the
 
 | Function name             | Required args       | Optional kwargs        | Description |
 |---------------------------|---------------------|------------------------|-------------|
-| `add-columns`             | `table-name`        | `:schema-name`         | [Add columns to an existing table](http://www.liquibase.org/manual/add_column) |
-|                           | `columns`           |                        | [Column definition](http://www.liquibase.org/manual/column) |
-| `rename-column`           | `table-name`        | `:schema-name`         | [Rename column in an existing table](http://www.liquibase.org/manual/rename_column) |
+| `add-columns`             | `table-name`        | `:schema-name`         | [Add columns to an existing table](http://www.liquibase.org/documentation/changes/add_column) |
+|                           | `columns`           |                        | [Column definition](http://www.liquibase.org/documentation/column) |
+| `rename-column`           | `table-name`        | `:schema-name`         | [Rename column in an existing table](http://www.liquibase.org/documentation/changes/rename_column) |
 |                           | `old-column-name`   | `:column-data-type`    ||
 |                           | `new-column-name`   |||
-| `modify-column`           | `table-name`        | `:schema-name`         | [Modify data type of a column in an existing table](http://www.liquibase.org/manual/modify_column) |
+| `modify-column`           | `table-name`        | `:schema-name`         | [Modify data type of a column in an existing table](http://www.liquibase.org/documentation/changes/modify_data_type) |
 |                           | `column-name`       |                        ||
 |                           | `new-data-type`     |||
-| `drop-column`             | `table-name`        | `:schema-name`         | [Drop specified column from an existing table](http://www.liquibase.org/manual/drop_column) |
+| `drop-column`             | `table-name`        | `:schema-name`         | [Drop specified column from an existing table](http://www.liquibase.org/documentation/changes/drop_column) |
 |                           | `column-name`       |                        ||
-| `alter-sequence`          | `seq-name`          | `:schema-name`         | [Modifies a database sequence](http://www.liquibase.org/manual/alter_sequence) |
+| `alter-sequence`          | `seq-name`          | `:schema-name`         | [Modifies a database sequence](http://www.liquibase.org/documentation/changes/alter_sequence) |
 |                           | `increment-by`      | `:max-value`           ||
 |                           |                     | `:min-value`           ||
 |                           |                     | `:ordered`             ||
-| `create-table`            | `table-name`        | `:schema-name`         | [Create a new table](http://www.liquibase.org/manual/create_table) |
-|                           | `columns`           | `:table-space`         | [Column definition](http://www.liquibase.org/manual/column) |
+| `create-table`            | `table-name`        | `:schema-name`         | [Create a new table](http://www.liquibase.org/documentation/changes/create_table) |
+|                           | `columns`           | `:table-space`         | [Column definition](http://www.liquibase.org/documentation/column) |
 |                           |                     | `:remarks`             ||
 | `create-table-withid`     | same as above       | same as above          | Same as above, except it creates auto-incremented ID column |
 |                           |                     | `:idcol`               ||
-| `rename-table`            | `old-table-name`    | `:schema-name`         | [Rename an existing table](http://www.liquibase.org/manual/rename_table) |
+| `rename-table`            | `old-table-name`    | `:schema-name`         | [Rename an existing table](http://www.liquibase.org/documentation/changes/rename_table) |
 |                           | `new-table-name`    |                        ||
-| `drop-table`              | `table-name`        | `:schema-name`         | [Drop an existing table](http://www.liquibase.org/manual/drop_table) |
+| `drop-table`              | `table-name`        | `:schema-name`         | [Drop an existing table](http://www.liquibase.org/documentation/changes/drop_table) |
 |                           |                     | `:cascade-constraints` ||
-| `create-view`             | `view-name`         | `:schema-name`         | [Create a database view](http://www.liquibase.org/manual/create_view) |
+| `create-view`             | `view-name`         | `:schema-name`         | [Create a database view](http://www.liquibase.org/documentation/changes/create_view) |
 |                           | `select-query`      | `:replace-if-exists`   ||
-| `rename-view`             | `old-view-name`     | `:schema-name`         | [Rename an existing database view](http://www.liquibase.org/manual/rename_view) |
+| `rename-view`             | `old-view-name`     | `:schema-name`         | [Rename an existing database view](http://www.liquibase.org/documentation/changes/rename_view) |
 |                           | `new-view-name`     |                        ||
-| `drop-view`               | `view-name`         | `:schema-name`         | [Drop an existing database view](http://www.liquibase.org/manual/drop_view) |
-| `merge-columns`           | `table-name`        | `:schema-name`         | [Merge two columns of the same table into one](http://www.liquibase.org/manual/merge_columns) |
+| `drop-view`               | `view-name`         | `:schema-name`         | [Drop an existing database view](http://www.liquibase.org/documentation/changes/drop_view) |
+| `merge-columns`           | `table-name`        | `:schema-name`         | [Merge two columns of the same table into one](http://www.liquibase.org/documentation/changes/merge_columns) |
 |                           | `column1-name`      |                        ||
 |                           | `join-string`       |||
 |                           | `column2-name`      |||
 |                           | `final-column-name` |||
 |                           | `final-column-type` |||
-| `create-stored-procedure` | `procedure-body`    | `:comments`            | [Create database stored procedure](http://www.liquibase.org/manual/create_stored_procedure) |
+| `create-stored-procedure` | `procedure-body`    | `:comments`            | [Create database stored procedure](http://www.liquibase.org/documentation/changes/create_procedure) |
 
 
 ##### Column config
 
 The functions `add-columns`, `create-table` and `create-table-withid` accept a
 `columns` argument, which is a collection of
-[_column-config_](http://www.liquibase.org/manual/column) elements. Each
+[_column-config_](http://www.liquibase.org/documentation/column) elements. Each
 column-config is a vector of 2 required args followed by optional keyword args.
 
 Required args: `column-name`, `column-type`
@@ -136,38 +136,38 @@ Example of creating a _change_ object:
 
 | Function name              | Required args          | Optional kwargs               | Description |
 |----------------------------|------------------------|-------------------------------|-------------|
-| `add-lookup-table`         | `existing-table-name`  | `:existing-table-schema-name` | [Add a lookup table](http://www.liquibase.org/manual/add_lookup_table) |
+| `add-lookup-table`         | `existing-table-name`  | `:existing-table-schema-name` | [Add a lookup table](http://www.liquibase.org/documentation/changes/add_lookup_table) |
 |                            | `existing-column-name` | `:new-table-schema-name`      ||
 |                            | `new-table-name`       | `:new-column-data-type`       ||
 |                            | `new-column-name`      |||
 |                            | `constraint-name`      |||
-| `add-not-null-constraint`  | `table-name`           | `:schema-name`                | [Add NOT NULL constraint on specified column in a table](http://www.liquibase.org/manual/add_not-null_constraint) |
+| `add-not-null-constraint`  | `table-name`           | `:schema-name`                | [Add NOT NULL constraint on specified column in a table](http://www.liquibase.org/documentation/changes/add_not_null_constraint) |
 |                            | `column-name`          | `:default-null-value`         ||
 |                            | `column-data-type`     |||
-| `drop-not-null-constraint` | `table-name`           | `:schema-name`                | [Drop NOT NULL constraint for specified column](http://www.liquibase.org/manual/remove_not-null_constraint) |
+| `drop-not-null-constraint` | `table-name`           | `:schema-name`                | [Drop NOT NULL constraint for specified column](http://www.liquibase.org/documentation/changes/drop_not_null_constraint) |
 |                            | `column-name`          | `:column-data-type`           ||
-| `add-unique-constraint`    | `table-name`           | `:schema-name`                | [Add UNIQUE constraint for specified columns](http://www.liquibase.org/manual/add_unique_constraint) |
+| `add-unique-constraint`    | `table-name`           | `:schema-name`                | [Add UNIQUE constraint for specified columns](http://www.liquibase.org/documentation/changes/add_unique_constraint) |
 |                            | `column-names`         | `:table-space`                ||
 |                            | `constraint-name`      | `:deferrable`                 ||
 |                            |                        | `:initially-deferred`         ||
 |                            |                        | `:disabled`                   ||
-| `drop-unique-constraint`   | `table-name`           | `:schema-name`                | [Drop specified UNIQUE constraint](http://www.liquibase.org/manual/drop_unique_constraint) |
+| `drop-unique-constraint`   | `table-name`           | `:schema-name`                | [Drop specified UNIQUE constraint](http://www.liquibase.org/documentation/changes/drop_unique_constraint) |
 |                            | `constraint-name`      |||
-| `create-sequence`          | `sequence-name`        | `:schema-name`                | [Create a database sequence](http://www.liquibase.org/manual/create_sequence) |
+| `create-sequence`          | `sequence-name`        | `:schema-name`                | [Create a database sequence](http://www.liquibase.org/documentation/changes/create_sequence) |
 |                            |                        | `:start-value`                ||
 |                            |                        | `:increment-by`               ||
 |                            |                        | `:max-value`                  ||
 |                            |                        | `:min-value`                  ||
 |                            |                        | `:ordered`                    ||
 |                            |                        | `:cycle`                      ||
-| `drop-sequence`            | `sequence-name`        | `:schema-name`                | [Drop specified database sequence](http://www.liquibase.org/manual/drop_sequence) |
-| `add-auto-increment`       | `table-name`           | `:schema-name`                | [Convert an existing column to auto-increment type](http://www.liquibase.org/manual/add_auto-increment) |
+| `drop-sequence`            | `sequence-name`        | `:schema-name`                | [Drop specified database sequence](http://www.liquibase.org/documentation/changes/drop_sequence) |
+| `add-auto-increment`       | `table-name`           | `:schema-name`                | [Convert an existing column to auto-increment type](http://www.liquibase.org/documentation/changes/add_auto_increment) |
 |                            | `column-name`          |||
 |                            | `column-data-type`     |||
-| `add-default-value`        | `table-name`           | `:schema-name`                | [Add default value for specified column](http://www.liquibase.org/manual/add_default_value) |
+| `add-default-value`        | `table-name`           | `:schema-name`                | [Add default value for specified column](http://www.liquibase.org/documentation/changes/add_default_value) |
 |                            | `column-name`          | `:column-data-type`           ||
 |                            | `default-value`        |||
-| `drop-default-value`       | `table-name`           | `:schema-name`                | [Drop default value for specified column](http://www.liquibase.org/manual/drop_default_value) |
+| `drop-default-value`       | `table-name`           | `:schema-name`                | [Drop default value for specified column](http://www.liquibase.org/documentation/changes/drop_default_value) |
 |                            | `column-name`          | `:column-data-type`           ||
 
 
@@ -175,18 +175,18 @@ Example of creating a _change_ object:
 
 | Function name                 | Required args             | Optional kwargs                 | Description |
 |-------------------------------|---------------------------|---------------------------------|-------------|
-| `add-foreign-key-constraint`  | `constraint-name`         | `:base-table-schema-name`       | [Add foreign key constraint to an existing column](http://www.liquibase.org/manual/add_foreign_key_constraint) |
+| `add-foreign-key-constraint`  | `constraint-name`         | `:base-table-schema-name`       | [Add foreign key constraint to an existing column](http://www.liquibase.org/documentation/changes/add_foreign_key_constraint) |
 |                               | `base-table-name`         | `:referenced-table-schema-name` ||
 |                               | `base-column-names`       | `:deferrable`                   ||
 |                               | `referenced-table-name`   | `:initially-deferred`           ||
 |                               | `referenced-column-names` | `:on-delete`                    ||
 |                               |                           | `:on-update`                    ||
-| `drop-foreign-key-constraint` | `constraint-name`         | `:schema-name`                  | [Drop a foreign key constraint](http://www.liquibase.org/manual/drop_foreign_key_constraint) |
+| `drop-foreign-key-constraint` | `constraint-name`         | `:schema-name`                  | [Drop a foreign key constraint](http://www.liquibase.org/documentation/changes/drop_foreign_key_constraint) |
 |                               | `base-table-name`         |||
-| `add-primary-key`             | `table-name`              | `:schema-name`                  | [Add primary key from one or more columns](http://www.liquibase.org/manual/add_primary_key_constraint) |
+| `add-primary-key`             | `table-name`              | `:schema-name`                  | [Add primary key from one or more columns](http://www.liquibase.org/documentation/changes/add_primary_key) |
 |                               | `column-names`            | `:table-space`                  ||
 |                               | `constraint-name`         |||
-| `drop-primary-key`            | `table-name`              | `:schema-name`                  | [Drop an existing primary key](http://www.liquibase.org/manual/drop_primary_key_constraint) |
+| `drop-primary-key`            | `table-name`              | `:schema-name`                  | [Drop an existing primary key](http://www.liquibase.org/documentation/changes/drop_primary_key) |
 |                               |                           | `:constraint-name`              ||
 
 
@@ -194,21 +194,21 @@ Example of creating a _change_ object:
 
 | Function name                 | Required args           | Type     | Optional kwargs                 | Description |
 |-------------------------------|-------------------------|----------|---------------------------------|-------------|
-| `insert-data`                 | `table-name`            | str/kw   | `:schema-name`                  | [Insert data into specified table](http://www.liquibase.org/manual/insert_data) |
+| `insert-data`                 | `table-name`            | str/kw   | `:schema-name`                  | [Insert data into specified table](http://www.liquibase.org/documentation/changes/insert) |
 |                               | `column-value-map`      | map      |||
-| `load-data`                   | `table-name`            | str/kw   | `:schema-name`                  | [Load data from CSV file into specified table](http://www.liquibase.org/manual/load_data) |
+| `load-data`                   | `table-name`            | str/kw   | `:schema-name`                  | [Load data from CSV file into specified table](http://www.liquibase.org/documentation/changes/load_data) |
 |                               | `csv-filename`          | string   | `:encoding`                     ||
 |                               | `columns-spec`          | coll/map |||
-| `load-update-data`            | `table-name`            | str/kw   | `:schema-name`                  | [Load and save (insert/update) data from CSV file into specified table](http://www.liquibase.org/manual/load_update_data) |
+| `load-update-data`            | `table-name`            | str/kw   | `:schema-name`                  | [Load and save (insert/update) data from CSV file into specified table](http://www.liquibase.org/documentation/changes/load_update_data) |
 |                               | `csv-filename`          | string   | `:encoding`                     ||
 |                               | `primary-key-cols`      |          |                                 ||
 |                               | `columns-spec`          | coll/map |                                 ||
-| `update-data`                 | `table-name`            |          | `:schema-name`                  | [Update data in existing table](http://www.liquibase.org/manual/update_data) |
+| `update-data`                 | `table-name`            |          | `:schema-name`                  | [Update data in existing table](http://www.liquibase.org/documentation/changes/update) |
 |                               | `column-name-value-map` |          | `:where-clause`                 ||
-| `delete-data`                 | `table-name`            |          | `:schema-name`                  | [Delete data from specified table](http://www.liquibase.org/manual/delete_data) |
+| `delete-data`                 | `table-name`            |          | `:schema-name`                  | [Delete data from specified table](http://www.liquibase.org/documentation/changes/delete) |
 |                               |                         |          | `:where-clause`                 ||
-| `tag-database`                | `tag`                   |          |                                 | [Tag the database with specified tag](http://www.liquibase.org/manual/tag_database) |
-| `stop`                        |                         |          |                                 | [Stop Liquibase execution immediately, useful for debugging](http://www.liquibase.org/manual/stop) |
+| `tag-database`                | `tag`                   |          |                                 | [Tag the database with specified tag](http://www.liquibase.org/documentation/changes/tag_database) |
+| `stop`                        |                         |          |                                 | [Stop Liquibase execution immediately, useful for debugging](http://www.liquibase.org/documentation/changes/stop) |
 
 ##### Columns config for loading data
 
@@ -231,11 +231,11 @@ Optional keyword args with corresponding values:
 
 | Function name                 | Required args           | Type       | Optional kwargs                 | Description |
 |-------------------------------|-------------------------|------------|---------------------------------|-------------|
-| `create-index`                | `table-name`            | stringable | `:schema-name`                  | [Create index with specified column names](http://www.liquibase.org/manual/create_index) |
+| `create-index`                | `table-name`            | stringable | `:schema-name`                  | [Create index with specified column names](http://www.liquibase.org/documentation/changes/create_index) |
 |                               | `column-names`          | collection | `:index-name`                   ||
 |                               |                         |            | `:unique`                       ||
 |                               |                         |            | `:table-space`                  ||
-| `drop-index`                  | `index-name`            | stringable | `:schema-name`                  | [Drop an existing index](http://www.liquibase.org/manual/drop_index) |
+| `drop-index`                  | `index-name`            | stringable | `:schema-name`                  | [Drop an existing index](http://www.liquibase.org/documentation/changes/drop_index) |
 |                               | `table-name`            | stringable |||
 
 
@@ -274,7 +274,7 @@ Note that you can use the following short names for corresponding keyword args:
 
 ### Constructing Changeset objects
 
-A [_changeset_](http://www.liquibase.org/manual/changeset) can be constructed
+A [_changeset_](http://www.liquibase.org/documentation/changeset) can be constructed
 using the function `clj-liquibase.core/make-changeset`.
 Required args: `id` (string),  `author` (string), `changes` (collection of _change_ objects)
 Optional kwargs:
@@ -374,18 +374,18 @@ The various switches for their respective commands are listed below:
 |------------|-------------------|--------------|--------------|-------------|
 | `help`     |                   |              |              | Show help text |
 | `version`  |                   |              |              | Show Clj-Liquibase version |
-| `update`   | `:datasource`     | `:chs-count` | `:sql-only`  | [Update database to specified changelog](http://www.liquibase.org/manual/update) |
+| `update`   | `:datasource`     | `:chs-count` | `:sql-only`  | [Update database to specified changelog](http://www.liquibase.org/documentation/update) |
 |            | `:changelog`      | `:contexts`  |||
-| `rollback` | `:datasource`     | `:chs-count` | `:sql-only`  | [Rollback database to specified changeset-count/tag/ISO-date](http://www.liquibase.org/manual/rollback) |
+| `rollback` | `:datasource`     | `:chs-count` | `:sql-only`  | [Rollback database to specified changeset-count/tag/ISO-date](http://www.liquibase.org/documentation/rollback) |
 |            | `:changelog`      | `:tag`       |||
 |            |                   | `:date`      |||
 |            |                   | `:contexts`  |||
 | `tag`      | `:datasource`     |              |              | Tag the database on _ad hoc_ basis |
 |            | `:tag`            ||||
-| `dbdoc`    | `:datasource`     | `:contexts`  |              | [Generate database/changelog documentation](http://www.liquibase.org/manual/dbdoc) |
+| `dbdoc`    | `:datasource`     | `:contexts`  |              | [Generate database/changelog documentation](http://www.liquibase.org/documentation/dbdoc) |
 |            | `:changelog`      ||||
 |            | `:output-dir`     ||||
-| `diff`     | `:datasource`     |              |              | [Report difference between 2 database instances](http://www.liquibase.org/manual/diff) |
+| `diff`     | `:datasource`     |              |              | [Report difference between 2 database instances](http://www.liquibase.org/documentation/diff) |
 |            | `:ref-datasource` ||||
 
 The switches listed above may either be provided as part of the `opts` map, or
