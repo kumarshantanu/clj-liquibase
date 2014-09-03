@@ -12,20 +12,31 @@
     (javax.sql       DataSource)))
 
 
+(def available-commands [{:cli-string "dbdoc"
+                          :short-desc "Generates documentation for database/changelogs"}
+                         {:cli-string "diff"
+                          :short-desc "Reports differences between two database instances"}
+                         {:cli-string "help"
+                          :short-desc "Shows this help screen"}
+                         {:cli-string "rollback"
+                          :short-desc "Rolls back database"}
+                         {:cli-string "tag"
+                          :short-desc "Tags the database"}
+                         {:cli-string "update"
+                          :short-desc "Updates the database"}
+                         {:cli-string "version"
+                          :short-desc "Shows clj-liquibase version"}])
+
+
 (defn help
   []
   (println "The following commands are available
-help       - Shows this help screen
-version    - Shows clj-liquibase version
-update     - Updates the database
-rollback   - Rolls back database
-tag        - Tags the database
-dbdoc      - Generates documentation for database/changelogs
-diff       - Reports differences between two database instances
-
+")
+  (doseq [command available-commands]
+    (printf "%-12s - %s\n" (:cli-string command) (:short-desc command)))
+  (println "
 For help on individual command, append with `--help`, e.g.:
-<command> update --help
-"))
+<command> update --help"))
 
 
 (defn ^String as-string
