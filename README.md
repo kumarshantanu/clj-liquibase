@@ -17,7 +17,7 @@ Supported actions:
 
 On Clojars: https://clojars.org/clj-liquibase
 
-Leiningen dependency: `[clj-liquibase "0.5.1"]`
+Leiningen dependency: `[clj-liquibase "0.5.2"]`
 
 
 ### Quickstart
@@ -27,7 +27,7 @@ include the following dependencies in `project.clj`:
 
 ```clojure
 [clj-dbcp      "0.8.1"]  ; to create connection-pooling DataSource
-[clj-liquibase "0.5.1"]  ; for this library
+[clj-liquibase "0.5.2"]  ; for this library
 [oss-jdbc      "0.8.0"]  ; for Open Source JDBC drivers
 ```
 
@@ -86,10 +86,11 @@ For more documentation please refer the file `doc/intro.md` in this repo.
 
 * Shantanu Kumar (author)
 * [Jonathan Rojas](https://github.com/john-roj87)
+* [Christopher Mark Gore](https://github.com/cgore)
 
 
 ## License
 
-Copyright © 2012-2014 Shantanu Kumar
+Copyright © 2012-2014 Shantanu Kumar and contributors
 
 Distributed under the Eclipse Public License, the same as Clojure.

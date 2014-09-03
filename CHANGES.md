@@ -13,6 +13,11 @@
     * Execute Shell Command
 
 
+## 0.5.2 / 2014-Sep-04
+
+* Make CLI command accessible (by Christopher Mark Gore, @cgore)
+
+
 ## 0.5.1 / 2014-Jan-28
 
 * Custom Refactorings
