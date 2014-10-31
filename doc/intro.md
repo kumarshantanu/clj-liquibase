@@ -105,7 +105,7 @@ Optional kwargs:
 | Long name                 | Short name  |Allowed types           |
 |---------------------------|-------------|------------------------|
 | `:default-value`          | `:default`  | String/Number/java.util.Date/Boolean/DatabaseFunction |
-| `:auto-increment`         | `:autoinc   | Boolean        |
+| `:auto-increment`         | `:autoinc`  | Boolean        |
 | `:remarks`                |             | String         |
 | `:nullable`               | `:null`     | Boolean        |
 | `:primary-key`            | `:pk`       | Boolean        |
