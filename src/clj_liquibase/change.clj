@@ -523,7 +523,7 @@
   "Return a Change instance that drops a NOT NULL constraint
   (DropNotNullConstraintChange).
   See also:
-    http://www.liquibase.org/documentation/changes/remove_not_null_constraint"
+    http://www.liquibase.org/documentation/changes/drop_not_null_constraint"
   [table-name column-name
    & {:keys [catalog-name     catalog   ; String/Keyword - subject to db-iden
              schema-name      schema    ; String/Keyword - subject to db-iden
