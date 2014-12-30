@@ -490,7 +490,7 @@
   "Return a Change instance that adds a NOT NULL constraint
   (AddNotNullConstraintChange).
   See also:
-    http://www.liquibase.org/documentation/changes/add_not-null_constraint"
+    http://www.liquibase.org/documentation/changes/add_not_null_constraint"
   [table-name column-name column-data-type
    & {:keys [catalog-name       catalog ; String/Keyword - subject to db-iden
              schema-name        schema  ; String/Keyword - subject to db-iden
@@ -523,7 +523,7 @@
   "Return a Change instance that drops a NOT NULL constraint
   (DropNotNullConstraintChange).
   See also:
-    http://www.liquibase.org/documentation/changes/remove_not-null_constraint"
+    http://www.liquibase.org/documentation/changes/drop_not_null_constraint"
   [table-name column-name
    & {:keys [catalog-name     catalog   ; String/Keyword - subject to db-iden
              schema-name      schema    ; String/Keyword - subject to db-iden
@@ -692,7 +692,7 @@
   "Return a Change instance that converts an existing column to be an
   auto-increment column (AddAutoIncrementChange).
   See also:
-    http://www.liquibase.org/documentation/changes/add_auto-increment"
+    http://www.liquibase.org/documentation/changes/add_auto_increment"
   [table-name column-name column-data-type
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
