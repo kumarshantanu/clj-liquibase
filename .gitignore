@@ -14,3 +14,4 @@ pom.xml
 .idea
 .lein-repl-history
 /derby.log
+/pom.xml.asc
