@@ -1,4 +1,4 @@
-(defproject clj-liquibase "0.5.2"
+(defproject clj-liquibase "0.5.3-SNAPSHOT"
   :description "Clojure wrapper for Liquibase"
   :url "https://github.com/kumarshantanu/clj-liquibase"
   :license {:name "Eclipse Public License"
@@ -9,8 +9,8 @@
                  :post "bitumenframework@googlegroups.com"}
   :java-source-paths ["java-src"]
   :javac-options {:destdir "target/classes/"
-                  :source  "1.5"
-                  :target  "1.5"}
+                  :source  "1.6"
+                  :target  "1.6"}
   :dependencies [[org.liquibase/liquibase-core "3.0.8"]
                  [clj-jdbcutil "0.1.0"]
                  [clj-miscutil "0.4.1"]]
@@ -20,9 +20,10 @@
              :1.3 {:dependencies [[org.clojure/clojure "1.3.0"]]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
-             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
-  :aliases {"dev" ["with-profile" "dev,1.6"]
-            "all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev,1.5:dev,1.6"]}
+             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
+             :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
+  :aliases {"dev" ["with-profile" "dev,1.7"]
+            "all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev,1.5:dev,1.6:dev,1.7"]}
   :global-vars {*warn-on-reflection* true}
   :min-lein-version "2.0.0"
   :jvm-opts ["-Xmx1g"])
