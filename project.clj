@@ -16,14 +16,13 @@
                  [clj-miscutil "0.4.1"]]
   :profiles {:dev {:dependencies [[oss-jdbc "0.8.0"]
                                   [clj-dbcp "0.8.1"]]}
-             :1.2 {:dependencies [[org.clojure/clojure "1.2.1"]]}
              :1.3 {:dependencies [[org.clojure/clojure "1.3.0"]]}
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
   :aliases {"dev" ["with-profile" "dev,1.7"]
-            "all" ["with-profile" "dev,1.2:dev,1.3:dev,1.4:dev,1.5:dev,1.6:dev,1.7"]}
+            "all" ["with-profile" "dev,1.3:dev,1.4:dev,1.5:dev,1.6:dev,1.7"]}
   :global-vars {*warn-on-reflection* true}
   :min-lein-version "2.0.0"
   :jvm-opts ["-Xmx1g"])
