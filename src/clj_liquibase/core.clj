@@ -2,6 +2,7 @@
   "Expose functions from the Liquibase library.
   See also:
     http://www.liquibase.org/documentation/index.html"
+  (:refer-clojure :exclude [update])
   (:require
     [clojure.string    :as sr]
     [clj-jdbcutil.core :as sp]

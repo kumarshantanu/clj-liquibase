@@ -1,4 +1,5 @@
 (ns clj-liquibase.cli
+  (:refer-clojure :exclude [update])
   (:require
     [clojure.java.io :as io]
     [clojure.string  :as sr]
