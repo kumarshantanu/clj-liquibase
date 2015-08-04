@@ -13,6 +13,13 @@
     * Execute Shell Command
 
 
+## 0.5.3 / 2015-Aug-04
+
+* Exclude `clojure.core/update` to avoid shadow warning in Clojure 1.7 (by Jake McCrary, @jakemcc)
+* Fix type hints
+* Drop support for Clojure 1.2
+
+
 ## 0.5.2 / 2014-Sep-04
 
 * Make CLI command accessible (by Christopher Mark Gore, @cgore)
