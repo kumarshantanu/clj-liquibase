@@ -13,25 +13,28 @@
   (instance? SqlVisitor v))
 
 
-(defn ^AppendSqlVisitor make-append-visitor
+(defn make-append-visitor
   "Return visitor that appends `text` to generated SQL."
+  ^AppendSqlVisitor
   [^String text] {:post [(visitor? %)]
                   :pre  [(mu/verify-arg (mu/not-nil? text))]}
   (doto (AppendSqlVisitor.)
     (.setValue (mu/as-string text))))
 
 
-(defn ^PrependSqlVisitor make-prepend-visitor
+(defn make-prepend-visitor
   "Return visitor that prefixes generated SQL with `text`."
+  ^PrependSqlVisitor
   [^String text] {:post [(visitor? %)]
                   :pre  [(mu/verify-arg (mu/not-nil? text))]}
   (doto (PrependSqlVisitor.)
     (.setValue (mu/as-string text))))
 
 
-(defn ^SqlVisitor make-replace-visitor
+(defn make-replace-visitor
   "Return visitor that replaces `needle` with `text` in generated SQL. Note that
   `needle` can be either string or regex (java.util.regex.Pattern instance.)"
+  ^SqlVisitor
   [needle ^String new-text] {:post [(visitor? %)]
                              :pre  [(mu/verify-arg (mu/not-nil? needle))
                                     (mu/verify-arg (mu/not-nil? new-text))]}

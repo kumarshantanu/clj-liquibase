@@ -18,8 +18,8 @@
 (defn todo [] (is false "Not implemented yet"))
 
 
-(defn ^List query
-  [^String sql]
+(defn query
+  ^List [^String sql]
   (with-open [st ^Statement (.createStatement
                               ^Connection (:connection sp/*dbspec*))]
     (sp/row-seq (.executeQuery st sql))))

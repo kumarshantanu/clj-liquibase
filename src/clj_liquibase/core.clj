@@ -91,7 +91,7 @@
   (instance? ChangeSet x))
 
 
-(defn ^ChangeSet make-changeset
+(defn make-changeset
   "Return a ChangeSet instance. Use MySQL InnoDB for `create-table` changes by
   default (unless overridden by :visitors argument.)
   Arguments:
@@ -112,6 +112,7 @@
     :visitors                       ; list of SqlVisitor objects
   See also:
     http://www.liquibase.org/documentation/changeset"
+  ^ChangeSet
   [^String id ^String author ^List changes
    & {:keys [logical-filepath   filepath
              dbms
@@ -205,16 +206,17 @@
 ;; ===== DatabaseChangeLog helpers =====
 
 
-(defn ^Database make-db-instance
+(defn make-db-instance
   "Return a Database instance for current connection."
-  [^Connection conn]
+  ^Database [^Connection conn]
   ;; DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(conn))
   (.findCorrectDatabaseImplementation (DatabaseFactory/getInstance)
     (JdbcConnection. conn)))
 
 
-(defn ^ChangeLogParameters make-changelog-params
+(defn make-changelog-params
   "Return a ChangeLogParameters instance."
+  ^ChangeLogParameters
   [^Database db-instance
    & {:keys [contexts ; list of string
              ]}]
@@ -247,7 +249,7 @@
   (instance? DatabaseChangeLog x))
 
 
-(defn ^DatabaseChangeLog make-changelog
+(defn make-changelog
   "Return a DatabaseChangeLog instance.
   Arguments:
     change-sets  (collection/list) List of ChangeSet instances, or
@@ -257,6 +259,7 @@
   See also:
     http://www.liquibase.org/documentation/databasechangelog
     make-changelog-params"
+  ^DatabaseChangeLog
   [^String filepath ^List change-sets
    & {:keys [pre-conditions     pre-cond   ; vector
              ] :as opt}] {:post [(instance? DatabaseChangeLog %)]
@@ -326,21 +329,21 @@
     (.checkDatabaseChangeLogLockTable db)))
 
 
-(defn ^ChangeLogIterator make-changelog-iterator
+(defn make-changelog-iterator
   "Return a ChangeLogIterator instance.
   See also:
     liquibase.Liquibase/getStandardChangelogIterator"
-  ([^DatabaseChangeLog changelog ^List changeset-filters]
+  (^ChangeLogIterator [^DatabaseChangeLog changelog ^List changeset-filters]
     (ChangeLogIterator. changelog
       (into-array ChangeSetFilter changeset-filters)))
-  ([^List ran-changesets ^DatabaseChangeLog changelog ^List changeset-filters]
+  (^ChangeLogIterator [^List ran-changesets ^DatabaseChangeLog changelog ^List changeset-filters]
     (ChangeLogIterator. ran-changesets changelog
       (into-array ChangeSetFilter
         changeset-filters))))
 
 
-(defn ^Executor get-db-executor
-  []
+(defn get-db-executor
+  ^Executor []
   (let [ex (ExecutorService/getInstance)]
     (.getExecutor ex *db-instance*)))
 
@@ -394,13 +397,13 @@
 ;; ===== Actions =====
 
 
-(defn ^List change-sql
+(defn change-sql
   "Return a list of SQL statements (string) that would be required to execute
   the given Change object instantly for current database without versioning."
-  [^Change change] {:post [(mu/verify-cond (vector? %))
-                           (mu/verify-cond (every? string? %))]
-                    :pre  [(mu/verify-arg  (instance? Change change))
-                           (mu/verify-cond (instance? Database *db-instance*))]}
+  ^List [^Change change] {:post [(mu/verify-cond (vector? %))
+                                 (mu/verify-cond (every? string? %))]
+                          :pre  [(mu/verify-arg  (instance? Change change))
+                                 (mu/verify-cond (instance? Database *db-instance*))]}
   (let [sgf (SqlGeneratorFactory/getInstance)
         sql (map (fn [^SqlStatement stmt]
                    (map (fn [^Sql sql]

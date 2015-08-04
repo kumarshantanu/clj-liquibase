@@ -12,12 +12,12 @@
     (java.util Date)))
 
 
-(defn ^Boolean dbfn?
-  [x]
+(defn dbfn?
+  ^Boolean [x]
   (instance? DatabaseFunction x))
 
 
-(defn ^String as-coltype
+(defn as-coltype
   "Create column-type (string - subject to sp/db-iden).
   Examples:
     (coltype :int)        => \"INT\"
@@ -26,7 +26,7 @@
     (coltype :float 17 5) => \"float(17, 5)\"
   Note: This function is called during constructing column-config.
   See also: http://www.liquibase.org/documentation/column"
-  [t & more]
+  ^String [t & more]
   (str (sp/db-iden t)
     (if (mu/not-empty? more) (apply str "(" (mu/comma-sep-str more) ")"))))
 
@@ -91,23 +91,23 @@
       ldcc)))
 
 
-(defn- ^DatabaseFunction dbfn
-  [^String value]
+(defn- dbfn
+  ^DatabaseFunction [^String value]
   (DatabaseFunction. value))
 
 
-(defn- ^java.util.Date iso-date
+(defn- iso-date
   "Parse date from ISO-date-format string."
-  [^String date-str]
+  ^java.util.Date [^String date-str]
   (.parse (ISODateFormat.) date-str))
 
 
-(defmacro ^String iso-date-str
+(defmacro iso-date-str
   "Generate ISO-Date string from the following types:
   java.sql.Date
   java.sql.Time
   java.sql.Timestamp"
-  [date]
+  ^String [date]
   `(let [idf# ^ISODateFormat (ISODateFormat.)
          sd# (cond
                (instance? java.sql.Date ~date)      (.format idf# ~(with-meta date {:tag 'java.sql.Date}))
@@ -178,7 +178,7 @@
              ", liquibase.statement.DatabaseFunction (see 'dbfn' function)")))
 
 
-(defn ^ColumnConfig as-column-config
+(defn as-column-config
   "Create column-configuration. This function is called by change/create-table.
   Arguments:
     colname  (String/Keyword) column name - subject to db-iden
@@ -210,7 +210,7 @@
   See also:
     as-coltype
     http://www.liquibase.org/documentation/column"
-  [colname coltype ; coltype (mixed) - keyword, string, vector (1st arg: db-iden)
+  ^ColumnConfig [colname coltype ; coltype (mixed) - keyword, string, vector (1st arg: db-iden)
    & {:keys [default-value          default  ; String/Number/Date/Boolean/DatabaseFunction
              auto-increment         autoinc  ; Boolean
              remarks                         ; String
@@ -276,8 +276,8 @@
     col))
 
 
-(defn ^String as-dbident-names
+(defn as-dbident-names
   "Return comma-separated name string for a given bunch of potentially
   Clojure-oriented names."
-  [names]
+  ^String [names]
   (mu/comma-sep-str (map sp/db-iden (mu/as-vector names))))

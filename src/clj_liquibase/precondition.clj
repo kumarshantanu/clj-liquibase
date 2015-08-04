@@ -33,8 +33,9 @@
   (instance? Precondition x))
 
 
-(defn ^ChangeLogPropertyDefinedPrecondition changelog-prop-defined
+(defn changelog-prop-defined
   "Change-log property defined"
+  ^ChangeLogPropertyDefinedPrecondition
   [prop value] {:post [(mu/verify-cond (instance? ChangeLogPropertyDefinedPrecondition %))]
                 :pre  [(mu/verify-arg (or (keyword? prop)  (string? prop)))
                        (mu/verify-arg (or (keyword? value) (string? value)))]}
@@ -45,8 +46,9 @@
     pc))
 
 
-(defn ^ChangeSetExecutedPrecondition changeset-executed
+(defn changeset-executed
   "Change-set executed"
+  ^ChangeSetExecutedPrecondition
   [file id author] {:post [(mu/verify-cond (instance? ChangeSetExecutedPrecondition %))]
                     :pre  [(mu/verify-arg (string? file))
                            (mu/verify-arg (mu/not-nil? id))
@@ -59,8 +61,9 @@
     pc))
 
 
-(defn ^ColumnExistsPrecondition column-exists
+(defn column-exists
   "Specified column exists"
+  ^ColumnExistsPrecondition
   [schema-name table-name column-name] {:post [(mu/verify-cond (instance? ColumnExistsPrecondition %))]
                                         :pre  [(mu/verify-arg (or (keyword? schema-name) (string? schema-name)))
                                                (mu/verify-arg (or (keyword? table-name)  (string? table-name)))
@@ -76,9 +79,10 @@
 ;; wrapper-based custom preconditions are not supported (they need class name)
 
 
-(defn ^DBMSPrecondition dbms
+(defn dbms
   "Check database type. Example:
   (dbms :mysql)"
+  ^DBMSPrecondition
   [db-type] {:post [(mu/verify-cond (instance? DBMSPrecondition %))]
              :pre  [(mu/verify-arg (or (keyword? db-type) (string? db-type)))]}
   (let [pc (DBMSPrecondition.)]
@@ -88,8 +92,9 @@
 
 
 ;; TODO - do we really need *both* `table-name` and `key-name` arguments?
-(defn ^ForeignKeyExistsPrecondition foreign-key-exists
+(defn foreign-key-exists
   "Return Precondition that asserts given Foreign key exists"
+  ^ForeignKeyExistsPrecondition
   [schema-name table-name key-name] {:post [(mu/verify-cond (instance? ForeignKeyExistsPrecondition %))]
                                      :pre  [(mu/verify-arg (or (keyword? schema-name) (string? schema-name)))
                                             (mu/verify-arg (or (keyword? table-name)  (string? table-name)))
@@ -102,7 +107,8 @@
     pc))
 
 
-(defn ^IndexExistsPrecondition index-exists
+(defn index-exists
+  ^IndexExistsPrecondition
   [schema-name table-name column-names index-name] {:post [(mu/verify-cond (instance? IndexExistsPrecondition %))]
                                                     :pre  [(mu/verify-arg (or (keyword? schema-name)  (string? schema-name)))
                                                            (mu/verify-arg (or (keyword? table-name)   (string? table-name)))
@@ -121,7 +127,8 @@
     pc))
 
 
-(defn ^PrimaryKeyExistsPrecondition primary-key-exists
+(defn primary-key-exists
+  ^PrimaryKeyExistsPrecondition
   [schema-name table-name primary-key-name] {:post [(mu/verify-cond (instance? PrimaryKeyExistsPrecondition %))]
                                              :pre  [(mu/verify-arg (or (keyword? schema-name)      (string? schema-name)))
                                                     (mu/verify-arg (or (keyword? primary-key-name) (string? primary-key-name)))
@@ -134,8 +141,9 @@
     pc))
 
 
-(defn ^RunningAsPrecondition running-as
+(defn running-as
   "Verify database user name"
+  ^RunningAsPrecondition
   [^String user-name] {:post [(mu/verify-cond (instance? RunningAsPrecondition %))]
                        :pre  [(mu/verify-arg (string? user-name))]}
   (let [pc (RunningAsPrecondition.)]
@@ -143,8 +151,9 @@
     pc))
 
 
-(defn ^SequenceExistsPrecondition sequence-exists
+(defn sequence-exists
   "Verify that given sequence exists"
+  ^SequenceExistsPrecondition
   [schema-name sequence-name] {:post [(mu/verify-cond (instance? SequenceExistsPrecondition %))]
                                :pre  [(mu/verify-arg (or (keyword? schema-name)   (string? schema-name)))
                                       (mu/verify-arg (or (keyword? sequence-name) (string? sequence-name)))]}
@@ -155,8 +164,9 @@
     pc))
 
 
-(defn ^SqlPrecondition sql
+(defn sql
   "SQL Check"
+  ^SqlPrecondition
   [expected ^String sql-stmt] {:post [(mu/verify-cond (instance? SqlPrecondition %))]
                                :pre  [(mu/verify-arg (string? sql-stmt))]}
   (let [pc (SqlPrecondition.)]
@@ -167,8 +177,9 @@
     pc))
 
 
-(defn ^TableExistsPrecondition table-exists
+(defn table-exists
   "Verify that said table exists"
+  ^TableExistsPrecondition
   [schema-name table-name] {:post [(mu/verify-cond (instance? TableExistsPrecondition %))]
                             :pre  [(mu/verify-arg (or (keyword? schema-name) (string? schema-name)))
                                    (mu/verify-arg (or (keyword? table-name)  (string? table-name)))]}
@@ -179,8 +190,9 @@
     pc))
 
 
-(defn ^ViewExistsPrecondition view-exists
+(defn view-exists
   "Verify that view exists"
+  ^ViewExistsPrecondition
   [schema-name view-name] {:post [(mu/verify-cond (instance? ViewExistsPrecondition %))]
                            :pre  [(mu/verify-arg (or (keyword? schema-name) (string? schema-name)))
                                   (mu/verify-arg (or (keyword? view-name)   (string? view-name)))]}
@@ -191,8 +203,9 @@
     pc))
 
 
-(defn  ^AndPrecondition pc-and
+(defn pc-and
   "Verify that ALL immediate nested preconditions are met"
+  ^AndPrecondition
   [pc & more] {:post [(mu/verify-cond (instance? AndPrecondition %))]
                :pre  [(mu/verify-arg (every? #(instance? Precondition %)
                                        (into [pc] more)))]}
@@ -202,8 +215,9 @@
     pl))
 
 
-(defn  ^NotPrecondition pc-not
+(defn pc-not
   "Verify that NONE OF immediate nested preconditions is met"
+  ^NotPrecondition
   [pc & more] {:post [(mu/verify-cond (instance? NotPrecondition %))]
                :pre  [(mu/verify-arg (every? #(instance? Precondition %)
                                        (into [pc] more)))]}
@@ -213,8 +227,9 @@
     pl))
 
 
-(defn  ^OrPrecondition pc-or
+(defn pc-or
   "Verify that ANY OF immediate nested preconditions is met"
+  ^OrPrecondition
   [pc & more] {:post [(mu/verify-cond (instance? OrPrecondition %))]
                :pre  [(mu/verify-arg (every? #(instance? Precondition %)
                                        (into [pc] more)))]}
@@ -239,7 +254,7 @@
    })
 
 
-(defn ^PreconditionContainer pre-cond
+(defn pre-cond
   "Return a PreconditionContainer that verifies that ALL immediate nested
   preconditions are met.
   Optional args:
@@ -253,6 +268,7 @@
                      :run, :fail, :ignore
   See also:
     http://www.liquibase.org/documentation/preconditions"
+  ^PreconditionContainer
   [pre-cond-list
    & {:keys [on-fail       ; onFail         -- What to do when preconditions fail
              on-fail-msg   ; onFailMessage  -- Custom message to output when preconditions fail

@@ -45,14 +45,14 @@
 ;; ===== Utility functions =====
 
 
-(defn ^DatabaseFunction dbfn
-  [^String value]
+(defn dbfn
+  ^DatabaseFunction [^String value]
   (DatabaseFunction. value))
 
 
-(defn ^java.util.Date iso-date
+(defn iso-date
   "Parse date from ISO-date-format string."
-  [^String date-str]
+  ^java.util.Date [^String date-str]
   (.parse (ISODateFormat.) date-str))
 
 
@@ -64,12 +64,13 @@
 
 ;; Add Column
 
-(defn ^AddColumnChange add-columns
+(defn add-columns
   "Return a Change instance that adds columns to an existing table
   (AddColumnChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_column
     http://www.liquibase.org/documentation/column"
+  ^AddColumnChange
   [table-name ^List columns
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -92,11 +93,12 @@
 
 ;; Rename Column
 
-(defn ^RenameColumnChange rename-column
+(defn rename-column
   "Return a Change instance that renames a column in an existing table
   (RenameColumnChange).
   See also:
     http://www.liquibase.org/documentation/changes/rename_column"
+  ^RenameColumnChange
   [table-name old-column-name new-column-name
    & {:keys [catalog-name     catalog   ; String/Keyword - subject to db-iden
              schema-name      schema    ; String/Keyword - subject to db-iden
@@ -125,11 +127,12 @@
 
 ;; Modify Column
 
-(defn ^ModifyDataTypeChange modify-column
+(defn modify-column
   "Return a Change instance that modifies data type of a column in an existing
   table (ModifyDataTypeChange).
   See also:
     http://www.liquibase.org/documentation/changes/modify_column"
+  ^ModifyDataTypeChange
   [table-name column-name new-data-type
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -153,11 +156,12 @@
 
 ;; Drop Column
 
-(defn ^DropColumnChange drop-column
+(defn drop-column
   "Return Change instance that drops a column from an existing table
   (DropColumnChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_column"
+  ^DropColumnChange
   [table-name column-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -179,10 +183,11 @@
 
 ;; Alter Sequence
 
-(defn ^AlterSequenceChange alter-sequence
+(defn alter-sequence
   "Return a Change instance that alters a seuqence (AlterSequenceChange).
   See also:
     http://www.liquibase.org/documentation/changes/alter_sequence"
+  ^AlterSequenceChange
   [seq-name increment-by
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; string/Keyword - subject to db-iden
@@ -216,11 +221,12 @@
 
 ;; Create Table
 
-(defn ^CreateTableChange create-table
+(defn create-table
   "Return a Change instance that creates a table (CreateTableChange).
   See also:
     http://www.liquibase.org/documentation/changes/create_table
     http://www.liquibase.org/documentation/column"
+  ^CreateTableChange
   [table-name ^List columns
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -247,14 +253,14 @@
     change))
 
 
-(defn ^CreateTableChange create-table-withid
+(defn create-table-withid
   "Same as `create-table`, but includes an additional auto-generated primary
   key column. The primary key column is named <table-name>_id unless overriden
   with optional argument `:idcol` and ID column-name as the value. E.g. if the
   table name is :sample or \"sample\", then primary key will be \"sample_id\".
   See also:
     create-table"
-  [table-name columns & args]
+  ^CreateTableChange [table-name columns & args]
   (let [{:keys [idcol] :as opt} args
         idcol-name (if idcol
                      (sp/db-iden idcol)
@@ -266,10 +272,11 @@
 
 ;; Rename Table
 
-(defn ^RenameTableChange rename-table
+(defn rename-table
   "Return a Change instance that renames a table (RenameTableChange).
   See also:
     http://www.liquibase.org/documentation/changes/rename_table"
+  ^RenameTableChange
   [old-table-name new-table-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -291,10 +298,11 @@
 
 ;; Drop Table
 
-(defn ^DropTableChange drop-table
+(defn drop-table
   "Return a Change instance that drops a table (DropTableChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_table"
+  ^DropTableChange
   [table-name
    & {:keys [catalog-name        catalog ; String/Keyword - subject to db-iden
              schema-name         schema  ; String/Keyword - subject to db-iden
@@ -317,10 +325,11 @@
 
 ;; Create View
 
-(defn ^CreateViewChange create-view
+(defn create-view
   "Return a Change instance that creates a view (CreateViewChange).
   See also:
     http://www.liquibase.org/documentation/changes/create_view"
+  ^CreateViewChange
   [view-name ^String select-query
    & {:keys [catalog-name      catalog ; String/Keyword - subject to db-iden
              schema-name       schema  ; String/Keyword - subject to db-iden
@@ -346,10 +355,11 @@
 
 ;; Rename View
 
-(defn ^RenameViewChange rename-view
+(defn rename-view
   "Return a Change instance that renames a view (RenameViewChange).
   See also:
     http://www.liquibase.org/documentation/changes/rename_view"
+  ^RenameViewChange
   [old-view-name new-view-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -371,10 +381,11 @@
 
 ;; Drop View
 
-(defn ^DropViewChange drop-view
+(defn drop-view
   "Return a Change instance that drops a view (DropViewChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_view"
+  ^DropViewChange
   [view-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -393,10 +404,11 @@
 
 ;; Merge Columns
 
-(defn ^MergeColumnChange merge-columns
+(defn merge-columns
   "Return a Change instance that merges columns (MergeColumnChange).
   See also:
     http://www.liquibase.org/documentation/changes/merge_columns"
+  ^MergeColumnChange
   [table-name column1-name ^String join-string
    column2-name final-column-name final-column-type
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
@@ -428,11 +440,12 @@
 
 ;; Create Stored Procedure
 
-(defn ^CreateProcedureChange create-stored-procedure
+(defn create-stored-procedure
   "Return a Change instance that creates a stored procedure
   (CreateProcedureChange).
   See also:
     http://www.liquibase.org/documentation/changes/create_stored_procedure"
+  ^CreateProcedureChange
   [^String procedure-body
    & {:keys [comments  ; String
              ] :as opt}] {:post [(instance? CreateProcedureChange %)]
@@ -448,10 +461,11 @@
 
 ;; Add Lookup Table
 
-(defn ^AddLookupTableChange add-lookup-table
+(defn add-lookup-table
   "Return a Change instance that adds a lookup table (AddLookupTableChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_lookup_table"
+  ^AddLookupTableChange
   [existing-table-name existing-column-name
    new-table-name      new-column-name
    constraint-name
@@ -486,11 +500,12 @@
 
 ;; Add Not-Null Constraint
 
-(defn ^AddNotNullConstraintChange add-not-null-constraint
+(defn add-not-null-constraint
   "Return a Change instance that adds a NOT NULL constraint
   (AddNotNullConstraintChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_not_null_constraint"
+  ^AddNotNullConstraintChange
   [table-name column-name column-data-type
    & {:keys [catalog-name       catalog ; String/Keyword - subject to db-iden
              schema-name        schema  ; String/Keyword - subject to db-iden
@@ -519,11 +534,12 @@
 
 ;; Remove/drop Not-Null Constraint
 
-(defn ^DropNotNullConstraintChange drop-not-null-constraint
+(defn drop-not-null-constraint
   "Return a Change instance that drops a NOT NULL constraint
   (DropNotNullConstraintChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_not_null_constraint"
+  ^DropNotNullConstraintChange
   [table-name column-name
    & {:keys [catalog-name     catalog   ; String/Keyword - subject to db-iden
              schema-name      schema    ; String/Keyword - subject to db-iden
@@ -550,11 +566,12 @@
 
 ;; Add Unique Constraint
 
-(defn ^AddUniqueConstraintChange add-unique-constraint
+(defn add-unique-constraint
   "Return a Change instance that adds a UNIQUE constraint
   (AddUniqueConstraintChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_unique_constraint"
+  ^AddUniqueConstraintChange
   [table-name column-names constraint-name
    & {:keys [catalog-name       catalog ; String/Keyword - subject to db-iden
              schema-name        schema  ; String/Keyword - subject to db-iden
@@ -594,11 +611,12 @@
 
 ;; Drop Unique Constraint
 
-(defn ^DropUniqueConstraintChange drop-unique-constraint
+(defn drop-unique-constraint
   "Return a Change instance that drops a UNIQUE constraint
   (DropUniqueConstraintChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_unique_constraint"
+  ^DropUniqueConstraintChange
   [table-name constraint-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
@@ -620,10 +638,11 @@
 
 ;; Create Sequence
 
-(defn ^CreateSequenceChange create-sequence
+(defn create-sequence
   "Return a Change instance that creates a sequence (CreateSequenceChange).
   See also:
     http://www.liquibase.org/documentation/changes/create_sequence"
+  ^CreateSequenceChange
   [sequence-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -666,10 +685,11 @@
 
 ;; Drop Sequence
 
-(defn ^DropSequenceChange drop-sequence
+(defn drop-sequence
   "Return a Change instance that drops a sequence (DropSequenceChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_sequence"
+  ^DropSequenceChange
   [sequence-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
@@ -688,11 +708,12 @@
 
 ;; Add Auto-Increment
 
-(defn ^AddAutoIncrementChange add-auto-increment
+(defn add-auto-increment
   "Return a Change instance that converts an existing column to be an
   auto-increment column (AddAutoIncrementChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_auto_increment"
+  ^AddAutoIncrementChange
   [table-name column-name column-data-type
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
@@ -717,11 +738,12 @@
 
 ;; Add Default Value
 
-(defn ^AddDefaultValueChange add-default-value
+(defn add-default-value
   "Return a Change instance that adds a default value to the database definition
   for the specified column (AddDefaultValueChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_default_value"
+  ^AddDefaultValueChange
   [table-name column-name default-value
    & {:keys [catalog-name     catalog   ; String/Keyword - subject to db-iden
              schema-name      schema    ; String/Keyword - subject to db-iden
@@ -749,11 +771,12 @@
 
 ;; Drop Default Value
 
-(defn ^DropDefaultValueChange drop-default-value
+(defn drop-default-value
   "Return a Change instance that removes a database default value for a column
   (DropDefaultValueChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_default_value"
+  ^DropDefaultValueChange
   [table-name column-name
    & {:keys [catalog-name     catalog ; String/Keyword - subject to db-iden
              schema-name      schema  ; String/Keyword - subject to db-iden
@@ -782,11 +805,12 @@
 
 ;; Add Foreign Key Constraint
 
-(defn ^AddForeignKeyConstraintChange add-foreign-key-constraint
+(defn add-foreign-key-constraint
   "Return a Change instance that adds a foreign key constraint to an existing
   column (AddForeignKeyConstraintChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_foreign_key_constraint"
+  ^AddForeignKeyConstraintChange
   [constraint-name base-table-name base-column-names
    referenced-table-name referenced-column-names
    & {:keys [base-table-schema-name       base-schema ; String
@@ -831,11 +855,12 @@
 
 ;; Drop Foreign Key Constraint
 
-(defn ^DropForeignKeyConstraintChange drop-foreign-key-constraint
+(defn drop-foreign-key-constraint
   "Return a Change instance that drops an existing foreign key
   (DropForeignKeyConstraintChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_foreign_key_constraint"
+  ^DropForeignKeyConstraintChange
   [constraint-name base-table-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
@@ -857,11 +882,12 @@
 
 ;; Add Primary Key Constraint
 
-(defn ^AddPrimaryKeyChange add-primary-key
+(defn add-primary-key
   "Return a Change instance that adds creates a primary key out of an existing
   column or set of columns (AddPrimaryKeyChange).
   See also:
     http://www.liquibase.org/documentation/changes/add_primary_key_constraint"
+  ^AddPrimaryKeyChange
   [table-name column-names constraint-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
@@ -889,11 +915,12 @@
 
 ;; Drop Primary Key Constraint - DropPrimaryKeyChange
 
-(defn ^DropPrimaryKeyChange drop-primary-key
+(defn drop-primary-key
   "Return a Change instance that drops an existing primary key
   (DropPrimaryKeyChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_primary_key_constraint"
+  ^DropPrimaryKeyChange
   [table-name
    & {:keys [catalog-name catalog   ; String/Keyword - subject to db-iden
              schema-name     schema ; String/Keyword - subject to db-iden
@@ -918,11 +945,12 @@
 
 ;; Insert Data - InsertDataChange
 
-(defn ^InsertDataChange insert-data
+(defn insert-data
   "Return a Change instance that inserts data into an existing table
   (InsertDataChange).
   See also:
     http://www.liquibase.org/documentation/changes/insert_data"
+  ^InsertDataChange
   [table-name column-value-map
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -945,7 +973,7 @@
 
 ;; Load Data - LoadDataChange
 
-(defn ^LoadDataChange load-data
+(defn load-data
   "Return a Change instance that Loads data from a CSV file into an existing
   table (LoadDataChange). A value of NULL in a cell will be converted to a
   database NULL rather than the string NULL.
@@ -959,6 +987,7 @@
     :encoding (String)         encoding of the CSV file - defaults to UTF-8
   See also:
     http://www.liquibase.org/documentation/changes/load_data"
+  ^LoadDataChange
   [table-name ^String csv-filename columns-spec
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -987,7 +1016,7 @@
 
 ;; Load Update Data - LoadUpdateDataChange
 
-(defn ^LoadUpdateDataChange load-update-data
+(defn load-update-data
   "Return a Change instance that loads or updates data from a CSV file into an
   existing table (LoadUpdateDataChange). Differs from loadData by issuing a SQL
   batch that checks for the existence of a record. If found, the record is
@@ -1005,6 +1034,7 @@
     :encoding (String)         encoding of the CSV file - defaults to UTF-8
   See also:
     http://www.liquibase.org/documentation/changes/load_update_data"
+  ^LoadUpdateDataChange
   [table-name ^String csv-filename primary-key-cols columns-spec
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name schema   ; String/Keyword - subject to db-iden
@@ -1035,11 +1065,12 @@
 
 ;; Update Data - UpdateDataChange
 
-(defn ^UpdateDataChange update-data
+(defn update-data
   "Return a Change instance that updates data in an existing table
   (UpdateDataChange).
   See also:
     http://www.liquibase.org/documentation/changes/update_data"
+  ^UpdateDataChange
   [table-name column-name-value-map
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -1065,11 +1096,12 @@
 
 ;; Delete Data - DeleteDataChange
 
-(defn ^DeleteDataChange delete-data
+(defn delete-data
   "Return a Change instance that deletes data from an existing table
   (DeleteDataChange).
   See also:
     http://www.liquibase.org/documentation/changes/delete_data"
+  ^DeleteDataChange
   [table-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -1092,11 +1124,12 @@
 
 ;; Tag Database - TagDatabaseChange
 
-(defn ^TagDatabaseChange tag-database
+(defn tag-database
   "Return a Change instance that applies a tag to the database for future
   rollback (TagDatabaseChange).
   See also:
     http://www.liquibase.org/documentation/changes/tag_database"
+  ^TagDatabaseChange
   [tag] {:post [(instance? TagDatabaseChange %)]
          :pre  [(mu/verify-arg (mu/not-nil? tag))]}
   (let [change (TagDatabaseChange.)]
@@ -1106,15 +1139,15 @@
 
 ;; Stop - StopChange
 
-(defn ^StopChange stop
+(defn stop
   "Return a Change instance that stops LiquiBase execution with a message
   (StopChange). Mainly useful for debugging and stepping through a changelog.
   See also:
     http://www.liquibase.org/documentation/changes/stop"
-  ([] {:post [(instance? StopChange %)]}
+  (^StopChange [] {:post [(instance? StopChange %)]}
    (StopChange.))
-  ([^String message] {:post [(instance? StopChange %)]
-                      :pre  [(mu/verify-arg (string? message))]}
+  (^StopChange [^String message] {:post [(instance? StopChange %)]
+                                  :pre  [(mu/verify-arg (string? message))]}
    (let [change (StopChange.)]
      (.setMessage change message)
      change)))
@@ -1124,11 +1157,12 @@
 
 ;; Create Index - CreateIndexChange
 
-(defn ^CreateIndexChange create-index
+(defn create-index
   "Return a Change instance that creates an index on an existing column or set
   of columns (CreateIndexChange).
   See also:
     http://www.liquibase.org/documentation/changes/create_index"
+  ^CreateIndexChange
   [table-name ^List column-names
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -1162,10 +1196,11 @@
 
 ;; Drop Index - DropIndexChange
 
-(defn ^DropIndexChange drop-index
+(defn drop-index
   "Return a Change instance that drops an existing index (DropIndexChange).
   See also:
     http://www.liquibase.org/documentation/changes/drop_index"
+  ^DropIndexChange
   [index-name table-name
    & {:keys [catalog-name catalog ; String/Keyword - subject to db-iden
              schema-name  schema  ; String/Keyword - subject to db-iden
@@ -1192,11 +1227,12 @@
 
 ;; Custom SQL - RawSQLChange
 
-(defn ^RawSQLChange sql
+(defn sql
   "Return a Change instance that executes arbitrary SQL (RawSQLChange). May be
   useful when desired change types don't exist, or are buggy/inflexible.
   See also:
     http://www.liquibase.org/documentation/changes/sql"
+  ^RawSQLChange
   [sql
    & {:keys [comment
              dbms
@@ -1225,12 +1261,13 @@
 
 ;; Custom SQL File - SQLFileChange
 
-(defn ^SQLFileChange sql-file
+(defn sql-file
   "Return a Change instance that executes SQL after reading it from a file
   (SQLFileChange). Useful to integrate with legacy projects having SQL files for
   DDL, or to decouple DDL from the project in general.
   See also:
     http://www.liquibase.org/documentation/changes/sql_file"
+  ^SQLFileChange
   [sql-filepath
    & {:keys [dbms
              encoding

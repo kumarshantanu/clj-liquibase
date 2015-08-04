@@ -40,8 +40,8 @@ For help on individual command, append with `--help`, e.g.:
 <command> update --help"))
 
 
-(defn ^String as-string
-  [s]
+(defn as-string
+  ^String [s]
   (if (keyword? s) (name s)
     (str s)))
 
