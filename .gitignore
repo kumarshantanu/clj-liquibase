@@ -15,3 +15,4 @@ pom.xml
 .lein-repl-history
 /derby.log
 /pom.xml.asc
+/.settings
