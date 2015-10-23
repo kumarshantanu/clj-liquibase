@@ -1,4 +1,4 @@
-(defproject clj-liquibase "0.5.3"
+(defproject clj-liquibase "0.6.0-SNAPSHOT"
   :description "Clojure wrapper for Liquibase"
   :url "https://github.com/kumarshantanu/clj-liquibase"
   :license {:name "Eclipse Public License"
