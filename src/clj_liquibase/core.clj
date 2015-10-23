@@ -34,8 +34,10 @@
     (liquibase.integration.commandline CommandLineUtils)
     (liquibase.lockservice             LockService LockServiceFactory)
     (liquibase.logging                 LogFactory Logger)
+    (liquibase.parser                  ChangeLogParser ChangeLogParserFactory)
     (liquibase.precondition            Precondition)
     (liquibase.precondition.core       PreconditionContainer)
+    (liquibase.resource                ClassLoaderResourceAccessor FileSystemResourceAccessor ResourceAccessor)
     (liquibase.sql                     Sql)
     (liquibase.sql.visitor             SqlVisitor)
     (liquibase.sqlgenerator            SqlGeneratorFactory)
@@ -247,6 +249,41 @@
   instance, false otherwise."
   [x]
   (instance? DatabaseChangeLog x))
+
+
+(defn parse-changelog
+  "Return a DatabaseChangeLog instance.
+  Arguments:
+    filepath
+  Optional args:
+    "
+  ^DatabaseChangeLog
+  ([^String filepath]
+    (parse-changelog filepath {}))
+  ([^String filepath {:keys [source]
+                      :or {source :classpath}
+                      :as options}]
+    (let [^ResourceAccessor ra (case source
+                                 :filesystem (FileSystemResourceAccessor.)
+                                 :classpath  (ClassLoaderResourceAccessor.
+                                               (.getContextClassLoader (Thread/currentThread))
+                                               )
+                                 (if (instance? ResourceAccessor source)
+                                   source
+                                   (throw (IllegalArgumentException.
+                                            (str "Expected source argument to be :filesystem, :classpath or a valid"
+                                              " liquibase.resource.ResourceAccessor instance. but found ("
+                                              (class source) ") " (pr-str source))))))
+          ^ChangeLogParser parser (.getParser (ChangeLogParserFactory/getInstance) filepath ra)]
+      (.parse parser filepath ^ChangeLogParameters *changelog-params* ra))))
+
+
+(defmacro defparser
+  "Define a parser for a changelog file, typically a XML, YAML, JSON or EDN file."
+  ([var-name filepath]
+    `(def ~var-name (partial parse-changelog ~filepath)))
+  ([var-name filepath options]
+    `(def ~var-name (partial parse-changelog ~filepath ~options))))
 
 
 (defn make-changelog

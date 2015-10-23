@@ -1,0 +1,17 @@
+{:database-change-log [; semi-colon marks an in-line comment
+                       ;{"preConditions" [{"runningAs" {"username" "liquibase"}}]}
+                       ; keywords work as keys (hyphen triggers camel-case)
+                       {:include {:file "child1.edn"}}
+                       ; symbols also work as keys (hyphen triggers camel-case)
+                       {change-set {"id" "2"
+                                    "author" "nvoxland"
+                                    "changes" [{"addColumn" {"tableName" "person"
+                                                             "columns" [{"column" {"name" "username"
+                                                                                   "type" "varchar(8)"}}]}}]}}
+                       {"changeSet" {"id" "3"
+                                     "author" "nvoxland"
+                                     "changes" [{"addLookupTable" {"existingTableName" "person"
+                                                                   "existingColumnName""state"
+                                                                   "newTableName" "state"
+                                                                   "newColumnName" "id"
+                                                                   "newColumnDataType" "char(2)"}}]}}]}

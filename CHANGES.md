@@ -13,6 +13,13 @@
     * Execute Shell Command
 
 
+## 0.6.0 / 2015-Oct-??
+
+* Support for parsing changelog files
+* Include EDN changelog parser
+* [TODO] Deprecate changelog/changeset DSL API
+
+
 ## 0.5.3 / 2015-Aug-04
 
 * Exclude `clojure.core/update` to avoid shadow warning in Clojure 1.7 (by Jake McCrary, @jakemcc)
