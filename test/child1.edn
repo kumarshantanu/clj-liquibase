@@ -4,8 +4,8 @@
                                                                  "columns" [{"column" {"name" "id"
                                                                                        "type" "int"
                                                                                        "autoIncrement" true,
-                                                                                       "constraints" {"primaryKey" true
-                                                                                                      "nullable" false}}}
+                                                                                       "constraints" {primary-key? true
+                                                                                                      nullable? false}}}
                                                                             {"column" {"name" "firstname"
                                                                                        "type" "varchar(50)"}}
                                                                             {"column" {"name" "lastname"

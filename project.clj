@@ -12,7 +12,7 @@
                   :source  "1.6"
                   :target  "1.6"}
   :dependencies [[org.liquibase/liquibase-core "3.0.8"]
-                 [liquibase-edn "3.0.8-0.1.0"]
+                 [liquibase-edn "3.0.8-0.1.1"]
                  [clj-jdbcutil "0.1.0"]
                  [clj-miscutil "0.4.1"]]
   :profiles {:dev {:dependencies [[oss-jdbc "0.8.0"]
