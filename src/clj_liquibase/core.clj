@@ -257,6 +257,7 @@
     filepath - name of the changelog file
   Optional args:
     :source  - either :classpath (default) or :filesystem"
+  {:added "0.6.0"}
   ^DatabaseChangeLog
   ([^String filepath]
     (parse-changelog filepath {}))
@@ -279,6 +280,7 @@
 
 (defmacro defparser
   "Define a parser for a changelog file, typically a XML, YAML, JSON or EDN file."
+  {:added "0.6.0"}
   ([var-name filepath]
     `(def ~var-name (partial parse-changelog ~filepath)))
   ([var-name filepath options]
@@ -286,7 +288,8 @@
 
 
 (defn make-changelog
-  "Return a DatabaseChangeLog instance.
+  "DEPRECATED: Use 'parse-changelog' instead.
+  Return a DatabaseChangeLog instance.
   Arguments:
     change-sets  (collection/list) List of ChangeSet instances, or
                                    List of arg-lists (for 'make-changeset' fn)
@@ -296,6 +299,7 @@
     http://www.liquibase.org/documentation/databasechangelog
     make-changelog-params"
   ^DatabaseChangeLog
+  {:deprecated "0.6.0"}
   [^String filepath ^List change-sets
    & {:keys [pre-conditions     pre-cond   ; vector
              ] :as opt}] {:post [(instance? DatabaseChangeLog %)]
@@ -332,11 +336,13 @@
 
 
 (defmacro defchangelog
-  "Define a function that when executed with no arguments, returns a database
+  "DEPRECATED: Use 'defparser' instead.
+  Define a function that when executed with no arguments, returns a database
   changelog (DatabaseChangeLog instance) while binding *logical-filepath* to
   `logical-schema`.
   See also:
     make-changelog"
+  {:deprecated "0.6.0"}
   [var-name logical-schema change-sets & var-args] {:pre [(symbol? var-name)]}
   `(def ~var-name
      (partial make-changelog ~logical-schema ~change-sets ~@var-args)))

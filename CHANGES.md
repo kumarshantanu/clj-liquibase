@@ -17,7 +17,7 @@
 
 * Support for parsing changelog files
 * Include EDN changelog parser
-* [TODO] Deprecate changelog/changeset DSL API
+* Deprecate changelog/changeset DSL API
 
 
 ## 0.5.3 / 2015-Aug-04
