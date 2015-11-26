@@ -17,7 +17,7 @@ Supported actions:
 
 On Clojars: https://clojars.org/clj-liquibase
 
-Leiningen dependency: `[clj-liquibase "0.5.3"]`
+Leiningen dependency: `[clj-liquibase "0.6.0"]`
 
 
 ### Quickstart
@@ -138,6 +138,6 @@ For more documentation please refer the file `doc/intro.md` in this repo.
 
 ## License
 
-Copyright © 2012-2014 Shantanu Kumar and contributors
+Copyright © 2012-2015 Shantanu Kumar and contributors
 
 Distributed under the Eclipse Public License, the same as Clojure.
