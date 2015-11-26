@@ -254,9 +254,9 @@
 (defn parse-changelog
   "Return a DatabaseChangeLog instance.
   Arguments:
-    filepath
+    filepath - name of the changelog file
   Optional args:
-    "
+    :source  - either :classpath (default) or :filesystem"
   ^DatabaseChangeLog
   ([^String filepath]
     (parse-changelog filepath {}))
@@ -266,8 +266,7 @@
     (let [^ResourceAccessor ra (case source
                                  :filesystem (FileSystemResourceAccessor.)
                                  :classpath  (ClassLoaderResourceAccessor.
-                                               (.getContextClassLoader (Thread/currentThread))
-                                               )
+                                               (.getContextClassLoader (Thread/currentThread)))
                                  (if (instance? ResourceAccessor source)
                                    source
                                    (throw (IllegalArgumentException.
