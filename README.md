@@ -27,9 +27,54 @@ include the following dependencies in `project.clj`:
 
 ```clojure
 [clj-dbcp      "0.8.1"]  ; to create connection-pooling DataSource
-[clj-liquibase "0.5.3"]  ; for this library
+[clj-liquibase "0.6.0"]  ; for this library
 [oss-jdbc      "0.8.0"]  ; for Open Source JDBC drivers
 ```
+
+#### Defining changes via a changelog file
+
+Create an [EDN](https://github.com/edn-format/edn) file `resources/changelog.edn` with the following changelog details:
+
+```edn
+{:database-change-log
+   [{:change-set
+      {:id "101"
+       :author "shantanu"
+       :changes [{:create-table {:table-name "sample-table1"
+       :columns [{:column {:name "id"   :type "int" :auto-increment true :constraints {:primary-key? true
+                                                                                       :nullable?    false}}}
+                 {:column {:name "name" :type "varchar(40)" :constraints {:nullable? false}}}
+                 {:column {:name "gender" :type "char(1)"   :constraints {:nullable? false}}}]}}]}}]}
+```
+
+_Note: You may alternatively create YAML, JSON, SQL or XML file (refer Liquibase schema) instead of EDN._
+
+Then create a Clojure source file for managing the DB schema:
+
+```clojure
+(ns fooapp.dbschema
+  (:require
+    [clj-dbcp.core        :as cp]
+    [clj-liquibase.cli    :as cli])
+  (:use
+    [clj-liquibase.core :refer (defparser)]))
+
+(defparser app-changelog "changelog.edn")
+
+;; keep the DataSource handy and invoke the CLI
+
+(def ds (cp/make-datasource :mysql {:host "localhost" :database "people"
+                                    :user "dbuser"    :password "s3cr3t"}))
+
+(defn -main
+  [& [cmd & args]]
+  (apply cli/entry cmd {:datasource ds :changelog  app-changelog}
+         args))
+```
+
+#### Defining changes programmatically (DEPRECATED)
+
+**(Defining changelog/changesets programmatically is deprecated and will be removed in future.)**
 
 Create a Clojure source file for managing the DB schema. Include the required
 namespaces define the _change_, _changeset_ and _changelog_ objects:
@@ -41,7 +86,7 @@ namespaces define the _change_, _changeset_ and _changelog_ objects:
     [clj-liquibase.change :as ch]
     [clj-liquibase.cli    :as cli])
   (:use
-    [clj-liquibase.core :only (defchangelog)]))
+    [clj-liquibase.core :refer (defchangelog)]))
 
 ;; define the changes, changesets and the changelog
 
@@ -67,8 +112,9 @@ namespaces define the _change_, _changeset_ and _changelog_ objects:
   [& [cmd & args]]
   (apply cli/entry cmd {:datasource ds :changelog  app-changelog}
          args))
-
 ```
+
+#### Applying changelog
 
 After defining the changelog, you need to apply the changes:
 

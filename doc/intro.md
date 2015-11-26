@@ -47,6 +47,8 @@ Important points to note:
 
 ### Change
 
+**Note: Defining changesets programmatically is deprecated as of version 0.6.0, and will be removed in the future.**
+
 _Change_ objects can be constructed by using the factory functions in the
 `clj-liquibase.change` namespace, which are described in the sub-sections below:
 
@@ -342,6 +344,21 @@ TODO
 TODO
 
 ### Defining Changelog
+
+#### Defining changelog via external file
+
+If you have a changelog defined in a EDN, YAML, SQL, JSON or XML file in classpath or file system, you can define the
+changelog as follows:
+
+```clojure
+(clj-liquibase.core/defparser "changelog.edn") ; reads from classpath
+
+(clj-liquibase.core/defparser "changelog.yml" {:source :filesystem}) ; reads from file system
+```
+
+#### Defining changelog programmatically (DEPRECATED)
+
+**Note: Defining changelog programmatically is deprecated as of version 0.6.0, and will be removed in the future.**
 
 A _changelog_ can be defined using the `defchangelog` macro, which essentially
 defines a partially applied function such that when executed with no args it

@@ -13,7 +13,7 @@
     * Execute Shell Command
 
 
-## 0.6.0 / 2015-Oct-??
+## 0.6.0 / 2015-Nov-26
 
 * Support for parsing changelog files
 * Include EDN changelog parser
