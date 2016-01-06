@@ -123,6 +123,11 @@ lein run -m fooapp.dbschema help
 lein run -m fooapp.dbschema update
 ```
 
+After running the above `update` command, we can rollback our change:
+```bash
+lein run -m fooapp.dbschema rollback -n1 
+```
+
 ### Documentation
 
 For more documentation please refer the file `doc/intro.md` in this repo.
