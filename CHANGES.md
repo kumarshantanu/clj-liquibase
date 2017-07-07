@@ -13,6 +13,19 @@
     * Execute Shell Command
 
 
+## [WIP] 0.7.0 / 2017-Jul-??
+
+* [TODO - BREAKING CHANGE] Drop support for old Clojure versions 1.3, 1.4, 1.5
+* [TODO - BREAKING CHANGE] Drop deprecated changeset/changelog DSL API
+* [TODO - BREAKING CHANGE] Drop version identifier
+* [TODO] Remove dependency on other libraries
+  * [TODO] clj-jdbcutil
+  * [TODO] clj-miscutil
+* [TODO - BREAKING CHANGE] Drop CLI integration API
+* [TODO - BREAKING CHANGE] Drop support for EDN changelog parser
+* [TODO] Upgrade to Liquibase 3.5.3
+
+
 ## 0.6.0 / 2015-Nov-26
 
 * Support for parsing changelog files
