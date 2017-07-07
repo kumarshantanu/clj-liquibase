@@ -23,7 +23,9 @@
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]
                    :global-vars  {*unchecked-math* :warn-on-boxed}}
-             :1.8 {:dependencies [[org.clojure/clojure "1.8.0-RC2"]]
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]
+                   :global-vars  {*unchecked-math* :warn-on-boxed}}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-alpha17"]]
                    :global-vars  {*unchecked-math* :warn-on-boxed}}}
   :aliases {"dev" ["with-profile" "dev,1.7"]
             "all" ["with-profile" "dev,1.3:dev,1.4:dev,1.5:dev,1.6:dev,1.7:dev,1.8"]}
